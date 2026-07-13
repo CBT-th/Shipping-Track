@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shipping Calendar · Lab Logistics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef1f6;
+    --panel:#ffffff;
+    --ink:#1b2735;
+    --ink-soft:#4a5a6d;
+    --muted:#8b98a9;
+    --line:#e4e9f0;
+    --line-strong:#d3dbe6;
+    --primary:#0f766e;
+    --primary-ink:#0b544e;
+    --primary-soft:#e2f4f1;
+    --accent:#f4823a;
+    --sun:#fbeef0;
+    --sun-ink:#d8607a;
+    --today:#0f766e;
+    --shadow:0 1px 2px rgba(23,40,58,.04),0 8px 24px rgba(23,40,58,.06);
+    --shadow-lg:0 10px 40px rgba(23,40,58,.14);
+    --radius:16px;
+
+    /* category palette (fill / dot / ink) */
+    --c-amber-fill:#fdeccd; --c-amber-dot:#f59e0b; --c-amber-ink:#8a5a00;
+    --c-blue-fill:#dbeafe;  --c-blue-dot:#3b82f6;  --c-blue-ink:#1e40af;
+    --c-green-fill:#d7f2e3; --c-green-dot:#10b981; --c-green-ink:#0b6b47;
+    --c-purple-fill:#eadcff;--c-purple-dot:#8b5cf6;--c-purple-ink:#5b2ea6;
+    --c-rose-fill:#ffe0e6;  --c-rose-dot:#f43f5e;  --c-rose-ink:#a01235;
+    --c-teal-fill:#cff3ef;  --c-teal-dot:#14b8a6;  --c-teal-ink:#0b6f66;
+    --c-slate-fill:#e2e8f0; --c-slate-dot:#64748b; --c-slate-ink:#334155;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Inter","Noto Sans Thai",system-ui,-apple-system,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #e6f2f0 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1280px;margin:0 auto;padding:22px 20px 60px}
+
+  /* ---------- Header ---------- */
+  header.top{
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .brand{display:flex;align-items:center;gap:13px;margin-right:auto}
+  .brand .mark{
+    width:44px;height:44px;border-radius:13px;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--primary),#0b544e);
+    display:grid;place-items:center;color:#fff;box-shadow:0 6px 16px rgba(15,118,110,.32);
+  }
+  .brand .mark svg{width:24px;height:24px}
+  .brand h1{
+    font-family:"Sora","Noto Sans Thai",sans-serif;
+    font-size:21px;font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.05;
+  }
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:500}
+
+  .yearnav{display:flex;align-items:center;gap:6px;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:var(--shadow)}
+  .yearnav button{
+    width:34px;height:34px;border:none;border-radius:8px;background:transparent;
+    color:var(--ink-soft);cursor:pointer;display:grid;place-items:center;transition:.15s}
+  .yearnav button:hover{background:var(--primary-soft);color:var(--primary-ink)}
+  .yearnav .yr{
+    font-family:"Sora",sans-serif;font-weight:700;font-size:18px;
+    min-width:74px;text-align:center;letter-spacing:.01em}
+
+  .hstat{
+    display:flex;gap:10px;align-items:stretch;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:9px 15px;box-shadow:var(--shadow)}
+  .hstat .num{font-family:"Sora",sans-serif;font-weight:700;font-size:20px;line-height:1;color:var(--primary-ink)}
+  .hstat .lbl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+  .hstat .sep{width:1px;background:var(--line);margin:2px 3px}
+
+  .btn{
+    border:1px solid var(--line-strong);background:var(--panel);color:var(--ink-soft);
+    font-family:inherit;font-weight:600;font-size:13px;border-radius:10px;padding:9px 13px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.15s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--primary);color:var(--primary-ink)}
+  .btn svg{width:15px;height:15px}
+
+  /* ---------- Filter bar ---------- */
+  .filterbar{
+    display:flex;gap:7px;flex-wrap:wrap;align-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:8px;margin-bottom:18px;box-shadow:var(--shadow)}
+  .mchip{
+    border:1px solid transparent;background:transparent;color:var(--ink-soft);
+    font-family:inherit;font-weight:600;font-size:13px;padding:8px 13px;border-radius:9px;
+    cursor:pointer;transition:.15s;position:relative;white-space:nowrap}
+  .mchip:hover{background:#f2f5f9}
+  .mchip.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(15,118,110,.3)}
+  .mchip .cnt{
+    display:inline-block;min-width:17px;height:17px;line-height:17px;text-align:center;
+    font-size:10.5px;font-weight:700;border-radius:9px;background:var(--accent);color:#fff;
+    margin-left:6px;padding:0 4px}
+  .mchip.active .cnt{background:rgba(255,255,255,.28)}
+  .mchip.all{background:#eef2f7}
+  .mchip.all.active{background:var(--primary);color:#fff}
+  .fspring{flex:1}
+
+  /* ---------- Layout ---------- */
+  .stage{display:block}
+
+  /* ===== Year (all) view ===== */
+  .yeargrid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .minicard{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:14px 14px 12px;box-shadow:var(--shadow);cursor:pointer;transition:.18s}
+  .minicard:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--line-strong)}
+  .minihead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
+  .minihead .mname{font-family:"Sora",sans-serif;font-weight:700;font-size:15px}
+  .minihead .mfull{font-size:11px;color:var(--muted);font-weight:500;margin-left:5px}
+  .minibadge{font-size:11px;font-weight:700;color:var(--primary-ink);background:var(--primary-soft);
+    border-radius:20px;padding:3px 9px}
+  .minibadge.zero{color:var(--muted);background:#f1f4f8}
+  .minigrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+  .minidow{font-size:9.5px;font-weight:700;color:var(--muted);text-align:center;padding-bottom:3px}
+  .minidow.su{color:var(--sun-ink)}
+  .minicell{
+    aspect-ratio:1;display:grid;place-items:center;font-size:11px;font-weight:500;
+    border-radius:6px;color:var(--ink-soft);position:relative}
+  .minicell.pad{color:transparent}
+  .minicell.su{color:var(--sun-ink)}
+  .minicell.filled{font-weight:700}
+  .minicell.today{outline:2px solid var(--today);outline-offset:-2px;border-radius:6px}
+  .minidot{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
+    width:4px;height:4px;border-radius:50%}
+
+  /* ===== Focused month view ===== */
+  .focuswrap{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+  .bigcard{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 24px 26px;box-shadow:var(--shadow)}
+  .bighead{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  .bighead .bm{font-family:"Sora",sans-serif;font-weight:700;font-size:30px;letter-spacing:-.02em}
+  .bighead .bfull{font-size:15px;color:var(--muted);font-weight:500}
+  .bighead .bbadge{margin-left:auto;font-size:13px;font-weight:700;color:var(--primary-ink);
+    background:var(--primary-soft);border-radius:22px;padding:6px 15px}
+  .biggrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+  .bigdow{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding-bottom:6px;letter-spacing:.04em}
+  .bigdow.su{color:var(--sun-ink)}
+  .bigcell{
+    aspect-ratio:1/.94;border:1.5px solid var(--line);border-radius:12px;padding:8px 9px;
+    display:flex;flex-direction:column;cursor:pointer;transition:.14s;background:#fff;position:relative;overflow:hidden}
+  .bigcell:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(15,118,110,.14);transform:translateY(-1px)}
+  .bigcell.pad{border-color:transparent;background:transparent;cursor:default;box-shadow:none;transform:none}
+  .bigcell.su{background:var(--sun)}
+  .bigcell .dnum{font-family:"Sora",sans-serif;font-weight:700;font-size:16px;color:var(--ink)}
+  .bigcell.su .dnum{color:var(--sun-ink)}
+  .bigcell.today .dnum{background:var(--today);color:#fff;width:26px;height:26px;border-radius:8px;
+    display:grid;place-items:center;font-size:14px;margin:-1px 0 0 -2px}
+  .bigcell .blabel{
+    margin-top:auto;font-size:11px;font-weight:700;line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .bigcell .pill{
+    position:absolute;top:8px;right:8px;min-width:20px;height:20px;padding:0 5px;border-radius:7px;
+    font-size:11px;font-weight:800;color:#fff;display:grid;place-items:center;line-height:1}
+  .bigcell .cdot{position:absolute;top:11px;right:10px;width:8px;height:8px;border-radius:50%}
+
+  /* side panel (day editor) */
+  .side{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:20px;position:sticky;top:18px}
+  .side .empty{text-align:center;color:var(--muted);padding:34px 10px}
+  .side .empty svg{width:46px;height:46px;opacity:.5;margin-bottom:10px}
+  .side .empty p{font-size:13.5px;margin:0;line-height:1.5}
+  .side h3{font-family:"Sora",sans-serif;margin:0 0 2px;font-size:20px;font-weight:700}
+  .side .datesub{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:16px}
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:11.5px;font-weight:700;color:var(--ink-soft);
+    text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+  .field input,.field textarea{
+    width:100%;border:1.5px solid var(--line-strong);border-radius:10px;padding:10px 12px;
+    font-family:inherit;font-size:14px;color:var(--ink);background:#fbfcfe;transition:.15s;resize:vertical}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--primary);background:#fff;
+    box-shadow:0 0 0 3px rgba(15,118,110,.12)}
+  .field textarea{min-height:82px}
+  .swatches{display:flex;gap:9px;flex-wrap:wrap}
+  .sw{width:32px;height:32px;border-radius:9px;cursor:pointer;border:2.5px solid transparent;
+    transition:.14s;position:relative}
+  .sw:hover{transform:scale(1.08)}
+  .sw.sel{border-color:var(--ink);box-shadow:0 0 0 2px #fff inset}
+  .sw.sel::after{content:"";position:absolute;inset:0;margin:auto;width:9px;height:9px;
+    border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.1)}
+  .sideactions{display:flex;gap:9px;margin-top:20px}
+  .sideactions .btn{flex:1;justify-content:center;box-shadow:none}
+  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .btn.primary:hover{background:var(--primary-ink);color:#fff}
+  .btn.danger{color:var(--sun-ink);border-color:#f2ccd4}
+  .btn.danger:hover{background:#fdeef1;border-color:var(--sun-ink);color:var(--sun-ink)}
+
+  /* legend */
+  .legend{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;margin-top:18px;box-shadow:var(--shadow)}
+  .legend h4{margin:0 0 3px;font-size:12px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--ink-soft)}
+  .legend .hint{font-size:11.5px;color:var(--muted);margin:0 0 12px}
+  .legrow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .legrow .swm{width:16px;height:16px;border-radius:5px;flex:0 0 auto}
+  .legrow input{flex:1;border:1px solid transparent;background:transparent;font-family:inherit;
+    font-size:13px;color:var(--ink);padding:5px 8px;border-radius:7px;transition:.15s}
+  .legrow input:hover{background:#f3f6fa}
+  .legrow input:focus{outline:none;background:#fff;border-color:var(--line-strong)}
+
+  /* tooltip */
+  .tip{position:fixed;z-index:80;pointer-events:none;background:var(--ink);color:#fff;
+    padding:9px 12px;border-radius:10px;font-size:12.5px;max-width:240px;line-height:1.4;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(4px);transition:.12s}
+  .tip.show{opacity:1;transform:translateY(0)}
+  .tip .tlab{font-weight:700;margin-bottom:2px}
+
+  /* toast */
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:11px 20px;border-radius:12px;font-size:13.5px;
+    font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.25s;z-index:90}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media(max-width:960px){
+    .yeargrid{grid-template-columns:repeat(2,1fr)}
+    .focuswrap{grid-template-columns:1fr}
+    .side{position:relative;top:0}
+  }
+  @media(max-width:560px){
+    .wrap{padding:16px 13px 50px}
+    .yeargrid{grid-template-columns:1fr}
+    .brand h1{font-size:18px}
+    .bighead .bm{font-size:24px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Shipping Calendar</h1>
+        <p>Lab logistics · ตารางการจัดส่งประจำปี</p>
+      </div>
+    </div>
+
+    <div class="yearnav">
+      <button id="prevYear" title="ปีก่อนหน้า">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="yr" id="yearLabel">2026</span>
+      <button id="nextYear" title="ปีถัดไป">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="hstat">
+      <div><div class="num" id="statYear">0</div><div class="lbl">รายการปีนี้</div></div>
+      <div class="sep"></div>
+      <div><div class="num" id="statMonth">0</div><div class="lbl">เดือนที่เลือก</div></div>
+    </div>
+
+    <button class="btn" id="exportBtn" title="สำรองข้อมูลเป็นไฟล์ JSON">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Export
+    </button>
+    <button class="btn" id="importBtn" title="นำเข้าไฟล์ข้อมูล">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v10"/></svg>
+      Import
+    </button>
+    <input type="file" id="importFile" accept="application/json" style="display:none">
+  </header>
+
+  <div class="filterbar" id="filterbar"></div>
+
+  <div class="stage" id="stage"></div>
+
+</div>
+
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ Config ============ */
+const CATS = [
+  {key:"amber",  fill:getVar("--c-amber-fill"),  dot:getVar("--c-amber-dot"),  ink:getVar("--c-amber-ink")},
+  {key:"blue",   fill:getVar("--c-blue-fill"),   dot:getVar("--c-blue-dot"),   ink:getVar("--c-blue-ink")},
+  {key:"green",  fill:getVar("--c-green-fill"),  dot:getVar("--c-green-dot"),  ink:getVar("--c-green-ink")},
+  {key:"purple", fill:getVar("--c-purple-fill"), dot:getVar("--c-purple-dot"), ink:getVar("--c-purple-ink")},
+  {key:"rose",   fill:getVar("--c-rose-fill"),   dot:getVar("--c-rose-dot"),   ink:getVar("--c-rose-ink")},
+  {key:"teal",   fill:getVar("--c-teal-fill"),   dot:getVar("--c-teal-dot"),   ink:getVar("--c-teal-ink")},
+  {key:"slate",  fill:getVar("--c-slate-fill"),  dot:getVar("--c-slate-dot"),  ink:getVar("--c-slate-ink")},
+];
+function getVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function catByKey(k){return CATS.find(c=>c.key===k)||CATS[0];}
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MABBR  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DOW    = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+
+const LS_DATA = "shippingCalendar_data_v1";
+const LS_LEG  = "shippingCalendar_legend_v1";
+const DEFAULT_LEGEND = {
+  amber:"จัดส่งต่างประเทศ", blue:"จัดส่งในประเทศ", green:"รับตัวอย่างเข้า",
+  purple:"นัดหมาย / เก็บตัวอย่าง", rose:"เร่งด่วน / Deadline", teal:"ส่งรายงาน",
+  slate:"อื่น ๆ"
+};
+
+/* ============ State ============ */
+let state = {
+  year: new Date().getFullYear(),
+  month: null,           // null = year view, 0-11 = focused
+  selectedDate: null,    // "YYYY-MM-DD"
+  data: loadData(),
+  legend: loadLegend(),
+};
+
+function loadData(){ try{return JSON.parse(localStorage.getItem(LS_DATA))||{};}catch(e){return {};} }
+function saveData(){ try{localStorage.setItem(LS_DATA,JSON.stringify(state.data));}catch(e){} }
+function loadLegend(){ try{return Object.assign({},DEFAULT_LEGEND,JSON.parse(localStorage.getItem(LS_LEG))||{});}catch(e){return {...DEFAULT_LEGEND};} }
+function saveLegend(){ try{localStorage.setItem(LS_LEG,JSON.stringify(state.legend));}catch(e){} }
+
+/* ============ Helpers ============ */
+const pad = n => String(n).padStart(2,"0");
+const keyOf = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
+function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+function firstDow(y,m){return new Date(y,m,1).getDay();}
+function todayKey(){const t=new Date();return keyOf(t.getFullYear(),t.getMonth(),t.getDate());}
+function monthCount(y,m){
+  let c=0;const p=`${y}-${pad(m+1)}-`;
+  for(const k in state.data){if(k.startsWith(p)&&entryHasContent(state.data[k]))c++;}
+  return c;
+}
+function yearCount(y){
+  let c=0;const p=`${y}-`;
+  for(const k in state.data){if(k.startsWith(p)&&entryHasContent(state.data[k]))c++;}
+  return c;
+}
+function entryHasContent(e){return e && (e.color || (e.note&&e.note.trim()) || (e.label&&e.label.trim()));}
+
+/* ============ Rendering ============ */
+function renderAll(){
+  document.getElementById("yearLabel").textContent = state.year;
+  document.getElementById("statYear").textContent = yearCount(state.year);
+  document.getElementById("statMonth").textContent = state.month===null ? "—" : monthCount(state.year,state.month);
+  renderFilterbar();
+  const stage = document.getElementById("stage");
+  stage.innerHTML = "";
+  if(state.month===null) stage.appendChild(buildYearView());
+  else stage.appendChild(buildFocusView());
+}
+
+function renderFilterbar(){
+  const bar = document.getElementById("filterbar");
+  bar.innerHTML = "";
+  const all = chip("ทั้งปี", state.month===null, ()=>{state.month=null;state.selectedDate=null;renderAll();});
+  all.classList.add("all"); if(state.month===null) all.classList.add("active");
+  bar.appendChild(all);
+  for(let m=0;m<12;m++){
+    const c = monthCount(state.year,m);
+    const el = chip(MABBR[m], state.month===m, ()=>{state.month=m;renderAll();});
+    if(c>0){const b=document.createElement("span");b.className="cnt";b.textContent=c;el.appendChild(b);}
+    bar.appendChild(el);
+  }
+  const spring=document.createElement("div");spring.className="fspring";bar.appendChild(spring);
+}
+function chip(text,active,onClick){
+  const b=document.createElement("button");
+  b.className="mchip"+(active?" active":"");
+  b.textContent=text;b.onclick=onClick;return b;
+}
+
+/* ---- Year view (12 mini months) ---- */
+function buildYearView(){
+  const grid=document.createElement("div");grid.className="yeargrid";
+  for(let m=0;m<12;m++) grid.appendChild(buildMiniMonth(m));
+  return grid;
+}
+function buildMiniMonth(m){
+  const card=document.createElement("div");card.className="minicard";
+  card.onclick=()=>{state.month=m;renderAll();window.scrollTo({top:0,behavior:"smooth"});};
+  const cnt=monthCount(state.year,m);
+  const head=document.createElement("div");head.className="minihead";
+  head.innerHTML=`<div><span class="mname">${MABBR[m]}</span><span class="mfull">${MONTHS[m]}</span></div>
+    <span class="minibadge${cnt?'':' zero'}">${cnt} รายการ</span>`;
+  card.appendChild(head);
+
+  const g=document.createElement("div");g.className="minigrid";
+  DOW.forEach((d,i)=>{const h=document.createElement("div");h.className="minidow"+(i===0?" su":"");h.textContent=d;g.appendChild(h);});
+  const fd=firstDow(state.year,m),dim=daysInMonth(state.year,m),tk=todayKey();
+  for(let i=0;i<fd;i++){const c=document.createElement("div");c.className="minicell pad";g.appendChild(c);}
+  for(let d=1;d<=dim;d++){
+    const key=keyOf(state.year,m,d);const e=state.data[key];const dow=(fd+d-1)%7;
+    const c=document.createElement("div");c.className="minicell"+(dow===0?" su":"");
+    c.textContent=d;
+    if(key===tk)c.classList.add("today");
+    if(e&&entryHasContent(e)){
+      const cat=catByKey(e.color||"slate");
+      c.classList.add("filled");c.style.background=cat.fill;c.style.color=cat.ink;
+      const dot=document.createElement("div");dot.className="minidot";dot.style.background=cat.dot;c.appendChild(dot);
+    }
+    g.appendChild(c);
+  }
+  card.appendChild(g);
+  return card;
+}
+
+/* ---- Focused month view ---- */
+function buildFocusView(){
+  const wrap=document.createElement("div");wrap.className="focuswrap";
+
+  /* left: big calendar */
+  const card=document.createElement("div");card.className="bigcard";
+  const cnt=monthCount(state.year,state.month);
+  const head=document.createElement("div");head.className="bighead";
+  head.innerHTML=`<span class="bm">${MABBR[state.month]}</span>
+    <span class="bfull">${MONTHS[state.month]} ${state.year}</span>
+    <span class="bbadge">${cnt} รายการจัดส่ง</span>`;
+  card.appendChild(head);
+
+  const g=document.createElement("div");g.className="biggrid";
+  DOW.forEach((d,i)=>{const h=document.createElement("div");h.className="bigdow"+(i===0?" su":"");h.textContent=d;g.appendChild(h);});
+  const fd=firstDow(state.year,state.month),dim=daysInMonth(state.year,state.month),tk=todayKey();
+  for(let i=0;i<fd;i++){const c=document.createElement("div");c.className="bigcell pad";g.appendChild(c);}
+  for(let d=1;d<=dim;d++){
+    const key=keyOf(state.year,state.month,d);const e=state.data[key];const dow=(fd+d-1)%7;
+    const c=document.createElement("div");c.className="bigcell"+(dow===0?" su":"");
+    if(key===tk)c.classList.add("today");
+    c.innerHTML=`<span class="dnum">${d}</span>`;
+    if(e&&entryHasContent(e)){
+      const cat=catByKey(e.color||"slate");
+      c.style.background=cat.fill;c.style.borderColor=cat.dot+"66";
+      if(e.label&&e.label.trim()){
+        const p=document.createElement("div");p.className="pill";p.style.background=cat.dot;
+        p.textContent=e.label.trim().slice(0,3);c.appendChild(p);
+      }else{
+        const dot=document.createElement("div");dot.className="cdot";dot.style.background=cat.dot;c.appendChild(dot);
+      }
+      if(e.note&&e.note.trim()){
+        const l=document.createElement("div");l.className="blabel";l.style.color=cat.ink;
+        l.textContent=e.note.trim();c.appendChild(l);
+      }
+      c.onmouseenter=ev=>showTip(ev,e);
+      c.onmousemove=moveTip;
+      c.onmouseleave=hideTip;
+    }
+    c.onclick=()=>selectDay(key);
+    g.appendChild(c);
+  }
+  card.appendChild(g);
+  wrap.appendChild(card);
+
+  /* right: editor + legend */
+  const col=document.createElement("div");
+  col.appendChild(buildSide());
+  col.appendChild(buildLegend());
+  wrap.appendChild(col);
+  return wrap;
+}
+
+/* ---- Side editor ---- */
+function buildSide(){
+  const side=document.createElement("div");side.className="side";side.id="side";
+  if(!state.selectedDate){
+    side.innerHTML=`<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 15h.01M12 15h.01M16 15h.01"/></svg>
+      <p>คลิกวันที่บนปฏิทิน<br>เพื่อเพิ่มรายละเอียดการจัดส่ง<br>และเลือกสีของวันนั้น</p></div>`;
+    return side;
+  }
+  const [y,mm,dd]=state.selectedDate.split("-").map(Number);
+  const e=state.data[state.selectedDate]||{color:"",note:"",label:""};
+  const dObj=new Date(y,mm-1,dd);
+  const dowName=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"][dObj.getDay()];
+
+  side.innerHTML=`
+    <h3>${dd} ${MONTHS[mm-1]}</h3>
+    <div class="datesub">วัน${dowName} · ${y}</div>
+    <div class="field">
+      <label>รายละเอียดการจัดส่ง</label>
+      <textarea id="fNote" placeholder="เช่น ส่งตัวอย่างดิน 12 ตัวอย่างไป Lab กรุงเทพฯ / เลขพัสดุ...">${(e.note||"").replace(/</g,"&lt;")}</textarea>
+    </div>
+    <div class="field">
+      <label>ป้ายกำกับสั้น (แสดงบนวัน)</label>
+      <input id="fLabel" maxlength="3" placeholder="เช่น B, DHL, ✈" value="${(e.label||"").replace(/"/g,'&quot;')}">
+    </div>
+    <div class="field">
+      <label>สีประเภทการจัดส่ง</label>
+      <div class="swatches" id="fSwatches"></div>
+    </div>
+    <div class="sideactions">
+      <button class="btn primary" id="fSave">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        บันทึก
+      </button>
+      <button class="btn danger" id="fClear">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+        ลบ
+      </button>
+    </div>`;
+
+  const sw=side.querySelector("#fSwatches");
+  let chosen=e.color||"amber";
+  CATS.forEach(cat=>{
+    const s=document.createElement("div");
+    s.className="sw"+(cat.key===chosen?" sel":"");
+    s.style.background=cat.dot;s.title=state.legend[cat.key]||cat.key;
+    s.onclick=()=>{chosen=cat.key;sw.querySelectorAll(".sw").forEach(x=>x.classList.remove("sel"));s.classList.add("sel");};
+    sw.appendChild(s);
+  });
+
+  side.querySelector("#fSave").onclick=()=>{
+    const note=side.querySelector("#fNote").value;
+    const label=side.querySelector("#fLabel").value;
+    state.data[state.selectedDate]={color:chosen,note,label};
+    if(!entryHasContent(state.data[state.selectedDate])) delete state.data[state.selectedDate];
+    saveData();toast("บันทึกแล้ว ✓");renderAll();restoreSelection();
+  };
+  side.querySelector("#fClear").onclick=()=>{
+    delete state.data[state.selectedDate];saveData();toast("ลบรายการแล้ว");
+    state.selectedDate=null;renderAll();
+  };
+  return side;
+}
+function restoreSelection(){/* keep selectedDate; re-render already rebuilt side */}
+
+/* ---- Legend ---- */
+function buildLegend(){
+  const box=document.createElement("div");box.className="legend";
+  box.innerHTML=`<h4>คำอธิบายสี</h4><p class="hint">แก้ไขชื่อประเภทได้ตามงานของคุณ · บันทึกอัตโนมัติ</p>`;
+  CATS.forEach(cat=>{
+    const row=document.createElement("div");row.className="legrow";
+    const sw=document.createElement("div");sw.className="swm";sw.style.background=cat.dot;
+    const inp=document.createElement("input");inp.value=state.legend[cat.key]||"";
+    inp.placeholder="ตั้งชื่อประเภท...";
+    inp.oninput=()=>{state.legend[cat.key]=inp.value;saveLegend();};
+    row.appendChild(sw);row.appendChild(inp);box.appendChild(row);
+  });
+  return box;
+}
+
+/* ---- Interaction ---- */
+function selectDay(key){
+  state.selectedDate=key;
+  const old=document.getElementById("side");
+  if(old){const fresh=buildSide();old.replaceWith(fresh);
+    fresh.scrollIntoView({behavior:"smooth",block:"nearest"});}
+  else renderAll();
+}
+
+/* ---- Tooltip ---- */
+const tip=document.getElementById("tip");
+function showTip(ev,e){
+  const cat=catByKey(e.color||"slate");
+  const legName=state.legend[cat.key]||"";
+  tip.innerHTML=(e.label?`<div class="tlab">[${e.label}] ${legName}</div>`:`<div class="tlab">${legName}</div>`)
+    +(e.note?e.note.replace(/</g,"&lt;"):"—");
+  tip.classList.add("show");moveTip(ev);
+}
+function moveTip(ev){
+  const x=Math.min(ev.clientX+14,window.innerWidth-250);
+  const y=Math.min(ev.clientY+14,window.innerHeight-90);
+  tip.style.left=x+"px";tip.style.top=y+"px";
+}
+function hideTip(){tip.classList.remove("show");}
+
+/* ---- Toast ---- */
+let toastT;
+function toast(msg){
+  const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),1900);
+}
+
+/* ---- Export / Import ---- */
+document.getElementById("exportBtn").onclick=()=>{
+  const payload={version:1,exportedAt:new Date().toISOString(),data:state.data,legend:state.legend};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`shipping-calendar-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(a.href);toast("ส่งออกไฟล์สำรองแล้ว ✓");
+};
+document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange=(ev)=>{
+  const f=ev.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const p=JSON.parse(r.result);
+      if(p.data&&typeof p.data==="object"){
+        if(!confirm("นำเข้าข้อมูลนี้? ข้อมูลปัจจุบันจะถูกรวม/แทนที่ด้วยไฟล์ที่เลือก")) return;
+        state.data=Object.assign({},state.data,p.data);
+        if(p.legend)state.legend=Object.assign({},state.legend,p.legend);
+        saveData();saveLegend();renderAll();toast("นำเข้าข้อมูลสำเร็จ ✓");
+      }else toast("ไฟล์ไม่ถูกต้อง");
+    }catch(e){toast("อ่านไฟล์ไม่สำเร็จ");}
+    ev.target.value="";
+  };
+  r.readAsText(f);
+};
+
+/* ---- Year nav ---- */
+document.getElementById("prevYear").onclick=()=>{state.year--;state.selectedDate=null;renderAll();};
+document.getElementById("nextYear").onclick=()=>{state.year++;state.selectedDate=null;renderAll();};
+
+/* ---- Init ---- */
+renderAll();
+</script>
+</body>
+</html>
