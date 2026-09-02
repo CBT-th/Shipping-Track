@@ -2081,7 +2081,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     const ty = k => TY[k] || TY.SALE;
 
     /* ---------- Day markers ---------- */
-    const MARKS = ["blue", "amber", "purple", "teal", "green", "rose", "slate"];
+    const MARKS = ["blue", "amber", "purple", "rose", "slate"];
     const MK = {}; MARKS.forEach(k => MK[k] = pal(k));
     const DEFAULT_MARKNAMES = {
       blue: "Export day · วันส่งออก",
@@ -2529,7 +2529,16 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     function saveMarks() {
       try { localStorage.setItem(LS_MARK, JSON.stringify(state.marks)); } catch (e) { }
     }
-    function loadMarkNames() { try { return Object.assign({}, DEFAULT_MARKNAMES, JSON.parse(localStorage.getItem(LS_MKNAME)) || {}); } catch (e) { return { ...DEFAULT_MARKNAMES }; } }
+    function loadMarkNames() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(LS_MKNAME)) || {};
+        const res = Object.assign({}, DEFAULT_MARKNAMES);
+        for (const k in saved) {
+          if (MARKS.includes(k) && saved[k] && saved[k].trim()) res[k] = saved[k];
+        }
+        return res;
+      } catch (e) { return { ...DEFAULT_MARKNAMES }; }
+    }
     function saveMarkNames() {
       try { localStorage.setItem(LS_MKNAME, JSON.stringify(state.markNames)); } catch (e) { }
     }
@@ -3067,6 +3076,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       p.innerHTML = `Tints the whole cell. Assigned in the backend. <span class="th">แต้มสีที่หลังบ้านเท่านั้น</span>`;
       box.appendChild(p);
       MARKS.forEach(c => {
+        if (!state.markNames[c] || !state.markNames[c].trim()) return;
         const r = document.createElement("div"); r.className = "legrow";
         const sw = document.createElement("span"); sw.className = "swm"; sw.style.background = MK[c].dot;
         const inp = document.createElement("input"); inp.value = state.markNames[c] || ""; inp.disabled = true;
