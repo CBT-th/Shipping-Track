@@ -45,7 +45,9 @@
       --c-amber-ink: #b45309;
       --c-purple-fill: #f5f0ff;
       --c-purple-dot: #a78bfa;
-      --c-purple-ink: #6d28d9;
+      --c-indigo-fill: #eef2ff;
+      --c-indigo-dot: #4f46e5;
+      --c-indigo-ink: #312e81;
       --c-teal-fill: #f0fdfa;
       --c-teal-dot: #2dd4bf;
       --c-teal-ink: #0f766e;
@@ -2073,7 +2075,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
 
     /* ---------- Order types ---------- */
     const TYPES = [
-      { key: "SALE", en: "Sale order", th: "รายการขาย", c: "teal" },
+      { key: "SALE", en: "Sale order", th: "รายการขาย", c: "indigo" },
       { key: "FREE", en: "Free sample request", th: "รายการตัวอย่างฟรี", c: "amber" }
     ];
     const TY = {}; TYPES.forEach(t => TY[t.key] = { ...t, ...pal(t.c) });
