@@ -1,665 +1,2894 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shipping Calendar · Lab Logistics</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#eef1f6;
-    --panel:#ffffff;
-    --ink:#1b2735;
-    --ink-soft:#4a5a6d;
-    --muted:#8b98a9;
-    --line:#e4e9f0;
-    --line-strong:#d3dbe6;
-    --primary:#0f766e;
-    --primary-ink:#0b544e;
-    --primary-soft:#e2f4f1;
-    --accent:#f4823a;
-    --sun:#fbeef0;
-    --sun-ink:#d8607a;
-    --today:#0f766e;
-    --shadow:0 1px 2px rgba(23,40,58,.04),0 8px 24px rgba(23,40,58,.06);
-    --shadow-lg:0 10px 40px rgba(23,40,58,.14);
-    --radius:16px;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shipping Calendar · SALE / FREE Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #eef1f6;
+      --panel: #fff;
+      --ink: #1b2735;
+      --ink-soft: #4a5a6d;
+      --muted: #8b98a9;
+      --line: #e4e9f0;
+      --line-strong: #d3dbe6;
+      --primary: #0f766e;
+      --primary-ink: #0b544e;
+      --primary-soft: #e2f4f1;
+      --accent: #f4823a;
+      --sun: #fbeef0;
+      --sun-ink: #d8607a;
+      --today: #0f766e;
+      --shadow: 0 1px 2px rgba(23, 40, 58, .04), 0 8px 24px rgba(23, 40, 58, .06);
+      --shadow-lg: 0 10px 40px rgba(23, 40, 58, .14);
+      --radius: 16px;
 
-    /* category palette (fill / dot / ink) */
-    --c-holiday-fill:#fef2f2; --c-holiday-dot:#ef4444; --c-holiday-ink:#991b1b;
-    --c-amber-fill:#fdeccd; --c-amber-dot:#f59e0b; --c-amber-ink:#8a5a00;
-    --c-blue-fill:#dbeafe;  --c-blue-dot:#3b82f6;  --c-blue-ink:#1e40af;
-    --c-green-fill:#d7f2e3; --c-green-dot:#10b981; --c-green-ink:#0b6b47;
-    --c-purple-fill:#eadcff;--c-purple-dot:#8b5cf6;--c-purple-ink:#5b2ea6;
-    --c-rose-fill:#ffe0e6;  --c-rose-dot:#f43f5e;  --c-rose-ink:#a01235;
-    --c-teal-fill:#cff3ef;  --c-teal-dot:#14b8a6;  --c-teal-ink:#0b6f66;
-    --c-slate-fill:#e2e8f0; --c-slate-dot:#64748b; --c-slate-ink:#334155;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{
-    font-family:"Inter","Noto Sans Thai",system-ui,-apple-system,sans-serif;
-    background:
-      radial-gradient(1200px 600px at 80% -10%, #e6f2f0 0%, transparent 60%),
-      var(--bg);
-    color:var(--ink);
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:1280px;margin:0 auto;padding:22px 20px 60px}
+      --c-holiday-fill: #fef2f2;
+      --c-holiday-dot: #ef4444;
+      --c-holiday-ink: #991b1b;
+      --c-slate-fill: #e8edf3;
+      --c-slate-dot: #64748b;
+      --c-slate-ink: #334155;
+      --c-blue-fill: #dbeafe;
+      --c-blue-dot: #3b82f6;
+      --c-blue-ink: #1e40af;
+      --c-amber-fill: #fdeccd;
+      --c-amber-dot: #f59e0b;
+      --c-amber-ink: #8a5a00;
+      --c-purple-fill: #eadcff;
+      --c-purple-dot: #8b5cf6;
+      --c-purple-ink: #5b2ea6;
+      --c-teal-fill: #cff3ef;
+      --c-teal-dot: #14b8a6;
+      --c-teal-ink: #0b6f66;
+      --c-green-fill: #d7f2e3;
+      --c-green-dot: #10b981;
+      --c-green-ink: #0b6b47;
+      --c-rose-fill: #ffe0e6;
+      --c-rose-dot: #f43f5e;
+      --c-rose-ink: #a01235;
+    }
 
-  /* ---------- Header ---------- */
-  header.top{
-    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
-    margin-bottom:18px;
-  }
-  .brand{display:flex;align-items:center;gap:13px;margin-right:auto}
-  .brand .mark{
-    width:44px;height:44px;border-radius:13px;flex:0 0 auto;
-    background:linear-gradient(135deg,var(--primary),#0b544e);
-    display:grid;place-items:center;color:#fff;box-shadow:0 6px 16px rgba(15,118,110,.32);
-  }
-  .brand .mark svg{width:24px;height:24px}
-  .brand h1{
-    font-family:"Sora","Noto Sans Thai",sans-serif;
-    font-size:21px;font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.05;
-  }
-  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:500}
+    * {
+      box-sizing: border-box
+    }
 
-  .yearnav{display:flex;align-items:center;gap:6px;background:var(--panel);
-    border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:var(--shadow)}
-  .yearnav button{
-    width:34px;height:34px;border:none;border-radius:8px;background:transparent;
-    color:var(--ink-soft);cursor:pointer;display:grid;place-items:center;transition:.15s}
-  .yearnav button:hover{background:var(--primary-soft);color:var(--primary-ink)}
-  .yearnav .yr{
-    font-family:"Sora",sans-serif;font-weight:700;font-size:18px;
-    min-width:74px;text-align:center;letter-spacing:.01em}
+    html,
+    body {
+      margin: 0;
+      padding: 0
+    }
 
-  .hstat{
-    display:flex;gap:10px;align-items:stretch;background:var(--panel);
-    border:1px solid var(--line);border-radius:12px;padding:9px 15px;box-shadow:var(--shadow)}
-  .hstat .num{font-family:"Sora",sans-serif;font-weight:700;font-size:20px;line-height:1;color:var(--primary-ink)}
-  .hstat .lbl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
-  .hstat .sep{width:1px;background:var(--line);margin:2px 3px}
+    body {
+      font-family: "Inter", "Noto Sans Thai", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1200px 600px at 80% -10%, #e6f2f0 0%, transparent 60%), var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased
+    }
 
-  .btn{
-    border:1px solid var(--line-strong);background:var(--panel);color:var(--ink-soft);
-    font-family:inherit;font-weight:600;font-size:13px;border-radius:10px;padding:9px 13px;
-    cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.15s;box-shadow:var(--shadow)}
-  .btn:hover{border-color:var(--primary);color:var(--primary-ink)}
-  .btn svg{width:15px;height:15px}
+    .wrap {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 22px 20px 60px
+    }
 
-  /* ---------- Filter bar ---------- */
-  .filterbar{
-    display:flex;gap:7px;flex-wrap:wrap;align-items:center;
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:8px;margin-bottom:18px;box-shadow:var(--shadow)}
-  .mchip{
-    border:1px solid transparent;background:transparent;color:var(--ink-soft);
-    font-family:inherit;font-weight:600;font-size:13px;padding:8px 13px;border-radius:9px;
-    cursor:pointer;transition:.15s;position:relative;white-space:nowrap}
-  .mchip:hover{background:#f2f5f9}
-  .mchip.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(15,118,110,.3)}
-  .mchip .cnt{
-    display:inline-block;min-width:17px;height:17px;line-height:17px;text-align:center;
-    font-size:10.5px;font-weight:700;border-radius:9px;background:var(--accent);color:#fff;
-    margin-left:6px;padding:0 4px}
-  .mchip.active .cnt{background:rgba(255,255,255,.28)}
-  .mchip.all{background:#eef2f7}
-  .mchip.all.active{background:var(--primary);color:#fff}
-  .fspring{flex:1}
+    .th {
+      font-family: "Noto Sans Thai", sans-serif;
+      font-size: .78em;
+      font-weight: 500;
+      color: var(--muted)
+    }
 
-  /* ---------- Layout ---------- */
-  .stage{display:block}
+    header.top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 16px
+    }
 
-  /* ===== Year (all) view ===== */
-  .yeargrid{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-  .minicard{
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:14px 14px 12px;box-shadow:var(--shadow);cursor:pointer;transition:.18s}
-  .minicard:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--line-strong)}
-  .minihead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
-  .minihead .mname{font-family:"Sora",sans-serif;font-weight:700;font-size:15px}
-  .minihead .mfull{font-size:11px;color:var(--muted);font-weight:500;margin-left:5px}
-  .minibadge{font-size:11px;font-weight:700;color:var(--primary-ink);background:var(--primary-soft);
-    border-radius:20px;padding:3px 9px}
-  .minibadge.zero{color:var(--muted);background:#f1f4f8}
-  .minigrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-  .minidow{font-size:9.5px;font-weight:700;color:var(--muted);text-align:center;padding-bottom:3px}
-  .minidow.su{color:var(--sun-ink)}
-  .minicell{
-    aspect-ratio:1;display:grid;place-items:center;font-size:11px;font-weight:500;
-    border-radius:6px;color:var(--ink-soft);position:relative}
-  .minicell.pad{color:transparent}
-  .minicell.su{color:var(--sun-ink)}
-  .minicell.filled{font-weight:700}
-  .minicell.today{outline:2px solid var(--today);outline-offset:-2px;border-radius:6px}
-  .minidot{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
-    width:4px;height:4px;border-radius:50%}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-right: auto
+    }
 
-  /* ===== Focused month view ===== */
-  .focuswrap{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
-  .bigcard{
-    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-    padding:22px 24px 26px;box-shadow:var(--shadow)}
-  .bighead{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-  .bighead .bm{font-family:"Sora",sans-serif;font-weight:700;font-size:30px;letter-spacing:-.02em}
-  .bighead .bfull{font-size:15px;color:var(--muted);font-weight:500}
-  .bighead .bbadge{margin-left:auto;font-size:13px;font-weight:700;color:var(--primary-ink);
-    background:var(--primary-soft);border-radius:22px;padding:6px 15px}
-  .biggrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-  .bigdow{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding-bottom:6px;letter-spacing:.04em}
-  .bigdow.su{color:var(--sun-ink)}
-  .bigcell{
-    aspect-ratio:1/.94;border:1.5px solid var(--line);border-radius:12px;padding:8px 9px;
-    display:flex;flex-direction:column;cursor:pointer;transition:.14s;background:#fff;position:relative;overflow:hidden}
-  .bigcell:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(15,118,110,.14);transform:translateY(-1px)}
-  .bigcell.pad{border-color:transparent;background:transparent;cursor:default;box-shadow:none;transform:none}
-  .bigcell.su{background:var(--sun)}
-  .bigcell .dnum{font-family:"Sora",sans-serif;font-weight:700;font-size:16px;color:var(--ink)}
-  .bigcell.su .dnum{color:var(--sun-ink)}
-  .bigcell.today .dnum{background:var(--today);color:#fff;width:26px;height:26px;border-radius:8px;
-    display:grid;place-items:center;font-size:14px;margin:-1px 0 0 -2px}
-  .bigcell .blabel{
-    margin-top:auto;font-size:11px;font-weight:700;line-height:1.25;
-    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-  .bigcell .pill{
-    position:absolute;top:8px;right:8px;min-width:20px;height:20px;padding:0 5px;border-radius:7px;
-    font-size:11px;font-weight:800;color:#fff;display:grid;place-items:center;line-height:1}
-  .bigcell .cdot{position:absolute;top:11px;right:10px;width:8px;height:8px;border-radius:50%}
+    .brand .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 13px;
+      flex: 0 0 auto;
+      background: linear-gradient(135deg, var(--primary), #0b544e);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(15, 118, 110, .32)
+    }
 
-  /* side panel (day editor) */
-  .side{
-    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:20px;position:sticky;top:18px}
-  .side .empty{text-align:center;color:var(--muted);padding:34px 10px}
-  .side .empty svg{width:46px;height:46px;opacity:.5;margin-bottom:10px}
-  .side .empty p{font-size:13.5px;margin:0;line-height:1.5}
-  .side h3{font-family:"Sora",sans-serif;margin:0 0 2px;font-size:20px;font-weight:700}
-  .side .datesub{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:16px}
-  .field{margin-bottom:15px}
-  .field label{display:block;font-size:11.5px;font-weight:700;color:var(--ink-soft);
-    text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
-  .field input,.field textarea{
-    width:100%;border:1.5px solid var(--line-strong);border-radius:10px;padding:10px 12px;
-    font-family:inherit;font-size:14px;color:var(--ink);background:#fbfcfe;transition:.15s;resize:vertical}
-  .field input:focus,.field textarea:focus{outline:none;border-color:var(--primary);background:#fff;
-    box-shadow:0 0 0 3px rgba(15,118,110,.12)}
-  .field textarea{min-height:82px}
-  .swatches{display:flex;gap:9px;flex-wrap:wrap}
-  .sw{width:32px;height:32px;border-radius:9px;cursor:pointer;border:2.5px solid transparent;
-    transition:.14s;position:relative}
-  .sw:hover{transform:scale(1.08)}
-  .sw.sel{border-color:var(--ink);box-shadow:0 0 0 2px #fff inset}
-  .sw.sel::after{content:"";position:absolute;inset:0;margin:auto;width:9px;height:9px;
-    border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.1)}
-  .sideactions{display:flex;gap:9px;margin-top:20px}
-  .sideactions .btn{flex:1;justify-content:center;box-shadow:none}
-  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
-  .btn.primary:hover{background:var(--primary-ink);color:#fff}
-  .btn.danger{color:var(--sun-ink);border-color:#f2ccd4}
-  .btn.danger:hover{background:#fdeef1;border-color:var(--sun-ink);color:var(--sun-ink)}
+    .brand .mark svg {
+      width: 24px;
+      height: 24px
+    }
 
-  /* legend */
-  .legend{background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:14px 16px;margin-top:18px;box-shadow:var(--shadow)}
-  .legend h4{margin:0 0 3px;font-size:12px;font-weight:700;text-transform:uppercase;
-    letter-spacing:.06em;color:var(--ink-soft)}
-  .legend .hint{font-size:11.5px;color:var(--muted);margin:0 0 12px}
-  .legrow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .legrow .swm{width:16px;height:16px;border-radius:5px;flex:0 0 auto}
-  .legrow input{flex:1;border:1px solid transparent;background:transparent;font-family:inherit;
-    font-size:13px;color:var(--ink);padding:5px 8px;border-radius:7px;transition:.15s}
-  .legrow input:hover{background:#f3f6fa}
-  .legrow input:focus{outline:none;background:#fff;border-color:var(--line-strong)}
+    .brand h1 {
+      font-family: "Sora", "Noto Sans Thai", sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin: 0;
+      line-height: 1.1
+    }
 
-  /* tooltip */
-  .tip{position:fixed;z-index:80;pointer-events:none;background:var(--ink);color:#fff;
-    padding:9px 12px;border-radius:10px;font-size:12.5px;max-width:240px;line-height:1.4;
-    box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(4px);transition:.12s}
-  .tip.show{opacity:1;transform:translateY(0)}
-  .tip .tlab{font-weight:700;margin-bottom:2px}
+    .brand p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500
+    }
 
-  /* toast */
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:var(--ink);color:#fff;padding:11px 20px;border-radius:12px;font-size:13.5px;
-    font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.25s;z-index:90}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .yearnav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 5px;
+      box-shadow: var(--shadow)
+    }
 
-  @media(max-width:960px){
-    .yeargrid{grid-template-columns:repeat(2,1fr)}
-    .focuswrap{grid-template-columns:1fr}
-    .side{position:relative;top:0}
-  }
-  @media(max-width:560px){
-    .wrap{padding:16px 13px 50px}
-    .yeargrid{grid-template-columns:1fr}
-    .brand h1{font-size:18px}
-    .bighead .bm{font-size:24px}
-  }
-</style>
+    .yearnav button {
+      height: 34px;
+      min-width: 34px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--ink-soft);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: .15s;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 12.5px;
+      padding: 0 9px
+    }
+
+    .yearnav button:hover {
+      background: var(--primary-soft);
+      color: var(--primary-ink)
+    }
+
+    .yearnav .yr {
+      font-family: "Sora", sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      min-width: 64px;
+      text-align: center
+    }
+
+    .hstat {
+      display: flex;
+      gap: 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 9px 15px;
+      box-shadow: var(--shadow)
+    }
+
+    .hstat .num {
+      font-family: "Sora", sans-serif;
+      font-weight: 700;
+      font-size: 19px;
+      line-height: 1;
+      color: var(--primary-ink)
+    }
+
+    .hstat .num.hol {
+      color: var(--c-holiday-ink)
+    }
+
+    .hstat .lbl {
+      font-size: 10.5px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-top: 4px;
+      white-space: nowrap
+    }
+
+    .hstat .sep {
+      width: 1px;
+      background: var(--line);
+      margin: 2px 0
+    }
+
+    .btn {
+      border: 1px solid var(--line-strong);
+      background: var(--panel);
+      color: var(--ink-soft);
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 13px;
+      border-radius: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: .15s;
+      box-shadow: var(--shadow)
+    }
+
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary-ink)
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px
+    }
+
+    .btn svg {
+      width: 15px;
+      height: 15px
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary)
+    }
+
+    .btn.primary:hover {
+      background: var(--primary-ink);
+      color: #fff
+    }
+
+    .btn.danger {
+      color: var(--sun-ink);
+      border-color: #f2ccd4
+    }
+
+    .btn.danger:hover {
+      background: #fdeef1;
+      color: var(--sun-ink);
+      border-color: var(--sun-ink)
+    }
+
+    .btn.tiny {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 8px;
+      box-shadow: none
+    }
+
+    .btn.edit {
+      color: var(--muted);
+      border-color: var(--line-strong)
+    }
+
+    .btn.edit.on {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary-ink)
+    }
+
+    .lockhint {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f6f8fb;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 9px 12px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45
+    }
+
+    .lockhint svg {
+      width: 15px;
+      height: 15px;
+      flex: 0 0 auto;
+      color: var(--muted)
+    }
+
+    .lockhint button {
+      margin-left: auto;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--primary-ink);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 6px;
+      white-space: nowrap
+    }
+
+    .lockhint button:hover {
+      background: var(--primary-soft)
+    }
+
+    .btn.lock {
+      color: var(--c-holiday-ink);
+      border-color: #f3cfcf
+    }
+
+    .btn.lock:hover {
+      border-color: var(--c-holiday-dot);
+      background: #fff6f6;
+      color: var(--c-holiday-ink)
+    }
+
+    .btn.lock.open {
+      background: var(--c-holiday-fill);
+      border-color: var(--c-holiday-dot)
+    }
+
+    .bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 7px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow)
+    }
+
+    .chip {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--ink-soft);
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 7px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: .15s;
+      white-space: nowrap
+    }
+
+    .chip:hover {
+      background: #f2f5f9
+    }
+
+    .chip.active {
+      background: var(--primary);
+      color: #fff
+    }
+
+    .chip .cnt {
+      display: inline-block;
+      min-width: 17px;
+      height: 17px;
+      line-height: 17px;
+      text-align: center;
+      font-size: 10.5px;
+      font-weight: 700;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #fff;
+      margin-left: 6px;
+      padding: 0 4px
+    }
+
+    .chip.active .cnt {
+      background: rgba(255, 255, 255, .3)
+    }
+
+    .schip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink-soft);
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 12.5px;
+      padding: 6px 11px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: .15s
+    }
+
+    .schip:hover {
+      border-color: var(--line-strong)
+    }
+
+    .schip .sd {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex: 0 0 auto
+    }
+
+    .schip .ar {
+      font-size: 13px;
+      line-height: 1
+    }
+
+    .schip .n {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700
+    }
+
+    .schip.on {
+      color: #fff;
+      border-color: transparent
+    }
+
+    .schip.on .n {
+      color: rgba(255, 255, 255, .85)
+    }
+
+    .vsep {
+      width: 1px;
+      height: 22px;
+      background: var(--line);
+      margin: 0 4px
+    }
+
+    .grow {
+      flex: 1
+    }
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 0 11px;
+      background: #fbfcfe;
+      min-width: 210px
+    }
+
+    .search svg {
+      width: 15px;
+      height: 15px;
+      color: var(--muted);
+      flex: 0 0 auto
+    }
+
+    .search input {
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--ink);
+      padding: 9px 0;
+      width: 100%
+    }
+
+    .search input:focus {
+      outline: none
+    }
+
+    .search:focus-within {
+      border-color: var(--primary);
+      background: #fff
+    }
+
+    /* Year view */
+    .yeargrid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px
+    }
+
+    .minicard {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 14px 12px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: .18s
+    }
+
+    .minicard:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg)
+    }
+
+    .minihead {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 9px
+    }
+
+    .minihead .mname {
+      font-family: "Sora", sans-serif;
+      font-weight: 700;
+      font-size: 15px
+    }
+
+    .minihead .mfull {
+      font-size: 10.5px;
+      color: var(--muted);
+      margin-left: 5px
+    }
+
+    .minibadge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary-ink);
+      background: var(--primary-soft);
+      border-radius: 20px;
+      padding: 3px 9px
+    }
+
+    .minibadge.zero {
+      color: var(--muted);
+      background: #f1f4f8
+    }
+
+    .minigrid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px
+    }
+
+    .minidow {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+      padding-bottom: 3px
+    }
+
+    .minidow.su {
+      color: var(--sun-ink)
+    }
+
+    .minicell {
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 6px;
+      color: var(--ink-soft);
+      position: relative
+    }
+
+    .minicell.pad {
+      color: transparent
+    }
+
+    .minicell.su {
+      color: var(--sun-ink)
+    }
+
+    .minicell.marked {
+      font-weight: 700
+    }
+
+    .minicell.today {
+      outline: 2px solid var(--today);
+      outline-offset: -2px
+    }
+
+    .minidots {
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      right: 0;
+      display: flex;
+      gap: 2px;
+      justify-content: center
+    }
+
+    .minidots i {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      display: block
+    }
+
+    .miniflag {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-top: 7px solid var(--c-holiday-dot);
+      border-right: 7px solid transparent;
+      border-top-left-radius: 6px
+    }
+
+    /* Month view */
+    .focuswrap {
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 16px;
+      align-items: start
+    }
+
+    .bigcard {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px 22px 24px;
+      box-shadow: var(--shadow)
+    }
+
+    .bighead {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap
+    }
+
+    .bighead .bm {
+      font-family: "Sora", sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      letter-spacing: -.02em
+    }
+
+    .bighead .bfull {
+      font-size: 14px;
+      color: var(--muted)
+    }
+
+    .bighead .bbadge {
+      margin-left: auto;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--primary-ink);
+      background: var(--primary-soft);
+      border-radius: 22px;
+      padding: 6px 14px
+    }
+
+    .bighead .bhol {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--c-holiday-ink);
+      background: var(--c-holiday-fill);
+      border-radius: 22px;
+      padding: 6px 14px
+    }
+
+    .biggrid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 7px
+    }
+
+    .bigdow {
+      text-align: center;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--muted);
+      padding-bottom: 6px
+    }
+
+    .bigdow.su {
+      color: var(--sun-ink)
+    }
+
+    .bigcell {
+      min-height: 122px;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: .14s;
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+      font-family: inherit;
+      text-align: left;
+      color: inherit
+    }
+
+    .bigcell:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 14px rgba(15, 118, 110, .14)
+    }
+
+    .bigcell:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px
+    }
+
+    .bigcell.sel {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .15)
+    }
+
+    .bigcell.pad {
+      border-color: transparent;
+      background: transparent;
+      cursor: default;
+      box-shadow: none
+    }
+
+    .bigcell.su {
+      background: var(--sun)
+    }
+
+    .cellhead {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 7px 4px;
+      flex: 0 0 auto
+    }
+
+    .bigcell .dnum {
+      font-family: "Sora", sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--ink)
+    }
+
+    .bigcell.su .dnum {
+      color: var(--sun-ink)
+    }
+
+    .bigcell.today .dnum {
+      background: var(--today);
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 13px
+    }
+
+    .mtag {
+      font-size: 9.5px;
+      font-weight: 800;
+      border-radius: 5px;
+      padding: 2px 6px;
+      max-width: 96px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis
+    }
+
+    .cntbadge {
+      margin-left: auto;
+      display: flex;
+      gap: 3px;
+      flex: 0 0 auto
+    }
+
+    .cntbadge span {
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 800;
+      display: grid;
+      place-items: center
+    }
+
+    .celllist {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 5px 5px;
+      overflow: hidden
+    }
+
+    .soline {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      font-weight: 700;
+      line-height: 1.35;
+      border-radius: 0 5px 5px 0;
+      padding: 3px 5px;
+      border-left: 3px solid;
+      background: #fff;
+      overflow: hidden;
+      white-space: nowrap
+    }
+
+    .soline.in {
+      border-left-style: dashed
+    }
+
+    .soline .ar {
+      flex: 0 0 auto;
+      font-size: 10px;
+      opacity: .85
+    }
+
+    .soline .sn {
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .more {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 1px 6px
+    }
+
+    .holname {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--c-holiday-ink);
+      padding: 0 8px 5px;
+      line-height: 1.25
+    }
+
+    .holflag {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-bottom: 14px solid var(--c-holiday-dot);
+      border-right: 14px solid transparent
+    }
+
+    /* Side panel */
+    .side {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      position: sticky;
+      top: 18px;
+      max-height: calc(100vh - 36px);
+      overflow: auto
+    }
+
+    .side .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px 10px
+    }
+
+    .side .empty svg {
+      width: 44px;
+      height: 44px;
+      opacity: .5;
+      margin-bottom: 10px
+    }
+
+    .side .empty p {
+      font-size: 13px;
+      margin: 0;
+      line-height: 1.6
+    }
+
+    .sidehead {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px
+    }
+
+    .sidehead h3 {
+      font-family: "Sora", sans-serif;
+      margin: 0;
+      font-size: 19px;
+      font-weight: 700
+    }
+
+    .sidehead .datesub {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-top: 2px
+    }
+
+    .sidehead .btn {
+      margin-left: auto
+    }
+
+    .holbanner {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      background: var(--c-holiday-fill);
+      border: 1px solid #f4c9c9;
+      border-radius: 11px;
+      padding: 10px 12px;
+      margin-bottom: 12px
+    }
+
+    .holbanner svg {
+      width: 15px;
+      height: 15px;
+      color: var(--c-holiday-dot);
+      flex: 0 0 auto;
+      margin-top: 2px
+    }
+
+    .holbanner .n {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--c-holiday-ink);
+      line-height: 1.35
+    }
+
+    .holbanner .s {
+      font-size: 11px;
+      color: #b06a6a;
+      margin-top: 1px
+    }
+
+    .block {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 14px
+    }
+
+    .block h4 {
+      font-family: "Sora", sans-serif;
+      font-size: 13px;
+      margin: 0 0 3px;
+      font-weight: 700
+    }
+
+    .block .bh {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 0 0 10px;
+      line-height: 1.45
+    }
+
+    .swatches {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 11px
+    }
+
+    .sw {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      cursor: pointer;
+      border: 2.5px solid transparent;
+      transition: .14s;
+      position: relative;
+      padding: 0
+    }
+
+    .sw:hover {
+      transform: scale(1.08)
+    }
+
+    .sw:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px
+    }
+
+    .sw.sel {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 2px #fff inset
+    }
+
+    .sw.sel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .1)
+    }
+
+    .sw.none {
+      background: #fff;
+      border: 2px dashed var(--line-strong);
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 700
+    }
+
+    .sw.none.sel {
+      border-style: solid;
+      border-color: var(--ink)
+    }
+
+    .sw.none.sel::after {
+      display: none
+    }
+
+    .grouphead {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 14px 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-soft)
+    }
+
+    .grouphead .ar {
+      font-size: 13px
+    }
+
+    .grouphead .n {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .socard {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 12px;
+      margin-bottom: 8px;
+      border-left-width: 4px
+    }
+
+    .socard.in {
+      border-left-style: dashed
+    }
+
+    .socard .r1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+      flex-wrap: wrap
+    }
+
+    .socard .so {
+      font-family: "Sora", sans-serif;
+      font-weight: 700;
+      font-size: 14px
+    }
+
+    .ttag {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      border-radius: 5px;
+      padding: 2px 7px;
+      color: #fff
+    }
+
+    .stag {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 20px;
+      padding: 3px 9px;
+      white-space: nowrap
+    }
+
+    .socard .r2 {
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      line-height: 1.5
+    }
+
+    .socard .r2 b {
+      color: var(--ink);
+      font-weight: 600
+    }
+
+    .dates {
+      display: flex;
+      gap: 12px;
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 6px;
+      flex-wrap: wrap
+    }
+
+    .dates b {
+      color: var(--ink-soft);
+      font-weight: 700
+    }
+
+    .socard .rem {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 5px;
+      line-height: 1.45
+    }
+
+    .socard .acts {
+      display: flex;
+      gap: 6px;
+      margin-top: 9px;
+      flex-wrap: wrap
+    }
+
+    .field {
+      margin-bottom: 12px
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      margin-bottom: 6px
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--ink);
+      background: #fbfcfe;
+      transition: .15s
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .12)
+    }
+
+    .field textarea {
+      min-height: 58px;
+      resize: vertical
+    }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px
+    }
+
+    .row3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px
+    }
+
+    .segs {
+      display: flex;
+      gap: 8px
+    }
+
+    .seg {
+      flex: 1;
+      border: 1.5px solid var(--line-strong);
+      background: #fbfcfe;
+      border-radius: 10px;
+      padding: 9px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: .14s
+    }
+
+    .seg.on {
+      color: #fff;
+      border-color: transparent
+    }
+
+    .formbox {
+      border: 1.5px dashed var(--line-strong);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #fcfdfe
+    }
+
+    .formbox h4 {
+      font-family: "Sora", sans-serif;
+      font-size: 14px;
+      margin: 0 0 12px;
+      font-weight: 700
+    }
+
+    .formacts {
+      display: flex;
+      gap: 8px
+    }
+
+    .formacts .btn {
+      flex: 1;
+      justify-content: center;
+      box-shadow: none
+    }
+
+    .legend {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-top: 14px;
+      box-shadow: var(--shadow)
+    }
+
+    .legend h4 {
+      margin: 0 0 3px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink-soft)
+    }
+
+    .legend .lh {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 0 0 10px;
+      line-height: 1.45
+    }
+
+    .legrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 3px 0;
+      font-size: 12.5px
+    }
+
+    .legrow .swm {
+      width: 14px;
+      height: 14px;
+      border-radius: 5px;
+      flex: 0 0 auto
+    }
+
+    .legrow .bar3 {
+      width: 5px;
+      height: 15px;
+      border-radius: 2px;
+      flex: 0 0 auto
+    }
+
+    .legrow .bar3.dash {
+      background: repeating-linear-gradient(180deg, currentColor 0 4px, transparent 4px 7px)
+    }
+
+    .legrow .en {
+      font-weight: 600
+    }
+
+    .legrow .n {
+      margin-left: auto;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--muted)
+    }
+
+    .legrow input {
+      flex: 1;
+      border: 1px solid transparent;
+      background: transparent;
+      font-family: inherit;
+      font-size: 12.5px;
+      color: var(--ink);
+      padding: 5px 7px;
+      border-radius: 7px;
+      min-width: 0
+    }
+
+    .legrow input:hover:not(:disabled) {
+      background: #f3f6fa
+    }
+
+    .legrow input:focus {
+      outline: none;
+      background: #fff;
+      border-color: var(--line-strong)
+    }
+
+    .legrow input:disabled {
+      color: var(--muted)
+    }
+
+    .locktag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--c-holiday-ink);
+      background: var(--c-holiday-fill);
+      border-radius: 6px;
+      padding: 2px 7px;
+      white-space: nowrap
+    }
+
+    .tip {
+      position: fixed;
+      z-index: 80;
+      pointer-events: none;
+      background: var(--ink);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      max-width: 280px;
+      line-height: 1.5;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+      opacity: 0;
+      transform: translateY(4px);
+      transition: .12s
+    }
+
+    .tip.show {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .tip .tmk {
+      font-weight: 700;
+      margin-bottom: 4px
+    }
+
+    .tip .thol {
+      color: #ffb4b4;
+      font-weight: 700;
+      margin-top: 4px
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink);
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+      opacity: 0;
+      transition: .25s;
+      z-index: 120
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 32, 45, .5);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      z-index: 100;
+      padding: 5vh 16px;
+      overflow: auto
+    }
+
+    .backdrop.show {
+      display: flex
+    }
+
+    .modal {
+      background: var(--panel);
+      border-radius: 18px;
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 660px;
+      overflow: hidden
+    }
+
+    .modal.narrow {
+      max-width: 380px
+    }
+
+    .mhead {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 17px 20px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .mhead .mi {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--c-holiday-fill);
+      display: grid;
+      place-items: center;
+      color: var(--c-holiday-ink);
+      flex: 0 0 auto
+    }
+
+    .mhead .mi svg {
+      width: 18px;
+      height: 18px
+    }
+
+    .mhead h2 {
+      font-family: "Sora", sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0
+    }
+
+    .mhead p {
+      margin: 2px 0 0;
+      font-size: 11.5px;
+      color: var(--muted)
+    }
+
+    .mhead .x {
+      margin-left: auto;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center
+    }
+
+    .mhead .x:hover {
+      background: #f2f5f9;
+      color: var(--ink)
+    }
+
+    .mbody {
+      padding: 18px 20px 20px;
+      max-height: 64vh;
+      overflow: auto
+    }
+
+    .mfoot {
+      display: flex;
+      gap: 9px;
+      padding: 13px 20px;
+      border-top: 1px solid var(--line);
+      background: #fafbfd
+    }
+
+    .pinrow {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 6px 0 4px
+    }
+
+    .pinrow input {
+      width: 44px;
+      height: 54px;
+      text-align: center;
+      font-family: "Sora", sans-serif;
+      font-size: 21px;
+      font-weight: 700;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 12px;
+      background: #fbfcfe
+    }
+
+    .pinrow input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .12)
+    }
+
+    .pinmsg {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--sun-ink);
+      font-weight: 600;
+      min-height: 18px;
+      margin-top: 10px
+    }
+
+    .pinnote {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 12px 0 0
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 15px;
+      background: #f2f5f9;
+      padding: 4px;
+      border-radius: 11px
+    }
+
+    .tabs button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--ink-soft);
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer
+    }
+
+    .tabs button.on {
+      background: #fff;
+      color: var(--primary-ink);
+      box-shadow: var(--shadow)
+    }
+
+    .holtools {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 13px
+    }
+
+    .htable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px
+    }
+
+    .htable th {
+      text-align: left;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      padding: 0 8px 8px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .htable td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .htable input {
+      width: 100%;
+      border: 1.5px solid transparent;
+      background: #fbfcfe;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--ink)
+    }
+
+    .htable input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff
+    }
+
+    .htable td.act {
+      width: 36px;
+      text-align: right
+    }
+
+    .htable .del {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      width: 27px;
+      height: 27px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center
+    }
+
+    .htable .del:hover {
+      background: #fdeef1;
+      color: var(--sun-ink)
+    }
+
+    .modempty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 26px 10px;
+      line-height: 1.7
+    }
+
+    .logitem {
+      display: flex;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 12.5px;
+      line-height: 1.4
+    }
+
+    .logitem .lts {
+      color: var(--muted);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums
+    }
+
+    .logitem .lact {
+      font-weight: 700;
+      white-space: nowrap
+    }
+
+    .logitem .lact.add {
+      color: var(--c-green-ink)
+    }
+
+    .logitem .lact.edit {
+      color: var(--c-blue-ink)
+    }
+
+    .logitem .lact.del {
+      color: var(--sun-ink)
+    }
+
+    .logitem .lact.pin {
+      color: var(--c-purple-ink)
+    }
+
+    @media(max-width:1080px) {
+      .focuswrap {
+        grid-template-columns: 1fr
+      }
+
+      .side {
+        position: relative;
+        max-height: none;
+        top: 0
+      }
+    }
+
+    @media(max-width:960px) {
+      .yeargrid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+    }
+
+    @media(max-width:560px) {
+      .wrap {
+        padding: 16px 12px 50px
+      }
+
+      .yeargrid {
+        grid-template-columns: 1fr
+      }
+
+      .bighead .bm {
+        font-size: 23px
+      }
+
+      .bigcell {
+        min-height: 84px
+      }
+
+      .row3 {
+        grid-template-columns: 1fr
+      }
+
+      .mtag {
+        display: none
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      * {
+        transition: none !important
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="wrap">
+  <div class="wrap">
 
-  <header class="top">
-    <div class="brand">
-      <div class="mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>
-        </svg>
+    <header class="top">
+      <div class="brand">
+        <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7l9-4 9 4v10l-9 4-9-4z" />
+            <path d="M3 7l9 4 9-4M12 11v10" />
+          </svg></div>
+        <div>
+          <h1>Shipping Calendar</h1>
+          <p>SALE / FREE orders · received and ship dates <span class="th">วันรับออเดอร์และวันจัดส่ง</span></p>
+        </div>
       </div>
-      <div>
-        <h1>Shipping Calendar</h1>
-        <p> ตารางการจัดส่งประจำปี</p>
+
+      <div class="yearnav">
+        <button id="prevYear" aria-label="Previous year"><svg viewBox="0 0 24 24" width="17" height="17" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg></button>
+        <span class="yr" id="yearLabel">2026</span>
+        <button id="nextYear" aria-label="Next year"><svg viewBox="0 0 24 24" width="17" height="17" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18l6-6-6-6" />
+          </svg></button>
+        <button id="todayBtn">Today</button>
+      </div>
+
+      <div class="hstat">
+        <div>
+          <div class="num" id="statOut">0</div>
+          <div class="lbl">Shipped out <span class="th">ส่งออก</span></div>
+        </div>
+        <div class="sep"></div>
+        <div>
+          <div class="num" id="statIn">0</div>
+          <div class="lbl">Received <span class="th">รับออเดอร์</span></div>
+        </div>
+        <div class="sep"></div>
+        <div>
+          <div class="num hol" id="statHol">0</div>
+          <div class="lbl">Holidays <span class="th">วันหยุด</span></div>
+        </div>
+      </div>
+
+      <button class="btn edit" id="editBtn"><svg id="editIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg><span id="editLbl">Editing off</span></button>
+      <button class="btn" id="exportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+        </svg>Back up</button>
+      <button class="btn" id="importBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v10" />
+        </svg>Restore</button>
+      <button class="btn lock" id="adminBtn"><svg id="lockIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>Backend</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none">
+    </header>
+
+    <div class="bar" id="monthbar"></div>
+    <div class="bar" id="filterbar"></div>
+    <div id="stage"></div>
+  </div>
+
+  <div class="backdrop" id="pinBack">
+    <div class="modal narrow" role="dialog" aria-modal="true">
+      <div class="mhead">
+        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg></div>
+        <div>
+          <h2>Admin PIN</h2>
+          <p>Required for holidays and day markers <span class="th">ใส่รหัสก่อนแก้ไข</span></p>
+        </div>
+        <button class="x" id="pinClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg></button>
+      </div>
+      <div class="mbody">
+        <div class="pinrow" id="pinRow">
+          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 1">
+          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 2">
+          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 3">
+          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 4">
+          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 5">
+          <input type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 6">
+        </div>
+        <div class="pinmsg" id="pinMsg"></div>
+        <p class="pinnote" id="pinNote"></p>
       </div>
     </div>
+  </div>
 
-    <div class="yearnav">
-      <button id="prevYear" title="ปีก่อนหน้า">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <span class="yr" id="yearLabel">2026</span>
-      <button id="nextYear" title="ปีถัดไป">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
+  <div class="backdrop" id="admBack">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="mhead">
+        <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+          </svg></div>
+        <div>
+          <h2>Backend settings</h2>
+          <p>Holidays and day markers · auto-locks after 5 min idle <span class="th">ล็อกอัตโนมัติ</span></p>
+        </div>
+        <button class="x" id="admClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg></button>
+      </div>
+      <div class="mbody" id="admBody"></div>
+      <div class="mfoot">
+        <button class="btn tiny" id="admLock">Lock now</button>
+        <div class="grow"></div>
+        <button class="btn tiny" id="admDone">Close</button>
+      </div>
     </div>
+  </div>
 
-    <div class="hstat">
-      <div><div class="num" id="statYear">0</div><div class="lbl">รายการปีนี้</div></div>
-      <div class="sep"></div>
-      <div><div class="num" id="statMonth">0</div><div class="lbl">เดือนที่เลือก</div></div>
-    </div>
+  <div class="tip" id="tip"></div>
+  <div class="toast" id="toast"></div>
 
-    <button class="btn" id="exportBtn" title="สำรองข้อมูลเป็นไฟล์ JSON">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-      Export
-    </button>
-    <button class="btn" id="importBtn" title="นำเข้าไฟล์ข้อมูล">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v10"/></svg>
-      Import
-    </button>
-    <input type="file" id="importFile" accept="application/json" style="display:none">
-  </header>
+  <script>
+    /* ============================================================
+       Shipping Calendar v5
+       Order = SALE or FREE. No detailed workflow status:
+       an order carries only a received date and a ship date, so it
+       appears twice on the calendar (↓ received, ↑ ship).
+       Day markers and holidays are backend-only, behind the admin PIN.
+       ============================================================ */
+    function cssv(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+    function pal(c) { return { fill: cssv("--c-" + c + "-fill"), dot: cssv("--c-" + c + "-dot"), ink: cssv("--c-" + c + "-ink") }; }
 
-  <div class="filterbar" id="filterbar"></div>
+    /* ---------- Order types ---------- */
+    const TYPES = [
+      { key: "SALE", en: "Sale order", th: "ขาย", c: "teal" },
+      { key: "FREE", en: "Free issue", th: "ไม่คิดเงิน", c: "amber" }
+    ];
+    const TY = {}; TYPES.forEach(t => TY[t.key] = { ...t, ...pal(t.c) });
+    const ty = k => TY[k] || TY.SALE;
 
-  <div class="stage" id="stage"></div>
+    /* ---------- Day markers ---------- */
+    const MARKS = ["blue", "amber", "purple", "teal", "green", "rose", "slate"];
+    const MK = {}; MARKS.forEach(k => MK[k] = pal(k));
+    const DEFAULT_MARKNAMES = {
+      blue: "Export day · วันส่งออก",
+      amber: "Container loading · วันตู้เข้า",
+      purple: "Customs / docs · เอกสารพิธีการ",
+      teal: "Domestic delivery · ส่งในประเทศ",
+      green: "Production ready · ผลิตเสร็จ",
+      rose: "Critical deadline · เส้นตายสำคัญ",
+      slate: "Other note · อื่น ๆ"
+    };
 
-</div>
+    const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const MABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const DOW = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
-<div class="tip" id="tip"></div>
-<div class="toast" id="toast"></div>
+    const LS_ORD = "shippingCalendar_orders_v5", LS_ORD4 = "shippingCalendar_orders_v3",
+      LS_MARK = "shippingCalendar_daymarks_v4", LS_MKNAME = "shippingCalendar_marknames_v4",
+      LS_HOL = "shippingCalendar_holidays_v1", LS_PIN = "shippingCalendar_adminpin_v1",
+      LS_LOG = "shippingCalendar_log_v1", LS_EDIT = "shippingCalendar_editunlock_v1";
+    const DEFAULT_PIN = "135790", IDLE_LOCK_MS = 5 * 60 * 1000, MAX_TRIES = 5, LOCKOUT_MS = 60 * 1000;
+    const SEED_HOLIDAYS = {
+      "2026-01-01": { name: "New Year's Day" }, "2026-04-13": { name: "Songkran" }, "2026-04-14": { name: "Songkran" },
+      "2026-04-15": { name: "Songkran" }, "2026-05-01": { name: "Labour Day" }, "2026-12-31": { name: "New Year's Eve" }
+    };
 
-<script>
-/* ============ Config ============ */
-const CATS = [
-  {key:"holiday", fill:getVar("--c-holiday-fill"), dot:getVar("--c-holiday-dot"), ink:getVar("--c-holiday-ink")},
-  {key:"amber",  fill:getVar("--c-amber-fill"),  dot:getVar("--c-amber-dot"),  ink:getVar("--c-amber-ink")},
-  {key:"blue",   fill:getVar("--c-blue-fill"),   dot:getVar("--c-blue-dot"),   ink:getVar("--c-blue-ink")},
-  {key:"green",  fill:getVar("--c-green-fill"),  dot:getVar("--c-green-dot"),  ink:getVar("--c-green-ink")},
-  {key:"purple", fill:getVar("--c-purple-fill"), dot:getVar("--c-purple-dot"), ink:getVar("--c-purple-ink")},
-  {key:"rose",   fill:getVar("--c-rose-fill"),   dot:getVar("--c-rose-dot"),   ink:getVar("--c-rose-ink")},
-  {key:"teal",   fill:getVar("--c-teal-fill"),   dot:getVar("--c-teal-dot"),   ink:getVar("--c-teal-ink")},
-  {key:"slate",  fill:getVar("--c-slate-fill"),  dot:getVar("--c-slate-dot"),  ink:getVar("--c-slate-ink")},
-];
-function getVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
-function catByKey(k){return CATS.find(c=>c.key===k)||CATS[0];}
+    /* ---------- State ---------- */
+    let state = {
+      year: new Date().getFullYear(), month: new Date().getMonth(), selectedDate: null,
+      orders: loadOrders(), marks: loadMarks(), markNames: loadMarkNames(), holidays: loadHolidays(),
+      typeFilter: "all", eventFilter: "all", query: "",
+      editing: null, adding: false, editUnlocked: loadEditLock(), adminUnlocked: false, admTab: "holidays"
+    };
+    let idleTimer = null, lockoutUntil = 0, tries = 0;
 
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const MABBR  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const DOW    = ["Su","Mo","Tu","We","Th","Fr","Sa"];
-
-const LS_DATA = "shippingCalendar_data_v1";
-const LS_LEG  = "shippingCalendar_legend_v1";
-const DEFAULT_LEGEND = {
-  holiday:"วันหยุด (ระบบ)",
-  amber:"จัดส่งต่างประเทศ", blue:"จัดส่งในประเทศ", green:"รับตัวอย่างเข้า",
-  purple:"นัดหมาย / เก็บตัวอย่าง", rose:"เร่งด่วน / Deadline", teal:"ส่งรายงาน",
-  slate:"อื่น ๆ"
-};
-const DEFAULT_HOLIDAYS = {
-  "2026-01-01": { color: "holiday", note: "New Year Day", label: "Holiday", isReadOnly: true },
-  "2026-04-13": { color: "holiday", note: "Songkarn Day", label: "Holiday", isReadOnly: true },
-  "2026-04-14": { color: "holiday", note: "Songkarn Day", label: "Holiday", isReadOnly: true },
-  "2026-04-15": { color: "holiday", note: "Songkarn Day", label: "Holiday", isReadOnly: true },
-  "2026-05-01": { color: "holiday", note: "Labor Day", label: "Holiday", isReadOnly: true },
-  "2026-12-31": { color: "holiday", note: "วันสิ้นปี", label: "Holiday", isReadOnly: true }
-};
-
-/* ============ State ============ */
-let state = {
-  year: new Date().getFullYear(),
-  month: null,           // null = year view, 0-11 = focused
-  selectedDate: null,    // "YYYY-MM-DD"
-  data: loadData(),
-  legend: loadLegend(),
-};
-
-function loadData(){ 
-  let data = {};
-  try { data = JSON.parse(localStorage.getItem(LS_DATA)) || {}; } catch(e) {}
-  return { ...data, ...DEFAULT_HOLIDAYS }; 
-}
-function saveData(){ try{localStorage.setItem(LS_DATA,JSON.stringify(state.data));}catch(e){} }
-function loadLegend(){ try{return Object.assign({},DEFAULT_LEGEND,JSON.parse(localStorage.getItem(LS_LEG))||{});}catch(e){return {...DEFAULT_LEGEND};} }
-function saveLegend(){ try{localStorage.setItem(LS_LEG,JSON.stringify(state.legend));}catch(e){} }
-
-/* ============ Helpers ============ */
-const pad = n => String(n).padStart(2,"0");
-const keyOf = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
-function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
-function firstDow(y,m){return new Date(y,m,1).getDay();}
-function todayKey(){const t=new Date();return keyOf(t.getFullYear(),t.getMonth(),t.getDate());}
-function monthCount(y,m){
-  let c=0;const p=`${y}-${pad(m+1)}-`;
-  for(const k in state.data){if(k.startsWith(p)&&entryHasContent(state.data[k]))c++;}
-  return c;
-}
-function yearCount(y){
-  let c=0;const p=`${y}-`;
-  for(const k in state.data){if(k.startsWith(p)&&entryHasContent(state.data[k]))c++;}
-  return c;
-}
-function entryHasContent(e){return e && (e.color || (e.note&&e.note.trim()) || (e.label&&e.label.trim()));}
-
-/* ============ Rendering ============ */
-function renderAll(){
-  document.getElementById("yearLabel").textContent = state.year;
-  document.getElementById("statYear").textContent = yearCount(state.year);
-  document.getElementById("statMonth").textContent = state.month===null ? "—" : monthCount(state.year,state.month);
-  renderFilterbar();
-  const stage = document.getElementById("stage");
-  stage.innerHTML = "";
-  if(state.month===null) stage.appendChild(buildYearView());
-  else stage.appendChild(buildFocusView());
-}
-
-function renderFilterbar(){
-  const bar = document.getElementById("filterbar");
-  bar.innerHTML = "";
-  const all = chip("ทั้งปี", state.month===null, ()=>{state.month=null;state.selectedDate=null;renderAll();});
-  all.classList.add("all"); if(state.month===null) all.classList.add("active");
-  bar.appendChild(all);
-  for(let m=0;m<12;m++){
-    const c = monthCount(state.year,m);
-    const el = chip(MABBR[m], state.month===m, ()=>{state.month=m;renderAll();});
-    if(c>0){const b=document.createElement("span");b.className="cnt";b.textContent=c;el.appendChild(b);}
-    bar.appendChild(el);
-  }
-  const spring=document.createElement("div");spring.className="fspring";bar.appendChild(spring);
-}
-function chip(text,active,onClick){
-  const b=document.createElement("button");
-  b.className="mchip"+(active?" active":"");
-  b.textContent=text;b.onclick=onClick;return b;
-}
-
-/* ---- Year view (12 mini months) ---- */
-function buildYearView(){
-  const grid=document.createElement("div");grid.className="yeargrid";
-  for(let m=0;m<12;m++) grid.appendChild(buildMiniMonth(m));
-  return grid;
-}
-function buildMiniMonth(m){
-  const card=document.createElement("div");card.className="minicard";
-  card.onclick=()=>{state.month=m;renderAll();window.scrollTo({top:0,behavior:"smooth"});};
-  const cnt=monthCount(state.year,m);
-  const head=document.createElement("div");head.className="minihead";
-  head.innerHTML=`<div><span class="mname">${MABBR[m]}</span><span class="mfull">${MONTHS[m]}</span></div>
-    <span class="minibadge${cnt?'':' zero'}">${cnt} รายการ</span>`;
-  card.appendChild(head);
-
-  const g=document.createElement("div");g.className="minigrid";
-  DOW.forEach((d,i)=>{const h=document.createElement("div");h.className="minidow"+(i===0?" su":"");h.textContent=d;g.appendChild(h);});
-  const fd=firstDow(state.year,m),dim=daysInMonth(state.year,m),tk=todayKey();
-  for(let i=0;i<fd;i++){const c=document.createElement("div");c.className="minicell pad";g.appendChild(c);}
-  for(let d=1;d<=dim;d++){
-    const key=keyOf(state.year,m,d);const e=state.data[key];const dow=(fd+d-1)%7;
-    const c=document.createElement("div");c.className="minicell"+(dow===0?" su":"");
-    c.textContent=d;
-    if(key===tk)c.classList.add("today");
-    if(e&&entryHasContent(e)){
-      const cat=catByKey(e.color||"slate");
-      c.classList.add("filled");c.style.background=cat.fill;c.style.color=cat.ink;
-      const dot=document.createElement("div");dot.className="minidot";dot.style.background=cat.dot;c.appendChild(dot);
+    /* ---------- Storage ---------- */
+    function loadEditLock() { try { return localStorage.getItem(LS_EDIT) === "1"; } catch (e) { return false; } }
+    function saveEditLock() { try { localStorage.setItem(LS_EDIT, state.editUnlocked ? "1" : "0"); } catch (e) { } }
+    const uid = () => "o_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    function loadOrders() {
+      let o = {}; try { o = JSON.parse(localStorage.getItem(LS_ORD)) || {}; } catch (e) { }
+      if (Object.keys(o).length) return o;
+      try { // migrate v3/v4 (keyed by ship date)
+        const old = JSON.parse(localStorage.getItem(LS_ORD4)) || {};
+        for (const k in old) {
+          if (!Array.isArray(old[k])) continue;
+          old[k].forEach(x => {
+            const id = x.id || uid();
+            o[id] = {
+              id, so: String(x.so || "").slice(0, 32), type: "SALE", customer: x.customer || "", dest: x.dest || "",
+              qty: x.qty || "", unit: x.unit || "", received: "", ship: k, remark: x.remark || "", updated: new Date().toISOString()
+            };
+          });
+        }
+        if (Object.keys(o).length) localStorage.setItem(LS_ORD, JSON.stringify(o));
+      } catch (e) { }
+      return o;
     }
-    g.appendChild(c);
-  }
-  card.appendChild(g);
-  return card;
-}
+    function saveOrders() { try { localStorage.setItem(LS_ORD, JSON.stringify(state.orders)); } catch (e) { toast("Save failed: storage full"); } }
+    function loadMarks() { try { return JSON.parse(localStorage.getItem(LS_MARK)) || {}; } catch (e) { return {}; } }
+    function saveMarks() { try { localStorage.setItem(LS_MARK, JSON.stringify(state.marks)); } catch (e) { } }
+    function loadMarkNames() { try { return Object.assign({}, DEFAULT_MARKNAMES, JSON.parse(localStorage.getItem(LS_MKNAME)) || {}); } catch (e) { return { ...DEFAULT_MARKNAMES }; } }
+    function saveMarkNames() { try { localStorage.setItem(LS_MKNAME, JSON.stringify(state.markNames)); } catch (e) { } }
+    function loadHolidays() {
+      try {
+        const s = localStorage.getItem(LS_HOL);
+        if (s === null) { localStorage.setItem(LS_HOL, JSON.stringify(SEED_HOLIDAYS)); return { ...SEED_HOLIDAYS }; }
+        const o = JSON.parse(s) || {}, out = {};
+        for (const k in o) if (/^\d{4}-\d{2}-\d{2}$/.test(k)) out[k] = { name: String(o[k].name || o[k].note || "Holiday") };
+        return out;
+      } catch (e) { return { ...SEED_HOLIDAYS }; }
+    }
+    function saveHolidays() { try { localStorage.setItem(LS_HOL, JSON.stringify(state.holidays)); } catch (e) { } }
+    function loadLog() { try { return JSON.parse(localStorage.getItem(LS_LOG)) || []; } catch (e) { return []; } }
+    function appendLog(action, ref, before, after) {
+      const log = loadLog();
+      log.push({ ts: new Date().toISOString(), action, ref: ref || "", before: before || "", after: after || "" });
+      try { localStorage.setItem(LS_LOG, JSON.stringify(log.slice(-800))); } catch (e) { }
+    }
 
-/* ---- Focused month view ---- */
-function buildFocusView(){
-  const wrap=document.createElement("div");wrap.className="focuswrap";
+    /* ---------- PIN ---------- */
+    async function hashPin(pin, salt) {
+      const msg = salt + "|" + pin;
+      if (window.crypto && crypto.subtle && crypto.subtle.digest) {
+        try {
+          const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(msg));
+          return "sha256:" + [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+        } catch (e) { }
+      }
+      let h1 = 0x811c9dc5, h2 = 0x01000193;
+      for (let i = 0; i < msg.length; i++) {
+        h1 = (h1 ^ msg.charCodeAt(i)) >>> 0; h1 = Math.imul(h1, 16777619) >>> 0;
+        h2 = (h2 + msg.charCodeAt(i) * (i + 31)) >>> 0; h2 = Math.imul(h2, 2654435761) >>> 0;
+      }
+      return "fnv:" + h1.toString(16).padStart(8, "0") + h2.toString(16).padStart(8, "0");
+    }
+    function randSalt() {
+      const a = new Uint8Array(12);
+      if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(a);
+      else for (let i = 0; i < 12; i++)a[i] = Math.floor(Math.random() * 256);
+      return [...a].map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+    async function ensurePinRecord() {
+      let rec = null; try { rec = JSON.parse(localStorage.getItem(LS_PIN)); } catch (e) { }
+      if (!rec || !rec.salt || !rec.hash) {
+        const salt = randSalt();
+        rec = { salt, hash: await hashPin(DEFAULT_PIN, salt), isDefault: true, updatedAt: new Date().toISOString() };
+        try { localStorage.setItem(LS_PIN, JSON.stringify(rec)); } catch (e) { }
+      }
+      return rec;
+    }
+    async function verifyPin(p) { const r = await ensurePinRecord(); return (await hashPin(p, r.salt)) === r.hash; }
+    async function setPin(p) {
+      const salt = randSalt();
+      try { localStorage.setItem(LS_PIN, JSON.stringify({ salt, hash: await hashPin(p, salt), isDefault: false, updatedAt: new Date().toISOString() })); } catch (e) { }
+      appendLog("pin", "", "", "admin PIN changed");
+    }
 
-  /* left: big calendar */
-  const card=document.createElement("div");card.className="bigcard";
-  const cnt=monthCount(state.year,state.month);
-  const head=document.createElement("div");head.className="bighead";
-  head.innerHTML=`<span class="bm">${MABBR[state.month]}</span>
+    /* ---------- Helpers ---------- */
+    const pad = n => String(n).padStart(2, "0");
+    const keyOf = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+    const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const daysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+    const firstDow = (y, m) => new Date(y, m, 1).getDay();
+    function todayKey() { const t = new Date(); return keyOf(t.getFullYear(), t.getMonth(), t.getDate()); }
+    const holidayOf = k => state.holidays[k] || null;
+    const markOf = k => state.marks[k] || null;
+    const markName = c => (state.markNames[c] || c).split("·")[0].trim();
+    function fmtDate(k) { if (!k) return "—"; const [y, m, d] = k.split("-").map(Number); return `${d} ${MABBR[m - 1]} ${y}`; }
+    function fmtLong(k) { const [y, m, d] = k.split("-").map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; }
+    function lead(o) { // days from received to ship
+      if (!o.received || !o.ship) return null;
+      return Math.round((new Date(o.ship) - new Date(o.received)) / 864e5);
+    }
+    function matches(o) {
+      if (state.typeFilter !== "all" && o.type !== state.typeFilter) return false;
+      const q = state.query.trim().toLowerCase();
+      if (!q) return true;
+      return (o.so + " " + o.customer + " " + o.dest + " " + (o.remark || "")).toLowerCase().includes(q);
+    }
+    /* entries on a date: {o, role:"in"|"out"} */
+    function entriesOn(k) {
+      const out = [];
+      for (const id in state.orders) {
+        const o = state.orders[id];
+        if (!matches(o)) continue;
+        if (o.received === k && state.eventFilter !== "out") out.push({ o, role: "in" });
+        if (o.ship === k && state.eventFilter !== "in") out.push({ o, role: "out" });
+      }
+      return out.sort((a, b) => a.role === b.role ? String(a.o.so).localeCompare(String(b.o.so)) : (a.role === "out" ? -1 : 1));
+    }
+    function countRole(y, m, role) {
+      let c = 0; const p = m == null ? `${y}-` : `${y}-${pad(m + 1)}-`;
+      for (const id in state.orders) {
+        const o = state.orders[id]; if (!matches(o)) continue;
+        const d = role === "in" ? o.received : o.ship;
+        if (d && d.startsWith(p)) c++;
+      }
+      return c;
+    }
+    function countCells(y, m) {
+      let c = 0; const p = m == null ? `${y}-` : `${y}-${pad(m + 1)}-`;
+      for (const id in state.orders) {
+        const o = state.orders[id]; if (!matches(o)) continue;
+        if (state.eventFilter !== "out" && o.received && o.received.startsWith(p)) c++;
+        if (state.eventFilter !== "in" && o.ship && o.ship.startsWith(p)) c++;
+      }
+      return c;
+    }
+    function typeCount(y, t) {
+      let c = 0; const p = `${y}-`;
+      for (const id in state.orders) {
+        const o = state.orders[id];
+        if (t !== "all" && o.type !== t) continue;
+        if ((o.ship && o.ship.startsWith(p)) || (o.received && o.received.startsWith(p))) c++;
+      }
+      return c;
+    }
+    function markCount(y, c) {
+      let n = 0; const p = `${y}-`;
+      for (const k in state.marks) if (k.startsWith(p) && state.marks[k].color === c) n++;
+      return n;
+    }
+    function holidayCount(y, m) {
+      let c = 0; const p = m == null ? `${y}-` : `${y}-${pad(m + 1)}-`;
+      for (const k in state.holidays) if (k.startsWith(p)) c++;
+      return c;
+    }
+
+    /* ---------- Render ---------- */
+    function renderAll() {
+      document.getElementById("yearLabel").textContent = state.year;
+      document.getElementById("statOut").textContent = countRole(state.year, state.month, "out");
+      document.getElementById("statIn").textContent = countRole(state.year, state.month, "in");
+      document.getElementById("statHol").textContent = holidayCount(state.year, state.month);
+      renderMonthBar(); renderFilterBar();
+      const stage = document.getElementById("stage"); stage.innerHTML = "";
+      stage.appendChild(state.month === null ? buildYearView() : buildFocusView());
+    }
+    function renderMonthBar() {
+      const bar = document.getElementById("monthbar"); bar.innerHTML = "";
+      bar.appendChild(chip("Year", state.month === null, () => { state.month = null; state.selectedDate = null; renderAll(); }));
+      for (let m = 0; m < 12; m++) {
+        const c = countCells(state.year, m);
+        const el = chip(MABBR[m], state.month === m, () => { state.month = m; renderAll(); });
+        if (c) { const b = document.createElement("span"); b.className = "cnt"; b.textContent = c; el.appendChild(b); }
+        bar.appendChild(el);
+      }
+      const g = document.createElement("div"); g.className = "grow"; bar.appendChild(g);
+      const s = document.createElement("div"); s.className = "search";
+      s.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>`;
+      const inp = document.createElement("input"); inp.placeholder = "Search SO / customer  ค้นหา"; inp.value = state.query;
+      inp.oninput = () => {
+        state.query = inp.value; renderAll();
+        const f = document.querySelector(".search input"); if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); }
+      };
+      s.appendChild(inp); bar.appendChild(s);
+    }
+    function chip(t, a, fn) { const b = document.createElement("button"); b.className = "chip" + (a ? " active" : ""); b.textContent = t; b.onclick = fn; return b; }
+    function pill(label, on, color, count, fn, arrow) {
+      const b = document.createElement("button");
+      b.className = "schip" + (on ? " on" : "");
+      if (on) b.style.background = color;
+      b.innerHTML = (arrow ? `<span class="ar">${arrow}</span>` : `<span class="sd" style="background:${on ? "#fff" : color}"></span>`)
+        + `<span>${label}</span>` + (count == null ? "" : `<span class="n">${count}</span>`);
+      b.onclick = fn; return b;
+    }
+    function renderFilterBar() {
+      const bar = document.getElementById("filterbar"); bar.innerHTML = "";
+      bar.appendChild(pill("All orders", state.typeFilter === "all", cssv("--primary"), typeCount(state.year, "all"),
+        () => { state.typeFilter = "all"; renderAll(); }));
+      TYPES.forEach(t => bar.appendChild(pill(t.key, state.typeFilter === t.key, ty(t.key).dot, typeCount(state.year, t.key),
+        () => { state.typeFilter = t.key; renderAll(); })));
+      const v = document.createElement("div"); v.className = "vsep"; bar.appendChild(v);
+      bar.appendChild(pill("Both dates", state.eventFilter === "all", cssv("--ink-soft"), null,
+        () => { state.eventFilter = "all"; renderAll(); }));
+      bar.appendChild(pill("Received", state.eventFilter === "in", cssv("--ink-soft"), countRole(state.year, null, "in"),
+        () => { state.eventFilter = "in"; renderAll(); }, "↓"));
+      bar.appendChild(pill("Ship out", state.eventFilter === "out", cssv("--ink-soft"), countRole(state.year, null, "out"),
+        () => { state.eventFilter = "out"; renderAll(); }, "↑"));
+      const g = document.createElement("div"); g.className = "grow"; bar.appendChild(g);
+      const n = document.createElement("span");
+      n.style.cssText = "font-size:11.5px;color:var(--muted);padding-right:6px";
+      n.innerHTML = `↓ received · ↑ ship out <span class="th">↓ วันรับ · ↑ วันส่ง</span>`;
+      bar.appendChild(n);
+    }
+
+    /* ---- Year view ---- */
+    function buildYearView() {
+      const g = document.createElement("div"); g.className = "yeargrid";
+      for (let m = 0; m < 12; m++)g.appendChild(buildMini(m));
+      return g;
+    }
+    function buildMini(m) {
+      const card = document.createElement("div"); card.className = "minicard";
+      card.onclick = () => { state.month = m; renderAll(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+      const cnt = countRole(state.year, m, "out");
+      const head = document.createElement("div"); head.className = "minihead";
+      head.innerHTML = `<div><span class="mname">${MABBR[m]}</span><span class="mfull">${MONTHS[m]}</span></div>
+    <span class="minibadge${cnt ? "" : " zero"}">${cnt} out</span>`;
+      card.appendChild(head);
+      const g = document.createElement("div"); g.className = "minigrid";
+      DOW.forEach((d, i) => { const h = document.createElement("div"); h.className = "minidow" + (i === 0 ? " su" : ""); h.textContent = d; g.appendChild(h); });
+      const fd = firstDow(state.year, m), dim = daysInMonth(state.year, m), tk = todayKey();
+      for (let i = 0; i < fd; i++) { const c = document.createElement("div"); c.className = "minicell pad"; g.appendChild(c); }
+      for (let d = 1; d <= dim; d++) {
+        const key = keyOf(state.year, m, d), list = entriesOn(key), hol = holidayOf(key), mk = markOf(key), dow = (fd + d - 1) % 7;
+        const c = document.createElement("div"); c.className = "minicell" + (dow === 0 ? " su" : ""); c.textContent = d;
+        if (key === tk) c.classList.add("today");
+        if (mk) { c.classList.add("marked"); c.style.background = MK[mk.color].fill; c.style.color = MK[mk.color].ink; }
+        else if (hol) { c.style.background = cssv("--c-holiday-fill"); c.style.color = cssv("--c-holiday-ink"); }
+        if (list.length) {
+          const box = document.createElement("div"); box.className = "minidots";
+          [...new Set(list.map(e => e.o.type))].forEach(t => {
+            const i = document.createElement("i"); i.style.background = ty(t).dot; box.appendChild(i);
+          });
+          c.appendChild(box);
+          c.title = list.map(e => (e.role === "in" ? "↓ " : "↑ ") + e.o.so + " · " + e.o.type).join("\n");
+        }
+        if (hol) { const f = document.createElement("div"); f.className = "miniflag"; c.appendChild(f); }
+        g.appendChild(c);
+      }
+      card.appendChild(g); return card;
+    }
+
+    /* ---- Month view ---- */
+    function buildFocusView() {
+      const wrap = document.createElement("div"); wrap.className = "focuswrap";
+      const card = document.createElement("div"); card.className = "bigcard";
+      const outN = countRole(state.year, state.month, "out"), inN = countRole(state.year, state.month, "in"),
+        hc = holidayCount(state.year, state.month);
+      const head = document.createElement("div"); head.className = "bighead";
+      head.innerHTML = `<span class="bm">${MABBR[state.month]}</span>
     <span class="bfull">${MONTHS[state.month]} ${state.year}</span>
-    <span class="bbadge">${cnt} รายการจัดส่ง</span>`;
-  card.appendChild(head);
+    <span class="bbadge">↑ ${outN} out · ↓ ${inN} in</span>` + (hc ? `<span class="bhol">${hc} holidays</span>` : "");
+      card.appendChild(head);
 
-  const g=document.createElement("div");g.className="biggrid";
-  DOW.forEach((d,i)=>{const h=document.createElement("div");h.className="bigdow"+(i===0?" su":"");h.textContent=d;g.appendChild(h);});
-  const fd=firstDow(state.year,state.month),dim=daysInMonth(state.year,state.month),tk=todayKey();
-  for(let i=0;i<fd;i++){const c=document.createElement("div");c.className="bigcell pad";g.appendChild(c);}
-  for(let d=1;d<=dim;d++){
-    const key=keyOf(state.year,state.month,d);const e=state.data[key];const dow=(fd+d-1)%7;
-    const c=document.createElement("div");c.className="bigcell"+(dow===0?" su":"");
-    if(key===tk)c.classList.add("today");
-    c.innerHTML=`<span class="dnum">${d}</span>`;
-    if(e&&entryHasContent(e)){
-      const cat=catByKey(e.color||"slate");
-      c.style.background=cat.fill;c.style.borderColor=cat.dot+"66";
-      if(e.label&&e.label.trim()){
-        const p=document.createElement("div");p.className="pill";p.style.background=cat.dot;
-        p.textContent=e.label.trim().slice(0,3);c.appendChild(p);
-      }else{
-        const dot=document.createElement("div");dot.className="cdot";dot.style.background=cat.dot;c.appendChild(dot);
+      const g = document.createElement("div"); g.className = "biggrid";
+      DOW.forEach((d, i) => { const h = document.createElement("div"); h.className = "bigdow" + (i === 0 ? " su" : ""); h.textContent = d; g.appendChild(h); });
+      const fd = firstDow(state.year, state.month), dim = daysInMonth(state.year, state.month), tk = todayKey();
+      for (let i = 0; i < fd; i++) { const c = document.createElement("div"); c.className = "bigcell pad"; g.appendChild(c); }
+      for (let d = 1; d <= dim; d++) {
+        const key = keyOf(state.year, state.month, d), list = entriesOn(key), hol = holidayOf(key), mk = markOf(key), dow = (fd + d - 1) % 7;
+        const c = document.createElement("button"); c.type = "button";
+        c.className = "bigcell" + (dow === 0 ? " su" : "") + (key === state.selectedDate ? " sel" : "");
+        if (key === tk) c.classList.add("today");
+        if (mk) { c.style.background = MK[mk.color].fill; c.style.borderColor = MK[mk.color].dot + "66"; }
+        else if (hol) { c.style.background = cssv("--c-holiday-fill"); c.style.borderColor = "#f4c9c9"; }
+
+        const hd = document.createElement("div"); hd.className = "cellhead";
+        hd.innerHTML = `<span class="dnum">${d}</span>`;
+        if (mk) {
+          const t = document.createElement("span"); t.className = "mtag";
+          t.style.background = MK[mk.color].dot; t.style.color = "#fff";
+          t.textContent = (mk.label || markName(mk.color)).slice(0, 14); hd.appendChild(t);
+        }
+        const nOut = list.filter(e => e.role === "out").length, nIn = list.filter(e => e.role === "in").length;
+        if (nOut || nIn) {
+          const b = document.createElement("span"); b.className = "cntbadge";
+          if (nOut) b.innerHTML += `<span style="background:var(--primary)">↑${nOut}</span>`;
+          if (nIn) b.innerHTML += `<span style="background:var(--muted)">↓${nIn}</span>`;
+          hd.appendChild(b);
+        }
+        c.appendChild(hd);
+
+        if (hol && !list.length) {
+          const h = document.createElement("div"); h.className = "holname"; h.textContent = hol.name; c.appendChild(h);
+        }
+        if (list.length) {
+          const box = document.createElement("div"); box.className = "celllist";
+          list.slice(0, 3).forEach(e => {
+            const t = ty(e.o.type);
+            const l = document.createElement("div");
+            l.className = "soline " + e.role;
+            l.style.color = t.ink; l.style.borderLeftColor = t.dot;
+            l.innerHTML = `<span class="ar">${e.role === "in" ? "↓" : "↑"}</span><span class="sn">${esc(e.o.so)}</span>`;
+            box.appendChild(l);
+          });
+          if (list.length > 3) { const m = document.createElement("div"); m.className = "more"; m.textContent = "+" + (list.length - 3) + " more"; box.appendChild(m); }
+          c.appendChild(box);
+          c.onmouseenter = ev => showTip(ev, list, hol, mk); c.onmousemove = moveTip; c.onmouseleave = hideTip;
+        }
+        if (hol && (list.length || mk)) { const f = document.createElement("div"); f.className = "holflag"; c.appendChild(f); }
+        c.onclick = () => selectDay(key);
+        g.appendChild(c);
       }
-      if(e.note&&e.note.trim()){
-        const l=document.createElement("div");l.className="blabel";l.style.color=cat.ink;
-        l.textContent=e.note.trim();c.appendChild(l);
-      }
-      c.onmouseenter=ev=>showTip(ev,e);
-      c.onmousemove=moveTip;
-      c.onmouseleave=hideTip;
+      card.appendChild(g); wrap.appendChild(card);
+      const col = document.createElement("div");
+      col.appendChild(buildSide()); col.appendChild(buildLegend());
+      wrap.appendChild(col); return wrap;
     }
-    c.onclick=()=>selectDay(key);
-    g.appendChild(c);
-  }
-  card.appendChild(g);
-  wrap.appendChild(card);
 
-  /* right: editor + legend */
-  const col=document.createElement("div");
-  col.appendChild(buildSide());
-  col.appendChild(buildLegend());
-  wrap.appendChild(col);
-  return wrap;
-}
-
-/* ---- Side editor ---- */
-function buildSide(){
-  const side=document.createElement("div");side.className="side";side.id="side";
-  
-  if(!state.selectedDate){
-    side.innerHTML=`<div class="empty">
+    /* ---- Side panel ---- */
+    function buildSide() {
+      const side = document.createElement("div"); side.className = "side"; side.id = "side";
+      if (!state.selectedDate) {
+        side.innerHTML = `<div class="empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 15h.01M12 15h.01M16 15h.01"/></svg>
-      <p>คลิกวันที่บนปฏิทิน<br>เพื่อเพิ่มรายละเอียดการจัดส่ง<br>และเลือกสีของวันนั้น</p></div>`;
-    return side;
-  }
+      <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h.01M12 15h.01M16 15h.01"/></svg>
+      <p>Pick a date to mark the day or add an order<br><span class="th">เลือกวันเพื่อแต้มสีหรือเพิ่มออเดอร์</span></p></div>`;
+        return side;
+      }
+      const key = state.selectedDate, hol = holidayOf(key);
+      const all = entriesOn(key);
+      const outs = all.filter(e => e.role === "out"), ins = all.filter(e => e.role === "in");
 
-  const [y,mm,dd]=state.selectedDate.split("-").map(Number);
-  const e=state.data[state.selectedDate]||{color:"",note:"",label:""};
-  const dObj=new Date(y,mm-1,dd);
-  const dowName=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"][dObj.getDay()];
+      const head = document.createElement("div"); head.className = "sidehead";
+      head.innerHTML = `<div><h3>${fmtLong(key)}</h3>
+    <div class="datesub">↑ ${outs.length} ship out · ↓ ${ins.length} received <span class="th">ส่ง / รับ</span></div></div>`;
+      if (state.editUnlocked) {
+        const add = document.createElement("button"); add.className = "btn primary tiny"; add.textContent = "+ Add order";
+        add.onclick = () => { state.adding = true; state.editing = null; refreshSide(); };
+        head.appendChild(add);
+      }
+      side.appendChild(head);
+      if (!state.editUnlocked) side.appendChild(lockHint());
 
-  if(e.isReadOnly){
-    side.innerHTML=`
-      <h3>${dd} ${MONTHS[mm-1]}</h3>
-      <div class="datesub">วัน${dowName} · ${y}</div>
-      <div class="field">
-        <label>รายละเอียดการจัดส่ง</label>
-        <div style="padding:10px 12px; background:#f9fafb; border:1.5px dashed var(--line-strong); border-radius:10px; color:var(--ink); font-size:14px;">
-          ${e.note}
-        </div>
-      </div>
-      <div class="field">
-        <label>ป้ายกำกับสั้น</label>
-        <div style="padding:10px 12px; background:#f9fafb; border:1.5px dashed var(--line-strong); border-radius:10px; color:var(--ink); font-size:14px;">
-          ${e.label}
-        </div>
-      </div>
-      <div style="margin-top:24px; text-align:center; color:var(--sun-ink); font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        ข้อมูลวันหยุดระบบ (ไม่สามารถแก้ไขได้)
-      </div>`;
-    return side;
-  }
+      if (hol) {
+        const b = document.createElement("div"); b.className = "holbanner";
+        b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div><div class="n">${esc(hol.name)}</div>
+      <div class="s">Company holiday, not an order <span class="th">วันหยุด ไม่นับรวม</span></div></div>`;
+        side.appendChild(b);
+      }
 
-  side.innerHTML=`
-    <h3>${dd} ${MONTHS[mm-1]}</h3>
-    <div class="datesub">วัน${dowName} · ${y}</div>
-    <div class="field">
-      <label>รายละเอียดการจัดส่ง</label>
-      <textarea id="fNote" placeholder="เช่น ส่งตัวอย่างดิน 12 ตัวอย่างไป Lab กรุงเทพฯ / เลขพัสดุ...">${(e.note||"").replace(/</g,"&lt;")}</textarea>
+      const mkb = markBanner(key); if (mkb) side.appendChild(mkb);
+
+      if (state.adding || state.editing)
+        side.appendChild(buildForm(key, state.editing ? state.orders[state.editing] : null));
+
+      if (!all.length && !state.adding) {
+        const e = document.createElement("div"); e.className = "empty";
+        e.innerHTML = `<p>No order on this date<br><span class="th">ยังไม่มีออเดอร์ในวันนี้</span></p>`;
+        side.appendChild(e);
+      }
+      if (outs.length) side.appendChild(group("↑", "Ship out", "วันจัดส่ง", outs, key));
+      if (ins.length) side.appendChild(group("↓", "Received", "วันรับออเดอร์", ins, key));
+      return side;
+    }
+    function group(arrow, en, th, list, key) {
+      const frag = document.createDocumentFragment();
+      const h = document.createElement("div"); h.className = "grouphead";
+      h.innerHTML = `<span class="ar">${arrow}</span><span>${en}</span> <span class="th">${th}</span>
+    <span class="n">${list.length}</span>`;
+      frag.appendChild(h);
+      list.forEach(e => frag.appendChild(orderCard(e.o, e.role, key)));
+      const box = document.createElement("div"); box.appendChild(frag); return box;
+    }
+    function orderCard(o, role, key) {
+      const t = ty(o.type);
+      const card = document.createElement("div"); card.className = "socard " + role; card.style.borderLeftColor = t.dot;
+      const qty = o.qty ? `${esc(o.qty)}${o.unit ? " " + esc(o.unit) : ""}` : "";
+      const ld = lead(o);
+      const done = o.ship && o.ship <= todayKey();
+      card.innerHTML = `
+    <div class="r1">
+      <span class="so">${esc(o.so)}</span>
+      <span class="ttag" style="background:${t.dot}">${o.type}</span>
+      <span class="stag" style="background:${done ? "var(--c-green-fill)" : "var(--c-slate-fill)"};color:${done ? "var(--c-green-ink)" : "var(--c-slate-ink)"}">
+        ${o.ship ? (done ? "Shipped" : "Scheduled") : "No ship date"}</span>
     </div>
-    <div class="field">
-      <label>ป้ายกำกับสั้น (แสดงบนวัน)</label>
-      <input id="fLabel" maxlength="3" placeholder="เช่น B, DHL, ✈" value="${(e.label||"").replace(/"/g,'&quot;')}">
+    <div class="r2">${o.customer ? `<b>${esc(o.customer)}</b>` : ""}${o.dest ? ` · ${esc(o.dest)}` : ""}${qty ? ` · ${qty}` : ""}</div>
+    <div class="dates">
+      <span>↓ Received <b>${fmtDate(o.received)}</b></span>
+      <span>↑ Ship <b>${fmtDate(o.ship)}</b></span>
+      ${ld != null ? `<span>${ld} d lead</span>` : ""}
     </div>
-    <div class="field">
-      <label>สีประเภทการจัดส่ง</label>
-      <div class="swatches" id="fSwatches"></div>
+    ${o.remark ? `<div class="rem">${esc(o.remark)}</div>` : ""}`;
+      if (state.editUnlocked) {
+        const acts = document.createElement("div"); acts.className = "acts";
+        const eb = document.createElement("button"); eb.className = "btn tiny"; eb.textContent = "Edit";
+        eb.onclick = () => { state.editing = o.id; state.adding = false; refreshSide(); };
+        const db = document.createElement("button"); db.className = "btn tiny danger"; db.textContent = "Delete";
+        db.onclick = () => removeOrder(o.id);
+        acts.appendChild(eb); acts.appendChild(db); card.appendChild(acts);
+      }
+      return card;
+    }
+    function refreshSide() { const o = document.getElementById("side"); if (o) o.replaceWith(buildSide()); else renderAll(); }
+
+    /* ---- Edit lock (front of house) ---- */
+    function lockHint() {
+      const d = document.createElement("div"); d.className = "lockhint";
+      d.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <span>Editing is off, view only <span class="th">โหมดดูอย่างเดียว</span></span>`;
+      const b = document.createElement("button"); b.textContent = "Turn on";
+      b.onclick = () => setEditLock(true);
+      d.appendChild(b); return d;
+    }
+    function applyEditUI(on) {
+      const btn = document.getElementById("editBtn");
+      btn.classList.toggle("on", on);
+      document.getElementById("editLbl").textContent = on ? "Editing on" : "Editing off";
+      document.getElementById("editIcon").innerHTML = on
+        ? '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>'
+        : '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+    }
+    function setEditLock(on) {
+      state.editUnlocked = on; saveEditLock();
+      if (!on) { state.adding = false; state.editing = null; }
+      applyEditUI(on); renderAll();
+      toast(on ? "Editing unlocked" : "Editing locked");
+      if (on) resetEditIdle(); else clearTimeout(editIdle);
+    }
+    let editIdle = null;
+    function resetEditIdle() {
+      clearTimeout(editIdle);
+      editIdle = setTimeout(() => { if (state.editUnlocked) { setEditLock(false); toast("Auto-locked after 15 min idle"); } }, 15 * 60 * 1000);
+    }
+    ["click", "keydown"].forEach(ev => document.addEventListener(ev, () => { if (state.editUnlocked) resetEditIdle(); }));
+
+    /* ---- Day marker (read-only here, edited in the backend) ---- */
+    function markBanner(key) {
+      const cur = markOf(key); if (!cur) return null;
+      const c = MK[cur.color];
+      const b = document.createElement("div"); b.className = "holbanner";
+      b.style.background = c.fill; b.style.borderColor = c.dot + "55";
+      b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${c.dot}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <div><div class="n" style="color:${c.ink}">${esc(cur.label || markName(cur.color))}</div>
+    <div class="s" style="color:${c.ink};opacity:.75">Day marker, set in the backend <span class="th">สีประจำวัน แก้ที่หลังบ้าน</span></div></div>`;
+      return b;
+    }
+
+    /* ---- Order form ---- */
+    function buildForm(key, order) {
+      const box = document.createElement("div"); box.className = "formbox";
+      const o = order || { so: "", type: "SALE", customer: "", dest: "", qty: "", unit: "kg", received: "", ship: key, remark: "" };
+      let chosenType = o.type;
+      box.innerHTML = `
+    <h4>${order ? "Edit order" : "New order"} <span class="th">${order ? "แก้ไข" : "เพิ่มออเดอร์"}</span></h4>
+    <div class="field"><label>Order type <span class="th">ประเภท</span></label>
+      <div class="segs" id="fSegs"></div></div>
+    <div class="field"><label>SO number <span class="th">เลขที่ SO</span></label>
+      <input id="fSo" maxlength="32" placeholder="SO-2026-0142" value="${esc(o.so)}"></div>
+    <div class="row2">
+      <div class="field"><label>Received date <span class="th">วันรับออเดอร์</span></label>
+        <input id="fRec" type="date" value="${esc(o.received || "")}"></div>
+      <div class="field"><label>Ship date <span class="th">วันจัดส่ง</span></label>
+        <input id="fShip" type="date" value="${esc(o.ship || "")}"></div>
     </div>
-    <div class="sideactions">
-      <button class="btn primary" id="fSave">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-        บันทึก
-      </button>
-      <button class="btn danger" id="fClear">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-        ลบ
-      </button>
+    <div class="field"><label>Customer <span class="th">ลูกค้า</span></label>
+      <input id="fCus" maxlength="60" value="${esc(o.customer)}"></div>
+    <div class="row3">
+      <div class="field"><label>Destination <span class="th">ปลายทาง</span></label>
+        <input id="fDest" maxlength="40" value="${esc(o.dest)}"></div>
+      <div class="field"><label>Qty <span class="th">จำนวน</span></label>
+        <input id="fQty" inputmode="decimal" value="${esc(o.qty)}"></div>
+      <div class="field"><label>Unit <span class="th">หน่วย</span></label>
+        <input id="fUnit" maxlength="10" value="${esc(o.unit)}"></div>
+    </div>
+    <div class="field"><label>Remark <span class="th">หมายเหตุ</span></label>
+      <textarea id="fRem" placeholder="Booking no., forwarder, reason for free issue...">${esc(o.remark)}</textarea></div>
+    <div class="formacts">
+      <button class="btn primary" id="fSave">Save <span class="th">บันทึก</span></button>
+      <button class="btn" id="fCancel">Cancel</button>
     </div>`;
+      const segs = box.querySelector("#fSegs");
+      TYPES.forEach(t => {
+        const b = document.createElement("button"); b.type = "button";
+        b.className = "seg" + (t.key === chosenType ? " on" : "");
+        if (t.key === chosenType) b.style.background = ty(t.key).dot;
+        b.innerHTML = `${t.key} <span class="th" style="color:inherit;opacity:.75">${t.th}</span>`;
+        b.onclick = () => {
+          chosenType = t.key;
+          segs.querySelectorAll(".seg").forEach(x => { x.classList.remove("on"); x.style.background = ""; });
+          b.classList.add("on"); b.style.background = ty(t.key).dot;
+        };
+        segs.appendChild(b);
+      });
+      box.querySelector("#fCancel").onclick = () => { state.adding = false; state.editing = null; refreshSide(); };
+      box.querySelector("#fSave").onclick = () => {
+        const rec = {
+          so: box.querySelector("#fSo").value.trim(), type: chosenType,
+          received: box.querySelector("#fRec").value, ship: box.querySelector("#fShip").value,
+          customer: box.querySelector("#fCus").value.trim(), dest: box.querySelector("#fDest").value.trim(),
+          qty: box.querySelector("#fQty").value.trim(), unit: box.querySelector("#fUnit").value.trim(),
+          remark: box.querySelector("#fRem").value.trim()
+        };
+        if (!rec.so) { toast("SO number is required"); return; }
+        if (!rec.received && !rec.ship) { toast("Enter a received date or a ship date"); return; }
+        if (rec.received && rec.ship && rec.ship < rec.received) { toast("Ship date is before the received date"); return; }
+        if (order) {
+          appendLog("edit", order.id, `${order.so} ${order.type} ${order.received || "—"}→${order.ship || "—"}`,
+            `${rec.so} ${rec.type} ${rec.received || "—"}→${rec.ship || "—"}`);
+          state.orders[order.id] = { ...order, ...rec, updated: new Date().toISOString() };
+          toast("Order updated");
+        } else {
+          const id = uid();
+          state.orders[id] = { id, ...rec, created: new Date().toISOString(), updated: new Date().toISOString() };
+          appendLog("add", id, "", `${rec.so} ${rec.type} ${rec.received || "—"}→${rec.ship || "—"}`);
+          toast("Order added");
+        }
+        saveOrders(); state.adding = false; state.editing = null; renderAll(); refreshSide();
+      };
+      return box;
+    }
+    function removeOrder(id) {
+      const o = state.orders[id]; if (!o) return;
+      if (!confirm(`Delete ${o.so}?\nลบออเดอร์นี้?`)) return;
+      appendLog("del", id, `${o.so} ${o.type} ${o.received || "—"}→${o.ship || "—"}`, "");
+      delete state.orders[id]; saveOrders(); renderAll(); refreshSide(); toast("Order deleted");
+    }
 
-  const sw=side.querySelector("#fSwatches");
-  let chosen=e.color||"amber";
-  CATS.forEach(cat=>{
-    if(cat.key === "holiday") return; // ซ่อนปุ่มสีวันหยุด ไม่ให้ผู้ใช้เลือกเองได้
-    const s=document.createElement("div");
-    s.className="sw"+(cat.key===chosen?" sel":"");
-    s.style.background=cat.dot;s.title=state.legend[cat.key]||cat.key;
-    s.onclick=()=>{chosen=cat.key;sw.querySelectorAll(".sw").forEach(x=>x.classList.remove("sel"));s.classList.add("sel");};
-    sw.appendChild(s);
-  });
+    /* ---- Legend ---- */
+    function buildLegend() {
+      const box = document.createElement("div"); box.className = "legend";
+      box.innerHTML = `<h4>Order type <span class="th">ประเภทออเดอร์</span></h4>
+    <p class="lh">Colour of each strip inside a day. <span class="th">สีแถบรายการในวัน</span></p>`;
+      TYPES.forEach(t => {
+        const r = document.createElement("div"); r.className = "legrow";
+        r.innerHTML = `<span class="bar3" style="background:${ty(t.key).dot}"></span>
+      <span class="en">${t.key} — ${t.en}</span> <span class="th">${t.th}</span>
+      <span class="n">${typeCount(state.year, t.key)}</span>`;
+        box.appendChild(r);
+      });
+      const e1 = document.createElement("div"); e1.className = "legrow";
+      e1.innerHTML = `<span class="bar3 dash" style="color:var(--muted)"></span>
+    <span class="en">↓ Received date</span> <span class="th">วันรับออเดอร์</span>`;
+      box.appendChild(e1);
+      const e2 = document.createElement("div"); e2.className = "legrow";
+      e2.innerHTML = `<span class="bar3" style="background:var(--ink-soft)"></span>
+    <span class="en">↑ Ship date</span> <span class="th">วันจัดส่ง</span>`;
+      box.appendChild(e2);
 
-  side.querySelector("#fSave").onclick=()=>{
-    const note=side.querySelector("#fNote").value;
-    const label=side.querySelector("#fLabel").value;
-    state.data[state.selectedDate]={color:chosen,note,label};
-    if(!entryHasContent(state.data[state.selectedDate])) delete state.data[state.selectedDate];
-    saveData();toast("บันทึกแล้ว ✓");renderAll();restoreSelection();
-  };
-  side.querySelector("#fClear").onclick=()=>{
-    delete state.data[state.selectedDate];saveData();toast("ลบรายการแล้ว");
-    state.selectedDate=null;renderAll();
-  };
-  return side;
-}
-function restoreSelection(){/* keep selectedDate; re-render already rebuilt side */}
+      const h2 = document.createElement("h4"); h2.style.marginTop = "16px";
+      h2.innerHTML = `Day markers <span class="th">สีประจำวัน</span>`; box.appendChild(h2);
+      const p = document.createElement("p"); p.className = "lh";
+      p.innerHTML = `Tints the whole cell. Assigned in the backend. <span class="th">แต้มสีที่หลังบ้านเท่านั้น</span>`;
+      box.appendChild(p);
+      MARKS.forEach(c => {
+        const r = document.createElement("div"); r.className = "legrow";
+        const sw = document.createElement("span"); sw.className = "swm"; sw.style.background = MK[c].dot;
+        const inp = document.createElement("input"); inp.value = state.markNames[c] || ""; inp.disabled = true;
+        const n = document.createElement("span"); n.className = "n"; n.textContent = markCount(state.year, c);
+        r.appendChild(sw); r.appendChild(inp); r.appendChild(n); box.appendChild(r);
+      });
+      const hr = document.createElement("div"); hr.className = "legrow";
+      hr.innerHTML = `<span class="swm" style="background:${cssv("--c-holiday-dot")}"></span>
+    <input value="Holiday · วันหยุด (ระบบ)" disabled><span class="locktag">Admin</span>`;
+      box.appendChild(hr);
+      return box;
+    }
 
-/* ---- Legend ---- */
-function buildLegend(){
-  const box=document.createElement("div");box.className="legend";
-  box.innerHTML=`<h4>คำอธิบายสี</h4><p class="hint">แก้ไขชื่อประเภทได้ตามงานของคุณ · บันทึกอัตโนมัติ</p>`;
-  CATS.forEach(cat=>{
-    const row=document.createElement("div");row.className="legrow";
-    const sw=document.createElement("div");sw.className="swm";sw.style.background=cat.dot;
-    const inp=document.createElement("input");inp.value=state.legend[cat.key]||"";
-    inp.placeholder="ตั้งชื่อประเภท...";
-    if(cat.key === "holiday") inp.disabled = true; // ล็อคไม่ให้แก้ชื่อวันหยุด
-    inp.oninput=()=>{state.legend[cat.key]=inp.value;saveLegend();};
-    row.appendChild(sw);row.appendChild(inp);box.appendChild(row);
-  });
-  return box;
-}
+    /* ---- Interaction ---- */
+    function selectDay(key) {
+      state.selectedDate = key; state.adding = false; state.editing = null; renderAll();
+      const s = document.getElementById("side");
+      if (s && window.innerWidth < 1080) s.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    const tip = document.getElementById("tip");
+    function showTip(ev, list, hol, mk) {
+      let h = "";
+      if (mk) h += `<div class="tmk" style="color:${MK[mk.color].dot}">■ ${esc(mk.label || markName(mk.color))}</div>`;
+      h += list.slice(0, 5).map(e => {
+        const t = ty(e.o.type), other = e.role === "out" ? e.o.received : e.o.ship;
+        return `<div><span style="color:${t.dot}">▌</span>${e.role === "in" ? "↓" : "↑"} <b>${esc(e.o.so)}</b> · ${e.o.type}`
+          + (e.o.customer ? " · " + esc(e.o.customer) : "")
+          + (other ? `<br><span style="color:#9fb0c2">${e.role === "out" ? "received" : "ship"} ${fmtDate(other)}</span>` : "") + `</div>`;
+      }).join("");
+      if (list.length > 5) h += `<div style="color:#9fb0c2">+${list.length - 5} more</div>`;
+      if (hol) h += `<div class="thol">Holiday: ${esc(hol.name)}</div>`;
+      tip.innerHTML = h; tip.classList.add("show"); moveTip(ev);
+    }
+    function moveTip(ev) {
+      tip.style.left = Math.min(ev.clientX + 14, window.innerWidth - 300) + "px";
+      tip.style.top = Math.min(ev.clientY + 14, window.innerHeight - 150) + "px";
+    }
+    function hideTip() { tip.classList.remove("show"); }
+    let toastT;
+    function toast(m) {
+      const t = document.getElementById("toast"); t.textContent = m; t.classList.add("show");
+      clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 1800);
+    }
 
-/* ---- Interaction ---- */
-function selectDay(key){
-  state.selectedDate=key;
-  const old=document.getElementById("side");
-  if(old){const fresh=buildSide();old.replaceWith(fresh);
-    fresh.scrollIntoView({behavior:"smooth",block:"nearest"});}
-  else renderAll();
-}
+    /* ============================================================
+       Backend: PIN + holiday master
+       ============================================================ */
+    const pinBack = document.getElementById("pinBack"), admBack = document.getElementById("admBack");
+    const pinInputs = [...document.querySelectorAll("#pinRow input")];
+    document.getElementById("adminBtn").onclick = () => { state.adminUnlocked ? openAdmin() : openPinGate(); };
+    document.getElementById("pinClose").onclick = () => pinBack.classList.remove("show");
+    document.getElementById("admClose").onclick = () => admBack.classList.remove("show");
+    document.getElementById("admDone").onclick = () => admBack.classList.remove("show");
+    document.getElementById("admLock").onclick = () => lockAdmin(true);
+    pinBack.addEventListener("mousedown", e => { if (e.target === pinBack) pinBack.classList.remove("show"); });
+    admBack.addEventListener("mousedown", e => { if (e.target === admBack) admBack.classList.remove("show"); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") { pinBack.classList.remove("show"); admBack.classList.remove("show"); } });
 
-/* ---- Tooltip ---- */
-const tip=document.getElementById("tip");
-function showTip(ev,e){
-  const cat=catByKey(e.color||"slate");
-  const legName=state.legend[cat.key]||"";
-  tip.innerHTML=(e.label?`<div class="tlab">[${e.label}] ${legName}</div>`:`<div class="tlab">${legName}</div>`)
-    +(e.note?e.note.replace(/</g,"&lt;"):"—");
-  tip.classList.add("show");moveTip(ev);
-}
-function moveTip(ev){
-  const x=Math.min(ev.clientX+14,window.innerWidth-250);
-  const y=Math.min(ev.clientY+14,window.innerHeight-90);
-  tip.style.left=x+"px";tip.style.top=y+"px";
-}
-function hideTip(){tip.classList.remove("show");}
+    function openPinGate() {
+      pinInputs.forEach(i => i.value = ""); document.getElementById("pinMsg").textContent = "";
+      ensurePinRecord().then(r => {
+        document.getElementById("pinNote").innerHTML = r.isDefault
+          ? `Default PIN ${DEFAULT_PIN} — change it under Security <span class="th">เปลี่ยนได้ในแท็บ Security</span>`
+          : `Forgot the PIN? Clear site data to reset <span class="th">ลืมรหัสต้องล้างข้อมูลเบราว์เซอร์</span>`;
+      });
+      pinBack.classList.add("show"); setTimeout(() => pinInputs[0].focus(), 50);
+    }
+    pinInputs.forEach((inp, i) => {
+      inp.addEventListener("input", () => {
+        inp.value = inp.value.replace(/\D/g, "").slice(0, 1);
+        if (inp.value && i < 5) pinInputs[i + 1].focus();
+        if (pinInputs.every(x => x.value)) submitPin();
+      });
+      inp.addEventListener("keydown", e => {
+        if (e.key === "Backspace" && !inp.value && i > 0) { pinInputs[i - 1].focus(); pinInputs[i - 1].value = ""; e.preventDefault(); }
+        if (e.key === "Enter") submitPin();
+      });
+      inp.addEventListener("paste", e => {
+        const t = (e.clipboardData.getData("text") || "").replace(/\D/g, "").slice(0, 6);
+        if (!t) return; e.preventDefault();
+        pinInputs.forEach((x, j) => x.value = t[j] || "");
+        if (t.length === 6) submitPin();
+      });
+    });
+    async function submitPin() {
+      const msg = document.getElementById("pinMsg"), now = Date.now();
+      if (now < lockoutUntil) { msg.textContent = "Locked. Wait " + Math.ceil((lockoutUntil - now) / 1000) + "s"; return; }
+      const pin = pinInputs.map(i => i.value).join("");
+      if (pin.length < 6) return;
+      if (await verifyPin(pin)) {
+        tries = 0; state.adminUnlocked = true; appendLog("unlock", "", "", "backend unlocked");
+        pinBack.classList.remove("show"); openAdmin();
+      } else {
+        tries++; pinInputs.forEach(i => i.value = ""); pinInputs[0].focus();
+        if (tries >= MAX_TRIES) {
+          lockoutUntil = Date.now() + LOCKOUT_MS; tries = 0;
+          msg.textContent = "Too many attempts. Locked 60s"; appendLog("lockout", "", "", "too many PIN attempts");
+        }
+        else msg.textContent = "Wrong PIN. " + (MAX_TRIES - tries) + " left";
+      }
+    }
+    function openAdmin() {
+      document.getElementById("adminBtn").classList.add("open");
+      document.getElementById("lockIcon").innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>';
+      admBack.classList.add("show"); renderAdmin(); resetIdle();
+    }
+    function lockAdmin(t) {
+      state.adminUnlocked = false; clearTimeout(idleTimer); admBack.classList.remove("show");
+      document.getElementById("adminBtn").classList.remove("open");
+      document.getElementById("lockIcon").innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+      if (t) toast("Backend locked");
+    }
+    function resetIdle() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => { if (state.adminUnlocked) { lockAdmin(false); toast("Auto-locked after 5 min idle"); } }, IDLE_LOCK_MS);
+    }
+    ["click", "keydown"].forEach(ev => admBack.addEventListener(ev, () => { if (state.adminUnlocked) resetIdle(); }));
 
-/* ---- Toast ---- */
-let toastT;
-function toast(msg){
-  const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
-  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),1900);
-}
+    function renderAdmin() {
+      const b = document.getElementById("admBody");
+      b.innerHTML = `<div class="tabs">
+    <button data-t="holidays" class="${state.admTab === "holidays" ? "on" : ""}">Holidays</button>
+    <button data-t="marks" class="${state.admTab === "marks" ? "on" : ""}">Day markers</button>
+    <button data-t="log" class="${state.admTab === "log" ? "on" : ""}">Audit log</button>
+    <button data-t="sec" class="${state.admTab === "sec" ? "on" : ""}">Security</button>
+  </div><div id="admPane"></div>`;
+      b.querySelectorAll(".tabs button").forEach(x => x.onclick = () => { state.admTab = x.dataset.t; renderAdmin(); });
+      const p = b.querySelector("#admPane");
+      p.appendChild(state.admTab === "holidays" ? paneHolidays() : state.admTab === "marks" ? paneMarks() :
+        state.admTab === "log" ? paneLog() : paneSecurity());
+    }
 
-/* ---- Export / Import ---- */
-document.getElementById("exportBtn").onclick=()=>{
-  const payload={version:1,exportedAt:new Date().toISOString(),data:state.data,legend:state.legend};
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download=`shipping-calendar-backup-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();URL.revokeObjectURL(a.href);toast("ส่งออกไฟล์สำรองแล้ว ✓");
-};
-document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
-document.getElementById("importFile").onchange=(ev)=>{
-  const f=ev.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=()=>{
-    try{
-      const p=JSON.parse(r.result);
-      if(p.data&&typeof p.data==="object"){
-        if(!confirm("นำเข้าข้อมูลนี้? ข้อมูลปัจจุบันจะถูกรวม/แทนที่ด้วยไฟล์ที่เลือก")) return;
-        state.data=Object.assign({},state.data,p.data);
-        if(p.legend)state.legend=Object.assign({},state.legend,p.legend);
-        saveData();saveLegend();renderAll();toast("นำเข้าข้อมูลสำเร็จ ✓");
-      }else toast("ไฟล์ไม่ถูกต้อง");
-    }catch(e){toast("อ่านไฟล์ไม่สำเร็จ");}
-    ev.target.value="";
-  };
-  r.readAsText(f);
-};
+    /* ---- Day markers pane (backend only) ---- */
+    function paneMarks() {
+      const box = document.createElement("div"), y = state.year;
+      const keys = Object.keys(state.marks).filter(k => k.startsWith(y + "-")).sort();
+      const tools = document.createElement("div"); tools.className = "holtools";
+      tools.innerHTML = `<strong style="font-family:Sora,sans-serif;font-size:15px">${y}</strong>
+    <span style="font-size:12px;color:var(--muted)">${keys.length} marked days <span class="th">วันที่แต้มสี</span></span>
+    <div class="grow"></div>`;
+      const add = document.createElement("button"); add.className = "btn tiny primary"; add.textContent = "Add marker";
+      tools.appendChild(add); box.appendChild(tools);
 
-/* ---- Year nav ---- */
-document.getElementById("prevYear").onclick=()=>{state.year--;state.selectedDate=null;renderAll();};
-document.getElementById("nextYear").onclick=()=>{state.year++;state.selectedDate=null;renderAll();};
+      if (!keys.length) {
+        const e = document.createElement("div"); e.className = "modempty";
+        e.innerHTML = `No marker in ${y}<br><span class="th">ยังไม่มีวันที่แต้มสีในปีนี้</span>`; box.appendChild(e);
+      } else {
+        const t = document.createElement("table"); t.className = "htable";
+        t.innerHTML = `<thead><tr><th style="width:140px">Date <span class="th">วันที่</span></th>
+      <th style="width:150px">Colour <span class="th">สี</span></th>
+      <th>Label <span class="th">ป้ายบนวัน</span></th><th></th></tr></thead>`;
+        const tb = document.createElement("tbody");
+        keys.forEach(k => {
+          const cur = state.marks[k];
+          const tr = document.createElement("tr");
+          const tdD = document.createElement("td"), inD = document.createElement("input");
+          inD.type = "date"; inD.value = k; tdD.appendChild(inD);
+          const tdC = document.createElement("td"), sel = document.createElement("select");
+          sel.style.cssText = "width:100%;border:1.5px solid transparent;background:#fbfcfe;border-radius:8px;"
+            + "padding:7px 9px;font-family:inherit;font-size:12.5px;color:" + MK[cur.color].ink;
+          MARKS.forEach(c => {
+            const op = document.createElement("option"); op.value = c;
+            op.textContent = (state.markNames[c] || c);
+            if (c === cur.color) op.selected = true; sel.appendChild(op);
+          });
+          tdC.appendChild(sel);
+          const tdL = document.createElement("td"), inL = document.createElement("input");
+          inL.maxLength = 14; inL.value = cur.label || ""; inL.placeholder = "e.g. Vessel cut-off"; tdL.appendChild(inL);
+          const tdA = document.createElement("td"); tdA.className = "act";
+          const del = document.createElement("button"); del.className = "del";
+          del.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>';
+          del.onclick = () => {
+            if (!confirm(`Remove the marker on ${k}?`)) return;
+            appendLog("del", k, `marker: ${cur.color} ${cur.label || ""}`, "");
+            delete state.marks[k]; saveMarks(); renderAll(); renderAdmin(); toast("Marker removed");
+          };
+          tdA.appendChild(del);
+          const commit = () => {
+            const nd = inD.value, nc = sel.value, nl = inL.value.trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(nd)) { inD.value = k; toast("Invalid date"); return; }
+            if (nd !== k && state.marks[nd]) { inD.value = k; toast("That date already has a marker"); return; }
+            if (nd === k && nc === cur.color && nl === (cur.label || "")) return;
+            appendLog("edit", nd, `marker: ${k} ${cur.color} ${cur.label || ""}`, `marker: ${nd} ${nc} ${nl}`);
+            delete state.marks[k]; state.marks[nd] = { color: nc, label: nl };
+            saveMarks(); renderAll(); renderAdmin(); toast("Marker updated");
+          };
+          inD.onchange = commit; sel.onchange = commit; inL.onblur = commit;
+          inL.onkeydown = e => { if (e.key === "Enter") inL.blur(); };
+          tr.appendChild(tdD); tr.appendChild(tdC); tr.appendChild(tdL); tr.appendChild(tdA); tb.appendChild(tr);
+        });
+        t.appendChild(tb); box.appendChild(t);
+      }
 
-/* ---- Init ---- */
-renderAll();
-</script>
+      add.onclick = () => {
+        let d = prompt("Date (YYYY-MM-DD)", state.selectedDate && state.selectedDate.startsWith(y + "-") ? state.selectedDate : y + "-01-01");
+        if (!d) return; d = d.trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { toast("Format must be YYYY-MM-DD"); return; }
+        if (state.marks[d]) { toast("That date already has a marker"); return; }
+        state.marks[d] = { color: MARKS[0], label: "" };
+        appendLog("add", d, "", `marker: ${d} ${MARKS[0]}`);
+        saveMarks(); state.year = Number(d.slice(0, 4)); renderAll(); renderAdmin(); toast("Marker added, set colour below");
+      };
+
+      const h = document.createElement("h4");
+      h.style.cssText = "font-family:Sora,sans-serif;font-size:13px;margin:20px 0 3px";
+      h.innerHTML = `Marker names <span class="th">ชื่อประเภทสี</span>`; box.appendChild(h);
+      const p = document.createElement("p");
+      p.style.cssText = "font-size:11.5px;color:var(--muted);margin:0 0 10px;line-height:1.45";
+      p.innerHTML = `Applies to every year. <span class="th">มีผลกับทุกปี</span>`; box.appendChild(p);
+      MARKS.forEach(c => {
+        const r = document.createElement("div"); r.className = "legrow";
+        const sw = document.createElement("span"); sw.className = "swm"; sw.style.background = MK[c].dot;
+        const inp = document.createElement("input"); inp.value = state.markNames[c] || ""; inp.placeholder = "Name this marker";
+        let before = inp.value;
+        inp.onblur = () => {
+          if (inp.value === before) return;
+          appendLog("edit", "", "marker name: " + before, "marker name: " + inp.value);
+          before = inp.value;
+        };
+        inp.oninput = () => { state.markNames[c] = inp.value; saveMarkNames(); renderAll(); };
+        const n = document.createElement("span"); n.className = "n"; n.textContent = markCount(state.year, c);
+        r.appendChild(sw); r.appendChild(inp); r.appendChild(n); box.appendChild(r);
+      });
+      return box;
+    }
+    function paneHolidays() {
+      const box = document.createElement("div"), y = state.year;
+      const keys = Object.keys(state.holidays).filter(k => k.startsWith(y + "-")).sort();
+      const tools = document.createElement("div"); tools.className = "holtools";
+      tools.innerHTML = `<strong style="font-family:Sora,sans-serif;font-size:15px">${y}</strong>
+    <span style="font-size:12px;color:var(--muted)">${keys.length} days <span class="th">วัน</span></span><div class="grow"></div>`;
+      const add = document.createElement("button"); add.className = "btn tiny primary"; add.textContent = "Add holiday";
+      const exp = document.createElement("button"); exp.className = "btn tiny"; exp.textContent = "Export";
+      tools.appendChild(add); tools.appendChild(exp); box.appendChild(tools);
+      if (!keys.length) {
+        const e = document.createElement("div"); e.className = "modempty";
+        e.innerHTML = `No holiday in ${y}<br><span class="th">ยังไม่มีวันหยุดในปีนี้</span>`; box.appendChild(e);
+      } else {
+        const t = document.createElement("table"); t.className = "htable";
+        t.innerHTML = `<thead><tr><th style="width:150px">Date <span class="th">วันที่</span></th><th>Name <span class="th">ชื่อ</span></th><th></th></tr></thead>`;
+        const tb = document.createElement("tbody");
+        keys.forEach(k => {
+          const tr = document.createElement("tr");
+          const tdD = document.createElement("td"), inD = document.createElement("input"); inD.type = "date"; inD.value = k; tdD.appendChild(inD);
+          const tdN = document.createElement("td"), inN = document.createElement("input"); inN.value = state.holidays[k].name; tdN.appendChild(inN);
+          const tdA = document.createElement("td"); tdA.className = "act";
+          const del = document.createElement("button"); del.className = "del";
+          del.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>';
+          del.onclick = () => {
+            if (!confirm(`Delete holiday ${k} (${state.holidays[k].name})?`)) return;
+            appendLog("del", k, "holiday: " + state.holidays[k].name, "");
+            delete state.holidays[k]; saveHolidays(); renderAll(); renderAdmin(); toast("Holiday deleted");
+          };
+          tdA.appendChild(del);
+          const commit = () => {
+            const nd = inD.value, nn = inN.value.trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(nd)) { inD.value = k; toast("Invalid date"); return; }
+            if (!nn) { inN.value = state.holidays[k].name; toast("Name required"); return; }
+            if (nd !== k && state.holidays[nd]) { inD.value = k; toast("That date already has a holiday"); return; }
+            if (nd === k && nn === state.holidays[k].name) return;
+            const before = k + " · " + state.holidays[k].name;
+            delete state.holidays[k]; state.holidays[nd] = { name: nn };
+            appendLog("edit", nd, "holiday: " + before, "holiday: " + nd + " · " + nn);
+            saveHolidays(); renderAll(); renderAdmin(); toast("Holiday updated");
+          };
+          inD.onchange = commit; inN.onblur = commit; inN.onkeydown = e => { if (e.key === "Enter") inN.blur(); };
+          tr.appendChild(tdD); tr.appendChild(tdN); tr.appendChild(tdA); tb.appendChild(tr);
+        });
+        t.appendChild(tb); box.appendChild(t);
+      }
+      add.onclick = () => {
+        let d = prompt("Date (YYYY-MM-DD)", y + "-01-01"); if (!d) return; d = d.trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { toast("Format must be YYYY-MM-DD"); return; }
+        if (state.holidays[d]) { toast("That date already has a holiday"); return; }
+        const n = prompt("Holiday name", ""); if (!n || !n.trim()) { toast("Cancelled"); return; }
+        state.holidays[d] = { name: n.trim() }; appendLog("add", d, "", "holiday: " + d + " · " + n.trim());
+        saveHolidays(); state.year = Number(d.slice(0, 4)); renderAll(); renderAdmin(); toast("Holiday added");
+      };
+      exp.onclick = () => {
+        downloadJson({ type: "holidays", version: 5, exportedAt: new Date().toISOString(), holidays: state.holidays },
+          `holidays-${new Date().toISOString().slice(0, 10)}.json`); toast("Holidays exported");
+      };
+      return box;
+    }
+    function paneLog() {
+      const box = document.createElement("div"), log = loadLog().slice().reverse().slice(0, 80);
+      if (!log.length) {
+        const e = document.createElement("div"); e.className = "modempty";
+        e.innerHTML = `No entries yet<br><span class="th">ยังไม่มีประวัติ</span>`; box.appendChild(e); return box;
+      }
+      const N = { add: "Add", edit: "Edit", del: "Delete", pin: "PIN", unlock: "Unlock", lockout: "Lockout", import: "Import" };
+      const C = { add: "add", edit: "edit", del: "del", pin: "pin" };
+      log.forEach(l => {
+        const d = new Date(l.ts), row = document.createElement("div"); row.className = "logitem";
+        row.innerHTML = `<span class="lts">${d.toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}</span>
+      <span class="lact ${C[l.action] || ""}">${N[l.action] || l.action}</span>
+      <span>${esc(l.after || l.before || l.ref || "")}${l.before && l.after ? ` <span style="color:var(--muted)">(was: ${esc(l.before)})</span>` : ""}</span>`;
+        box.appendChild(row);
+      });
+      const n = document.createElement("p");
+      n.style.cssText = "font-size:11.5px;color:var(--muted);margin:14px 0 0;line-height:1.6";
+      n.innerHTML = `Append-only, last 800 entries <span class="th">บันทึกต่อท้าย แก้ไขไม่ได้</span>`;
+      box.appendChild(n); return box;
+    }
+    function paneSecurity() {
+      const box = document.createElement("div");
+      box.innerHTML = `
+    <div class="field"><label>Current PIN <span class="th">รหัสปัจจุบัน</span></label>
+      <input id="pinOld" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+    <div class="field"><label>New PIN <span class="th">รหัสใหม่</span></label>
+      <input id="pinNew" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+    <div class="field"><label>Confirm new PIN <span class="th">ยืนยันรหัสใหม่</span></label>
+      <input id="pinNew2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+    <button class="btn primary" id="pinSave" style="width:100%;justify-content:center">Save PIN</button>
+    <p style="font-size:11.5px;color:var(--muted);line-height:1.6;margin:14px 0 0">
+      Stored as a salted SHA-256 hash, never as digits. Guards against accidental edits on a shared PC,
+      not against a determined user with DevTools.
+      <span class="th">กันการแก้โดยไม่ตั้งใจ ไม่ใช่การควบคุมสิทธิ์จริง</span></p>`;
+      box.querySelector("#pinSave").onclick = async () => {
+        const o = box.querySelector("#pinOld").value.trim(), n = box.querySelector("#pinNew").value.trim(),
+          n2 = box.querySelector("#pinNew2").value.trim();
+        if (!/^\d{6}$/.test(n)) { toast("New PIN must be 6 digits"); return; }
+        if (n !== n2) { toast("PINs do not match"); return; }
+        if (!(await verifyPin(o))) { toast("Current PIN is wrong"); return; }
+        await setPin(n);["#pinOld", "#pinNew", "#pinNew2"].forEach(s => box.querySelector(s).value = "");
+        toast("PIN changed");
+      };
+      return box;
+    }
+
+    /* ---- Backup / restore ---- */
+    function downloadJson(obj, name) {
+      const b = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+    document.getElementById("exportBtn").onclick = () => {
+      downloadJson({
+        version: 5, exportedAt: new Date().toISOString(), orders: state.orders, marks: state.marks,
+        markNames: state.markNames, holidays: state.holidays
+      },
+        `shipping-calendar-${new Date().toISOString().slice(0, 10)}.json`);
+      toast("Backup downloaded");
+    };
+    document.getElementById("importBtn").onclick = () => document.getElementById("importFile").click();
+    document.getElementById("importFile").onchange = ev => {
+      const f = ev.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const p = JSON.parse(r.result);
+          const hasO = p.orders && typeof p.orders === "object", hasH = p.holidays && typeof p.holidays === "object";
+          if (!hasO && !hasH) { toast("Nothing to import in this file"); return; }
+          if (hasO) {
+            if (!confirm("Import orders and day markers? Existing records will be overwritten.\nนำเข้าข้อมูล?")) return;
+            const isFlat = !Array.isArray(Object.values(p.orders)[0]);
+            if (isFlat) {
+              for (const id in p.orders) {
+                const o = p.orders[id];
+                state.orders[id] = {
+                  id, so: String(o.so || "").slice(0, 32), type: o.type === "FREE" ? "FREE" : "SALE",
+                  customer: o.customer || "", dest: o.dest || "", qty: o.qty || "", unit: o.unit || "",
+                  received: /^\d{4}-\d{2}-\d{2}$/.test(o.received || "") ? o.received : "",
+                  ship: /^\d{4}-\d{2}-\d{2}$/.test(o.ship || "") ? o.ship : "",
+                  remark: o.remark || "", updated: o.updated || new Date().toISOString()
+                };
+              }
+            } else { // older per-date format
+              for (const k in p.orders) {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !Array.isArray(p.orders[k])) continue;
+                p.orders[k].forEach(x => {
+                  const id = x.id || uid();
+                  state.orders[id] = {
+                    id, so: String(x.so || "").slice(0, 32), type: "SALE", customer: x.customer || "",
+                    dest: x.dest || "", qty: x.qty || "", unit: x.unit || "", received: "", ship: k,
+                    remark: x.remark || "", updated: new Date().toISOString()
+                  };
+                });
+              }
+            }
+            if (p.marks && typeof p.marks === "object") {
+              if (!state.adminUnlocked) toast("Day markers skipped: unlock the backend first");
+              else {
+                for (const k in p.marks) {
+                  const m = p.marks[k];
+                  if (/^\d{4}-\d{2}-\d{2}$/.test(k) && MARKS.includes(m.color))
+                    state.marks[k] = { color: m.color, label: String(m.label || "").slice(0, 14) };
+                }
+                saveMarks();
+                if (p.markNames) { state.markNames = Object.assign({}, state.markNames, p.markNames); saveMarkNames(); }
+                appendLog("import", "", "", "day markers restored");
+              }
+            }
+            saveOrders(); appendLog("import", "", "", "orders restored from file");
+          }
+          if (hasH) {
+            if (!state.adminUnlocked) toast("Holidays skipped: unlock the backend first");
+            else if (confirm("Import holidays too?")) {
+              let n = 0;
+              for (const k in p.holidays) {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue;
+                state.holidays[k] = { name: String(p.holidays[k].name || "Holiday") }; n++;
+              }
+              saveHolidays(); appendLog("import", "", "", n + " holidays restored");
+            }
+          }
+          renderAll(); toast("Import done");
+        } catch (e) { toast("Cannot read file: bad format"); }
+        ev.target.value = "";
+      };
+      r.readAsText(f);
+    };
+
+    /* ---- Nav ---- */
+    document.getElementById("prevYear").onclick = () => { state.year--; state.selectedDate = null; renderAll(); if (admBack.classList.contains("show")) renderAdmin(); };
+    document.getElementById("nextYear").onclick = () => { state.year++; state.selectedDate = null; renderAll(); if (admBack.classList.contains("show")) renderAdmin(); };
+    document.getElementById("todayBtn").onclick = () => {
+      const t = new Date(); state.year = t.getFullYear(); state.month = t.getMonth(); selectDay(todayKey());
+    };
+
+    /* ---- Init ---- */
+    document.getElementById("editBtn").onclick = () => setEditLock(!state.editUnlocked);
+    ensurePinRecord();
+    applyEditUI(state.editUnlocked);
+    renderAll();
+    if (state.editUnlocked) resetEditIdle();
+  </script>
 </body>
+
 </html>
