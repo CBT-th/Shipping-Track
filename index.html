@@ -1726,21 +1726,25 @@
       align-items: center;
       gap: 7px;
     }
+
     .btn.cloud.connected {
       background: #ecfdf5;
       border-color: #a7f3d0;
       color: #065f46;
     }
+
     .btn.cloud.connecting {
       background: #fffbeb;
       border-color: #fde68a;
       color: #92400e;
     }
+
     .btn.cloud.error {
       background: #fef2f2;
       border-color: #fecaca;
       color: #991b1b;
     }
+
     .cloud-dot {
       width: 8px;
       height: 8px;
@@ -1749,22 +1753,36 @@
       display: inline-block;
       transition: .2s;
     }
+
     .btn.cloud.connected .cloud-dot {
       background: #10b981;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, .25);
       animation: pulseDot 2s infinite;
     }
+
     .btn.cloud.connecting .cloud-dot {
       background: #f59e0b;
       animation: pulseDot 1s infinite;
     }
+
     .btn.cloud.error .cloud-dot {
       background: #ef4444;
     }
+
     @keyframes pulseDot {
-      0%, 100% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.2); opacity: 1; }
+
+      0%,
+      100% {
+        transform: scale(0.95);
+        opacity: 0.8;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
     }
+
     .sqlbox {
       background: #1e293b;
       color: #e2e8f0;
@@ -1836,14 +1854,6 @@
         <span class="cloud-dot" id="cloudDot"></span>
         <span id="cloudLbl">Cloud Sync</span>
       </button>
-      <button class="btn" id="exportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-        </svg>Back up</button>
-      <button class="btn" id="importBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v10" />
-        </svg>Restore</button>
       <button class="btn lock" id="adminBtn"><svg id="lockIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" />
@@ -1918,7 +1928,8 @@
   <div class="backdrop" id="cloudBack">
     <div class="modal" role="dialog" aria-modal="true" style="max-width: 580px;">
       <div class="mhead">
-        <div class="mi" style="background: #ecfdf5; color: #065f46;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="mi" style="background: #ecfdf5; color: #065f46;"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
           </svg></div>
         <div>
@@ -1931,7 +1942,8 @@
           </svg></button>
       </div>
       <div class="mbody">
-        <div id="cloudStatusBanner" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:#f8fafc;border:1px solid var(--line);margin-bottom:14px;font-size:12.5px;">
+        <div id="cloudStatusBanner"
+          style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:#f8fafc;border:1px solid var(--line);margin-bottom:14px;font-size:12.5px;">
           <span class="cloud-dot" id="cloudBannerDot"></span>
           <div id="cloudBannerText" style="flex:1;">Checking cloud status...</div>
           <button class="btn tiny" id="btnCloudRefresh" style="padding:4px 9px;">Sync Now</button>
@@ -1943,7 +1955,8 @@
         </div>
         <div class="field">
           <label>Supabase Anon Key (Public API Key) <span class="th">คีย์สาธารณะ</span></label>
-          <input id="sbKeyInput" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." autocomplete="off" spellcheck="false">
+          <input id="sbKeyInput" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            autocomplete="off" spellcheck="false">
         </div>
 
         <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
@@ -1953,9 +1966,12 @@
           <button class="btn danger tiny" id="btnSbDisconnect">Disconnect</button>
         </div>
 
-        <details style="margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;">
-          <summary style="cursor:pointer;font-weight:700;color:var(--ink-soft);user-select:none;">📋 Supabase SQL Schema (คลิกเพื่อดูคำสั่งสร้างตารางใน Supabase)</summary>
-          <p style="margin:8px 0 4px;color:var(--muted);">คัดลอกคำสั่ง SQL นี้ไปวางใน SQL Editor บน Supabase dashboard เพื่อสร้างตารางและเปิด Realtime:</p>
+        <details
+          style="margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;">
+          <summary style="cursor:pointer;font-weight:700;color:var(--ink-soft);user-select:none;">📋 Supabase SQL Schema
+            (คลิกเพื่อดูคำสั่งสร้างตารางใน Supabase)</summary>
+          <p style="margin:8px 0 4px;color:var(--muted);">คัดลอกคำสั่ง SQL นี้ไปวางใน SQL Editor บน Supabase dashboard
+            เพื่อสร้างตารางและเปิด Realtime:</p>
           <pre class="sqlbox" id="sqlSchemaBox">-- 1. ตารางคำสั่งซื้อและการจัดส่ง (Orders)
 CREATE TABLE IF NOT EXISTS public.orders (
     id TEXT PRIMARY KEY,
@@ -2031,7 +2047,8 @@ CREATE POLICY "Allow public all mark_names" ON public.mark_names FOR ALL USING (
 
 CREATE POLICY "Allow public read logs" ON public.calendar_logs FOR SELECT USING (true);
 CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH CHECK (true);</pre>
-          <button class="btn tiny" id="btnCopySql" style="width:100%;justify-content:center;">📋 Copy SQL to Clipboard</button>
+          <button class="btn tiny" id="btnCopySql" style="width:100%;justify-content:center;">📋 Copy SQL to
+            Clipboard</button>
         </details>
       </div>
       <div class="mfoot">
@@ -2057,8 +2074,8 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
 
     /* ---------- Order types ---------- */
     const TYPES = [
-      { key: "SALE", en: "Sale order", th: "ขาย", c: "teal" },
-      { key: "FREE", en: "Free issue", th: "ไม่คิดเงิน", c: "amber" }
+      { key: "SALE", en: "Sale order", th: "รายการขาย", c: "teal" },
+      { key: "FREE", en: "Free sample request", th: "รายการตัวอย่างฟรี", c: "amber" }
     ];
     const TY = {}; TYPES.forEach(t => TY[t.key] = { ...t, ...pal(t.c) });
     const ty = k => TY[k] || TY.SALE;
@@ -2068,11 +2085,9 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     const MK = {}; MARKS.forEach(k => MK[k] = pal(k));
     const DEFAULT_MARKNAMES = {
       blue: "Export day · วันส่งออก",
-      amber: "Container loading · วันตู้เข้า",
-      purple: "Customs / docs · เอกสารพิธีการ",
-      teal: "Domestic delivery · ส่งในประเทศ",
-      green: "Production ready · ผลิตเสร็จ",
-      rose: "Critical deadline · เส้นตายสำคัญ",
+      amber: "Order receiving · วันรับออเดอร์",
+      purple: "Delivery day · วันส่งออกสินค้า",
+      rose: "Production period · กำหนดการผลิต",
       slate: "Other note · อื่น ๆ"
     };
 
@@ -2670,7 +2685,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       const g = document.createElement("div"); g.className = "grow"; bar.appendChild(g);
       const s = document.createElement("div"); s.className = "search";
       s.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>`;
-      const inp = document.createElement("input"); inp.placeholder = "Search SO / customer  ค้นหา"; inp.value = state.query;
+      const inp = document.createElement("input"); inp.placeholder = "Search SALE / FREE  ค้นหา"; inp.value = state.query;
       inp.oninput = () => {
         state.query = inp.value; renderAll();
         const f = document.querySelector(".search input"); if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); }
@@ -3175,13 +3190,14 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       b.innerHTML = `<div class="tabs">
     <button data-t="holidays" class="${state.admTab === "holidays" ? "on" : ""}">Holidays</button>
     <button data-t="marks" class="${state.admTab === "marks" ? "on" : ""}">Day markers</button>
+    <button data-t="backup" class="${state.admTab === "backup" ? "on" : ""}">Backup &amp; Restore</button>
     <button data-t="log" class="${state.admTab === "log" ? "on" : ""}">Audit log</button>
     <button data-t="sec" class="${state.admTab === "sec" ? "on" : ""}">Security</button>
   </div><div id="admPane"></div>`;
       b.querySelectorAll(".tabs button").forEach(x => x.onclick = () => { state.admTab = x.dataset.t; renderAdmin(); });
       const p = b.querySelector("#admPane");
       p.appendChild(state.admTab === "holidays" ? paneHolidays() : state.admTab === "marks" ? paneMarks() :
-        state.admTab === "log" ? paneLog() : paneSecurity());
+        state.admTab === "backup" ? paneBackup() : state.admTab === "log" ? paneLog() : paneSecurity());
     }
 
     /* ---- Day markers pane (backend only) ---- */
@@ -3391,21 +3407,54 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       return box;
     }
 
-    /* ---- Backup / restore ---- */
+    /* ---- Backup / restore pane (backend only) ---- */
+    function paneBackup() {
+      const box = document.createElement("div");
+      const totalOrders = Object.keys(state.orders).length;
+      const totalMarks = Object.keys(state.marks).length;
+      const totalHols = Object.keys(state.holidays).length;
+
+      box.innerHTML = `
+        <div class="block" style="margin-bottom:16px;">
+          <h4>💾 Export System Backup (สำรองข้อมูลทั้งหมด)</h4>
+          <p class="bh">Download complete system data including orders (${totalOrders}), day markers (${totalMarks}), and holidays (${totalHols}) as a JSON backup file.<br><span class="th">ดาวน์โหลดไฟล์ JSON สำรองข้อมูลทั้งหมดในระบบ</span></p>
+          <button class="btn primary" id="btnAdminExport" style="width:100%;justify-content:center;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+            </svg>Download Backup JSON (${totalOrders} orders)
+          </button>
+        </div>
+
+        <div class="block">
+          <h4>📂 Restore System from File (กู้คืนข้อมูล)</h4>
+          <p class="bh">Restore system records from a previously exported JSON backup file.<br><span class="th">นำเข้าไฟล์ JSON เพื่อกู้คืนคำสั่งซื้อ ป้ายสี และวันหยุด</span></p>
+          <button class="btn" id="btnAdminImport" style="width:100%;justify-content:center;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v10" />
+            </svg>Select JSON File to Restore
+          </button>
+        </div>
+      `;
+
+      box.querySelector("#btnAdminExport").onclick = () => {
+        downloadJson({
+          version: 5, exportedAt: new Date().toISOString(), orders: state.orders, marks: state.marks,
+          markNames: state.markNames, holidays: state.holidays
+        }, `shipping-calendar-${new Date().toISOString().slice(0, 10)}.json`);
+        appendLog("export", "", "", "full backup exported");
+        toast("Backup downloaded");
+      };
+
+      box.querySelector("#btnAdminImport").onclick = () => document.getElementById("importFile").click();
+      return box;
+    }
+
     function downloadJson(obj, name) {
       const b = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
       const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
-    document.getElementById("exportBtn").onclick = () => {
-      downloadJson({
-        version: 5, exportedAt: new Date().toISOString(), orders: state.orders, marks: state.marks,
-        markNames: state.markNames, holidays: state.holidays
-      },
-        `shipping-calendar-${new Date().toISOString().slice(0, 10)}.json`);
-      toast("Backup downloaded");
-    };
-    document.getElementById("importBtn").onclick = () => document.getElementById("importFile").click();
+
     document.getElementById("importFile").onchange = ev => {
       const f = ev.target.files[0]; if (!f) return;
       const r = new FileReader();
@@ -3467,7 +3516,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
               saveHolidays(); appendLog("import", "", "", n + " holidays restored");
             }
           }
-          renderAll(); toast("Import done");
+          renderAll(); if (admBack.classList.contains("show")) renderAdmin(); toast("Import done");
         } catch (e) { toast("Cannot read file: bad format"); }
         ev.target.value = "";
       };
