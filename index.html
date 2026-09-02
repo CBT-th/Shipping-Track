@@ -1559,7 +1559,72 @@
       box-shadow: var(--shadow)
     }
 
-    .holtools {
+        .batchcard {
+      background: #f8fafc;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .batchcard h4 {
+      font-family: "Sora", sans-serif;
+      font-size: 13.5px;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .batchgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .batchcard label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      margin-bottom: 4px;
+    }
+    .batchcard input, .batchcard select, .batchcard textarea {
+      width: 100%;
+      border: 1.5px solid var(--line-strong);
+      background: #fff;
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-family: inherit;
+      font-size: 12.5px;
+      color: var(--ink);
+      box-sizing: border-box;
+    }
+    .batchcard input:focus, .batchcard select:focus, .batchcard textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2.5px rgba(15, 118, 110, .15);
+    }
+    .batchacts {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+    .batchcheck {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--ink-soft);
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .batchcheck input {
+      width: auto !important;
+      margin: 0;
+      cursor: pointer;
+    }
+
+.holtools {
       display: flex;
       gap: 8px;
       align-items: center;
@@ -3261,6 +3326,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     }
 
     /* ---- Day markers pane (backend only) ---- */
+    let batchMarksOpen = false;
     function paneMarks() {
       const box = document.createElement("div"), y = state.year;
       const keys = Object.keys(state.marks).filter(k => k.startsWith(y + "-")).sort();
@@ -3268,8 +3334,165 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       tools.innerHTML = `<strong style="font-family:Sora,sans-serif;font-size:15px">${y}</strong>
     <span style="font-size:12px;color:var(--muted)">${keys.length} marked days <span class="th">วันที่แต้มสี</span></span>
     <div class="grow"></div>`;
-      const add = document.createElement("button"); add.className = "btn tiny primary"; add.textContent = "Add marker";
-      tools.appendChild(add); box.appendChild(tools);
+      
+      const addBtn = document.createElement("button"); 
+      addBtn.className = "btn tiny primary"; 
+      addBtn.innerHTML = batchMarksOpen ? "Close form <span class='th'>ปิดฟอร์ม</span>" : "+ Add days / Range <span class='th'>+ แต้มสีหลายวัน</span>";
+      tools.appendChild(addBtn); 
+      box.appendChild(tools);
+
+      // Batch Form Box
+      const batchBox = document.createElement("div");
+      batchBox.className = "batchcard";
+      batchBox.style.display = batchMarksOpen ? "block" : "none";
+      
+      const defaultStart = state.selectedDate && state.selectedDate.startsWith(y + "-") ? state.selectedDate : y + "-01-01";
+      
+      batchBox.innerHTML = `
+        <h4>Add day markers (Batch / Range) <span class="th">แต้มสีประจำวันพร้อมกันหลายวัน</span></h4>
+        <div class="tabs" id="bTabs" style="margin-bottom:10px">
+          <button type="button" class="on" data-m="range">📅 Date range <span class="th">ช่วงวันที่</span></button>
+          <button type="button" data-m="list">📌 Specific dates <span class="th">หลายวันที่ระบุ</span></button>
+        </div>
+        
+        <div id="bRangeSec">
+          <div class="batchgrid">
+            <div>
+              <label>Start date <span class="th">วันเริ่มต้น *</span></label>
+              <input type="date" id="bStart" value="${defaultStart}">
+            </div>
+            <div>
+              <label>End date <span class="th">วันสิ้นสุด *</span></label>
+              <input type="date" id="bEnd" value="${defaultStart}">
+            </div>
+          </div>
+          <label class="batchcheck">
+            <input type="checkbox" id="bSkipWeekend"> Skip weekends (Saturday & Sunday) <span class="th">เว้นวันเสาร์-อาทิตย์</span>
+          </label>
+        </div>
+
+        <div id="bListSec" style="display:none;margin-bottom:10px">
+          <label>Date list (YYYY-MM-DD, comma or line separated) <span class="th">ระบุวันที่ (คั่นด้วยจุลภาคหรือขึ้นบรรทัดใหม่)</span></label>
+          <textarea id="bList" rows="3" placeholder="2026-09-01, 2026-09-05, 2026-09-12"></textarea>
+        </div>
+
+        <div class="batchgrid" style="margin-top:10px">
+          <div>
+            <label>Marker color <span class="th">เลือกสี / ประเภท *</span></label>
+            <select id="bColor"></select>
+          </div>
+          <div>
+            <label>Label on day <span class="th">ป้ายข้อความบนวัน (Optional)</span></label>
+            <input id="bLabel" maxlength="14" placeholder="e.g. Production Lot 1, Vessel cut-off">
+          </div>
+        </div>
+
+        <div class="batchacts">
+          <button type="button" class="btn" id="bCancel">Cancel <span class="th">ยกเลิก</span></button>
+          <button type="button" class="btn primary" id="bApply">Apply to all days <span class="th">บันทึกทุกวัน</span></button>
+        </div>
+      `;
+
+      const bColorSel = batchBox.querySelector("#bColor");
+      MARKS.forEach(c => {
+        const op = document.createElement("option");
+        op.value = c;
+        op.textContent = state.markNames[c] || c;
+        bColorSel.appendChild(op);
+      });
+
+      let currentMode = "range";
+      const bTabs = batchBox.querySelectorAll("#bTabs button");
+      const bRangeSec = batchBox.querySelector("#bRangeSec");
+      const bListSec = batchBox.querySelector("#bListSec");
+
+      bTabs.forEach(b => {
+        b.onclick = () => {
+          bTabs.forEach(x => x.classList.remove("on"));
+          b.classList.add("on");
+          currentMode = b.dataset.m;
+          bRangeSec.style.display = currentMode === "range" ? "block" : "none";
+          bListSec.style.display = currentMode === "list" ? "block" : "none";
+        };
+      });
+
+      addBtn.onclick = () => {
+        batchMarksOpen = !batchMarksOpen;
+        batchBox.style.display = batchMarksOpen ? "block" : "none";
+        addBtn.innerHTML = batchMarksOpen ? "Close form <span class='th'>ปิดฟอร์ม</span>" : "+ Add days / Range <span class='th'>+ แต้มสีหลายวัน</span>";
+      };
+
+      batchBox.querySelector("#bCancel").onclick = () => {
+        batchMarksOpen = false;
+        batchBox.style.display = "none";
+        addBtn.innerHTML = "+ Add days / Range <span class='th'>+ แต้มสีหลายวัน</span>";
+      };
+
+      batchBox.querySelector("#bApply").onclick = async () => {
+        const chosenColor = bColorSel.value;
+        const chosenLabel = batchBox.querySelector("#bLabel").value.trim();
+        const datesToMark = [];
+
+        if (currentMode === "range") {
+          const sVal = batchBox.querySelector("#bStart").value;
+          const eVal = batchBox.querySelector("#bEnd").value;
+          const skipWeekend = batchBox.querySelector("#bSkipWeekend").checked;
+
+          if (!/^d{4}-d{2}-d{2}$/.test(sVal) || !/^d{4}-d{2}-d{2}$/.test(eVal)) {
+            toast("Please enter valid dates (YYYY-MM-DD)");
+            return;
+          }
+          if (sVal > eVal) {
+            toast("Start date must be before or equal to End date\nวันเริ่มต้นต้องมาก่อนหรือตรงกับวันสิ้นสุด");
+            return;
+          }
+
+          const cur = new Date(sVal + "T00:00:00");
+          const end = new Date(eVal + "T00:00:00");
+
+          while (cur <= end) {
+            const dow = cur.getDay(); // 0 = Sun, 6 = Sat
+            if (!skipWeekend || (dow !== 0 && dow !== 6)) {
+              const yStr = cur.getFullYear();
+              const mStr = String(cur.getMonth() + 1).padStart(2, "0");
+              const dStr = String(cur.getDate()).padStart(2, "0");
+              datesToMark.push(`${yStr}-${mStr}-${dStr}`);
+            }
+            cur.setDate(cur.getDate() + 1);
+          }
+        } else {
+          const raw = batchBox.querySelector("#bList").value;
+          const matches = raw.match(/\d{4}-\d{2}-\d{2}/g) || [];
+          matches.forEach(d => {
+            if (!datesToMark.includes(d)) datesToMark.push(d);
+          });
+          if (!datesToMark.length) {
+            toast("No valid dates found\nไม่พบวันที่ถูกต้อง");
+            return;
+          }
+        }
+
+        if (!datesToMark.length) {
+          toast("No days selected\nไม่มีวันที่ตรงตามเงื่อนไข");
+          return;
+        }
+
+        // Apply to state and cloud
+        datesToMark.forEach(d => {
+          state.marks[d] = { color: chosenColor, label: chosenLabel };
+          cloudUpsertMark(d, chosenColor, chosenLabel);
+        });
+
+        appendLog("add", datesToMark[0] + (datesToMark.length > 1 ? "..${datesToMark[datesToMark.length-1]}" : ""), "", 
+          `batch marker: ${chosenColor} (${datesToMark.length} days)`);
+        
+        saveMarks();
+        renderAll();
+        renderAdmin();
+        toast(`Applied marker to ${datesToMark.length} days successfully!\nแต้มสีเรียบร้อย ${datesToMark.length} วัน`);
+      };
+
+      box.appendChild(batchBox);
 
       if (!keys.length) {
         const e = document.createElement("div"); e.className = "modempty";
@@ -3323,17 +3546,6 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
         });
         t.appendChild(tb); box.appendChild(t);
       }
-
-      add.onclick = () => {
-        let d = prompt("Date (YYYY-MM-DD)", state.selectedDate && state.selectedDate.startsWith(y + "-") ? state.selectedDate : y + "-01-01");
-        if (!d) return; d = d.trim();
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { toast("Format must be YYYY-MM-DD"); return; }
-        if (state.marks[d]) { toast("That date already has a marker"); return; }
-        state.marks[d] = { color: MARKS[0], label: "" };
-        appendLog("add", d, "", `marker: ${d} ${MARKS[0]}`);
-        cloudUpsertMark(d, MARKS[0], "");
-        saveMarks(); state.year = Number(d.slice(0, 4)); renderAll(); renderAdmin(); toast("Marker added, set colour below");
-      };
 
       const h = document.createElement("h4");
       h.style.cssText = "font-family:Sora,sans-serif;font-size:13px;margin:20px 0 3px";
@@ -3664,14 +3876,6 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       }
     };
 
-    /* ---- Init ---- */
-    document.getElementById("editBtn").onclick = () => setEditLock(!state.editUnlocked);
-    ensurePinRecord();
-    applyEditUI(state.editUnlocked);
-    renderAll();
-    if (state.editUnlocked) resetEditIdle();
-    initSupabase(true);
-  </script>
-</body>
+
 
 </html>
