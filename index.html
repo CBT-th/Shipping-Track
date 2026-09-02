@@ -10,6 +10,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
     rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg: #eef1f6;
@@ -1716,6 +1717,67 @@
         transition: none !important
       }
     }
+
+    /* Supabase Cloud Sync Styles */
+    .btn.cloud {
+      color: var(--primary-ink);
+      border-color: var(--line-strong);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .btn.cloud.connected {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #065f46;
+    }
+    .btn.cloud.connecting {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+    .btn.cloud.error {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .cloud-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+      display: inline-block;
+      transition: .2s;
+    }
+    .btn.cloud.connected .cloud-dot {
+      background: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, .25);
+      animation: pulseDot 2s infinite;
+    }
+    .btn.cloud.connecting .cloud-dot {
+      background: #f59e0b;
+      animation: pulseDot 1s infinite;
+    }
+    .btn.cloud.error .cloud-dot {
+      background: #ef4444;
+    }
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+    .sqlbox {
+      background: #1e293b;
+      color: #e2e8f0;
+      font-family: Consolas, monospace;
+      font-size: 11.5px;
+      padding: 12px;
+      border-radius: 10px;
+      overflow-x: auto;
+      max-height: 180px;
+      line-height: 1.45;
+      margin: 8px 0 12px;
+      user-select: all;
+    }
   </style>
 </head>
 
@@ -1770,6 +1832,10 @@
           <rect x="3" y="11" width="18" height="11" rx="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg><span id="editLbl">Editing off</span></button>
+      <button class="btn cloud" id="cloudBtn" title="Supabase Realtime Cloud Sync">
+        <span class="cloud-dot" id="cloudDot"></span>
+        <span id="cloudLbl">Cloud Sync</span>
+      </button>
       <button class="btn" id="exportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
@@ -1849,6 +1915,132 @@
     </div>
   </div>
 
+  <div class="backdrop" id="cloudBack">
+    <div class="modal" role="dialog" aria-modal="true" style="max-width: 580px;">
+      <div class="mhead">
+        <div class="mi" style="background: #ecfdf5; color: #065f46;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+          </svg></div>
+        <div>
+          <h2>Supabase Realtime Database</h2>
+          <p>Cloud sync · live updates across all devices <span class="th">อัปเดตอัตโนมัติแบบเรียลไทม์</span></p>
+        </div>
+        <button class="x" id="cloudClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg></button>
+      </div>
+      <div class="mbody">
+        <div id="cloudStatusBanner" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:#f8fafc;border:1px solid var(--line);margin-bottom:14px;font-size:12.5px;">
+          <span class="cloud-dot" id="cloudBannerDot"></span>
+          <div id="cloudBannerText" style="flex:1;">Checking cloud status...</div>
+          <button class="btn tiny" id="btnCloudRefresh" style="padding:4px 9px;">Sync Now</button>
+        </div>
+
+        <div class="field">
+          <label>Supabase Project URL <span class="th">URL โปรเจกต์</span></label>
+          <input id="sbUrlInput" placeholder="https://your-project.supabase.co" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>Supabase Anon Key (Public API Key) <span class="th">คีย์สาธารณะ</span></label>
+          <input id="sbKeyInput" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." autocomplete="off" spellcheck="false">
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn primary tiny" id="btnSbSaveConnect">💾 Save &amp; Connect</button>
+          <button class="btn tiny" id="btnSbPush">⬆️ Push Local to Cloud</button>
+          <button class="btn tiny" id="btnSbPull">⬇️ Pull from Cloud</button>
+          <button class="btn danger tiny" id="btnSbDisconnect">Disconnect</button>
+        </div>
+
+        <details style="margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;">
+          <summary style="cursor:pointer;font-weight:700;color:var(--ink-soft);user-select:none;">📋 Supabase SQL Schema (คลิกเพื่อดูคำสั่งสร้างตารางใน Supabase)</summary>
+          <p style="margin:8px 0 4px;color:var(--muted);">คัดลอกคำสั่ง SQL นี้ไปวางใน SQL Editor บน Supabase dashboard เพื่อสร้างตารางและเปิด Realtime:</p>
+          <pre class="sqlbox" id="sqlSchemaBox">-- 1. ตารางคำสั่งซื้อและการจัดส่ง (Orders)
+CREATE TABLE IF NOT EXISTS public.orders (
+    id TEXT PRIMARY KEY,
+    so TEXT NOT NULL,
+    type TEXT NOT NULL DEFAULT 'SALE',
+    customer TEXT DEFAULT '',
+    dest TEXT DEFAULT '',
+    qty TEXT DEFAULT '',
+    unit TEXT DEFAULT '',
+    received TEXT DEFAULT '',
+    ship TEXT DEFAULT '',
+    remark TEXT DEFAULT '',
+    created TIMESTAMPTZ DEFAULT NOW(),
+    updated TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. ตารางป้ายสีกำกับวัน (Day Markers)
+CREATE TABLE IF NOT EXISTS public.day_marks (
+    date TEXT PRIMARY KEY,
+    color TEXT NOT NULL,
+    label TEXT DEFAULT '',
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. ตารางวันหยุด (Holidays)
+CREATE TABLE IF NOT EXISTS public.holidays (
+    date TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. ตารางชื่อหมวดหมู่สี (Mark Names)
+CREATE TABLE IF NOT EXISTS public.mark_names (
+    color TEXT PRIMARY KEY,
+    label TEXT NOT NULL
+);
+
+-- 5. ตารางบันทึกประวัติการเปลี่ยนแปลง (Audit Log)
+CREATE TABLE IF NOT EXISTS public.calendar_logs (
+    id BIGSERIAL PRIMARY KEY,
+    ts TIMESTAMPTZ DEFAULT NOW(),
+    action TEXT NOT NULL,
+    ref TEXT DEFAULT '',
+    before TEXT DEFAULT '',
+    after TEXT DEFAULT ''
+);
+
+-- เปิดใช้งาน Realtime
+ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.day_marks;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.holidays;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.mark_names;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.calendar_logs;
+
+-- เปิดใช้งาน Row Level Security (RLS)
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.day_marks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.holidays ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.mark_names ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.calendar_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read orders" ON public.orders FOR SELECT USING (true);
+CREATE POLICY "Allow public all orders" ON public.orders FOR ALL USING (true);
+
+CREATE POLICY "Allow public read day_marks" ON public.day_marks FOR SELECT USING (true);
+CREATE POLICY "Allow public all day_marks" ON public.day_marks FOR ALL USING (true);
+
+CREATE POLICY "Allow public read holidays" ON public.holidays FOR SELECT USING (true);
+CREATE POLICY "Allow public all holidays" ON public.holidays FOR ALL USING (true);
+
+CREATE POLICY "Allow public read mark_names" ON public.mark_names FOR SELECT USING (true);
+CREATE POLICY "Allow public all mark_names" ON public.mark_names FOR ALL USING (true);
+
+CREATE POLICY "Allow public read logs" ON public.calendar_logs FOR SELECT USING (true);
+CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH CHECK (true);</pre>
+          <button class="btn tiny" id="btnCopySql" style="width:100%;justify-content:center;">📋 Copy SQL to Clipboard</button>
+        </details>
+      </div>
+      <div class="mfoot">
+        <div class="grow"></div>
+        <button class="btn tiny" id="cloudDone">Close</button>
+      </div>
+    </div>
+  </div>
+
   <div class="tip" id="tip"></div>
   <div class="toast" id="toast"></div>
 
@@ -1891,12 +2083,397 @@
     const LS_ORD = "shippingCalendar_orders_v5", LS_ORD4 = "shippingCalendar_orders_v3",
       LS_MARK = "shippingCalendar_daymarks_v4", LS_MKNAME = "shippingCalendar_marknames_v4",
       LS_HOL = "shippingCalendar_holidays_v1", LS_PIN = "shippingCalendar_adminpin_v1",
-      LS_LOG = "shippingCalendar_log_v1", LS_EDIT = "shippingCalendar_editunlock_v1";
+      LS_LOG = "shippingCalendar_log_v1", LS_EDIT = "shippingCalendar_editunlock_v1",
+      LS_SB_URL = "shippingCalendar_supabase_url_v1", LS_SB_KEY = "shippingCalendar_supabase_key_v1";
     const DEFAULT_PIN = "135790", IDLE_LOCK_MS = 5 * 60 * 1000, MAX_TRIES = 5, LOCKOUT_MS = 60 * 1000;
     const SEED_HOLIDAYS = {
       "2026-01-01": { name: "New Year's Day" }, "2026-04-13": { name: "Songkran" }, "2026-04-14": { name: "Songkran" },
       "2026-04-15": { name: "Songkran" }, "2026-05-01": { name: "Labour Day" }, "2026-12-31": { name: "New Year's Eve" }
     };
+
+    /* ---------- Supabase Cloud Realtime Sync Engine ---------- */
+    let supabaseClient = null, realtimeChannel = null;
+    let cloudStatus = "disconnected";
+
+    function getSupabaseConfig() {
+      try {
+        return {
+          url: localStorage.getItem(LS_SB_URL) || "",
+          key: localStorage.getItem(LS_SB_KEY) || ""
+        };
+      } catch (e) { return { url: "", key: "" }; }
+    }
+
+    function saveSupabaseConfig(url, key) {
+      try {
+        if (url) localStorage.setItem(LS_SB_URL, url.trim());
+        else localStorage.removeItem(LS_SB_URL);
+        if (key) localStorage.setItem(LS_SB_KEY, key.trim());
+        else localStorage.removeItem(LS_SB_KEY);
+      } catch (e) { }
+    }
+
+    function updateCloudStatusUI(st, msg) {
+      cloudStatus = st;
+      const btn = document.getElementById("cloudBtn");
+      const lbl = document.getElementById("cloudLbl");
+      const bDot = document.getElementById("cloudBannerDot");
+      const bText = document.getElementById("cloudBannerText");
+
+      if (btn) {
+        btn.className = "btn cloud " + st;
+        if (st === "connected") lbl.textContent = "Live Sync 🟢";
+        else if (st === "connecting") lbl.textContent = "Connecting... 🟡";
+        else if (st === "error") lbl.textContent = "Sync Error 🔴";
+        else lbl.textContent = "Cloud Sync";
+      }
+
+      if (bDot) bDot.className = "cloud-dot " + st;
+      if (bText) {
+        if (msg) bText.innerHTML = msg;
+        else if (st === "connected") bText.innerHTML = "<strong>Connected to Supabase Realtime</strong> (Live Sync on)";
+        else if (st === "connecting") bText.innerHTML = "Connecting to Supabase...";
+        else if (st === "error") bText.innerHTML = "<span style='color:var(--sun-ink)'>Connection error: Check URL/Key or network</span>";
+        else bText.innerHTML = "Not connected (Working in local offline mode)";
+      }
+    }
+
+    async function cloudUpsertOrder(order) {
+      if (!supabaseClient) return;
+      try {
+        const payload = {
+          id: order.id,
+          so: order.so || "",
+          type: order.type || "SALE",
+          customer: order.customer || "",
+          dest: order.dest || "",
+          qty: order.qty || "",
+          unit: order.unit || "",
+          received: order.received || "",
+          ship: order.ship || "",
+          remark: order.remark || "",
+          updated: order.updated || new Date().toISOString()
+        };
+        const { error } = await supabaseClient.from("orders").upsert(payload);
+        if (error) console.error("Cloud order upsert error:", error);
+      } catch (e) { console.error("Cloud order upsert fail:", e); }
+    }
+
+    async function cloudDeleteOrder(id) {
+      if (!supabaseClient) return;
+      try {
+        const { error } = await supabaseClient.from("orders").delete().eq("id", id);
+        if (error) console.error("Cloud order delete error:", error);
+      } catch (e) { console.error("Cloud order delete fail:", e); }
+    }
+
+    async function cloudUpsertMark(date, color, label) {
+      if (!supabaseClient) return;
+      try {
+        const { error } = await supabaseClient.from("day_marks").upsert({
+          date, color, label: label || "", updated_at: new Date().toISOString()
+        });
+        if (error) console.error("Cloud mark upsert error:", error);
+      } catch (e) { console.error("Cloud mark upsert fail:", e); }
+    }
+
+    async function cloudDeleteMark(date) {
+      if (!supabaseClient) return;
+      try {
+        const { error } = await supabaseClient.from("day_marks").delete().eq("date", date);
+        if (error) console.error("Cloud mark delete error:", error);
+      } catch (e) { console.error("Cloud mark delete fail:", e); }
+    }
+
+    async function cloudUpsertHoliday(date, name) {
+      if (!supabaseClient) return;
+      try {
+        const { error } = await supabaseClient.from("holidays").upsert({
+          date, name, updated_at: new Date().toISOString()
+        });
+        if (error) console.error("Cloud holiday upsert error:", error);
+      } catch (e) { console.error("Cloud holiday upsert fail:", e); }
+    }
+
+    async function cloudDeleteHoliday(date) {
+      if (!supabaseClient) return;
+      try {
+        const { error } = await supabaseClient.from("holidays").delete().eq("date", date);
+        if (error) console.error("Cloud holiday delete error:", error);
+      } catch (e) { console.error("Cloud holiday delete fail:", e); }
+    }
+
+    async function cloudUpsertMarkName(color, label) {
+      if (!supabaseClient) return;
+      try {
+        const { error } = await supabaseClient.from("mark_names").upsert({ color, label });
+        if (error) console.error("Cloud mark_name upsert error:", error);
+      } catch (e) { console.error("Cloud mark_name upsert fail:", e); }
+    }
+
+    async function cloudAppendLog(entry) {
+      if (!supabaseClient) return;
+      try {
+        await supabaseClient.from("calendar_logs").insert({
+          ts: entry.ts || new Date().toISOString(),
+          action: entry.action || "",
+          ref: entry.ref || "",
+          before: entry.before || "",
+          after: entry.after || ""
+        });
+      } catch (e) { }
+    }
+
+    async function pullCloudData(notify = true) {
+      if (!supabaseClient) return;
+      updateCloudStatusUI("connecting", "Fetching latest data from Supabase...");
+      try {
+        // 1. Orders
+        const { data: ords, error: ordErr } = await supabaseClient.from("orders").select("*");
+        if (ordErr) throw ordErr;
+        if (Array.isArray(ords)) {
+          const newOrders = {};
+          ords.forEach(r => {
+            if (r.id) newOrders[r.id] = {
+              id: r.id,
+              so: r.so || "",
+              type: r.type || "SALE",
+              customer: r.customer || "",
+              dest: r.dest || "",
+              qty: r.qty || "",
+              unit: r.unit || "",
+              received: r.received || "",
+              ship: r.ship || "",
+              remark: r.remark || "",
+              updated: r.updated || new Date().toISOString()
+            };
+          });
+          state.orders = newOrders;
+          try { localStorage.setItem(LS_ORD, JSON.stringify(state.orders)); } catch (e) { }
+        }
+
+        // 2. Day Marks
+        const { data: dMarks, error: dmarksErr } = await supabaseClient.from("day_marks").select("*");
+        if (!dmarksErr && Array.isArray(dMarks)) {
+          const newMarks = {};
+          dMarks.forEach(m => {
+            if (m.date && m.color) newMarks[m.date] = { color: m.color, label: m.label || "" };
+          });
+          state.marks = newMarks;
+          try { localStorage.setItem(LS_MARK, JSON.stringify(state.marks)); } catch (e) { }
+        }
+
+        // 3. Holidays
+        const { data: dHols, error: dholErr } = await supabaseClient.from("holidays").select("*");
+        if (!dholErr && Array.isArray(dHols)) {
+          const newHols = {};
+          dHols.forEach(h => {
+            if (h.date && h.name) newHols[h.date] = { name: h.name };
+          });
+          if (Object.keys(newHols).length) {
+            state.holidays = newHols;
+            try { localStorage.setItem(LS_HOL, JSON.stringify(state.holidays)); } catch (e) { }
+          }
+        }
+
+        // 4. Mark Names
+        const { data: dMarkNames, error: dmnErr } = await supabaseClient.from("mark_names").select("*");
+        if (!dmnErr && Array.isArray(dMarkNames)) {
+          dMarkNames.forEach(mn => {
+            if (mn.color && mn.label) state.markNames[mn.color] = mn.label;
+          });
+          try { localStorage.setItem(LS_MKNAME, JSON.stringify(state.markNames)); } catch (e) { }
+        }
+
+        updateCloudStatusUI("connected", `<strong>Connected</strong> · Synced ${Object.keys(state.orders).length} orders`);
+        renderAll();
+        if (state.selectedDate) refreshSide();
+        if (notify) toast(`Cloud synced: ${Object.keys(state.orders).length} orders`);
+      } catch (err) {
+        console.error("Failed to fetch cloud data:", err);
+        updateCloudStatusUI("error", `<span style="color:var(--sun-ink)">Sync failed: ${esc(err.message || String(err))}</span>`);
+        if (notify) toast("Cloud sync failed: " + (err.message || "Network error"));
+      }
+    }
+
+    async function pushLocalDataToCloud(notify = true) {
+      if (!supabaseClient) {
+        toast("Please connect to Supabase first");
+        return;
+      }
+      updateCloudStatusUI("connecting", "Pushing local data to Supabase...");
+      try {
+        const ordList = Object.values(state.orders).map(o => ({
+          id: o.id,
+          so: o.so || "",
+          type: o.type || "SALE",
+          customer: o.customer || "",
+          dest: o.dest || "",
+          qty: o.qty || "",
+          unit: o.unit || "",
+          received: o.received || "",
+          ship: o.ship || "",
+          remark: o.remark || "",
+          updated: o.updated || new Date().toISOString()
+        }));
+        if (ordList.length > 0) {
+          const { error: oErr } = await supabaseClient.from("orders").upsert(ordList);
+          if (oErr) throw oErr;
+        }
+
+        const markList = Object.entries(state.marks).map(([date, m]) => ({
+          date, color: m.color, label: m.label || "", updated_at: new Date().toISOString()
+        }));
+        if (markList.length > 0) {
+          const { error: mErr } = await supabaseClient.from("day_marks").upsert(markList);
+          if (mErr) throw mErr;
+        }
+
+        const holList = Object.entries(state.holidays).map(([date, h]) => ({
+          date, name: h.name, updated_at: new Date().toISOString()
+        }));
+        if (holList.length > 0) {
+          const { error: hErr } = await supabaseClient.from("holidays").upsert(holList);
+          if (hErr) throw hErr;
+        }
+
+        const mnList = Object.entries(state.markNames).map(([color, label]) => ({
+          color, label
+        }));
+        if (mnList.length > 0) {
+          const { error: mnErr } = await supabaseClient.from("mark_names").upsert(mnList);
+          if (mnErr) throw mnErr;
+        }
+
+        updateCloudStatusUI("connected", `<strong>Upload complete</strong> · ${ordList.length} orders saved to Cloud`);
+        if (notify) toast(`Pushed ${ordList.length} orders to Supabase`);
+      } catch (err) {
+        console.error("Push failed:", err);
+        updateCloudStatusUI("error", `<span style="color:var(--sun-ink)">Upload failed: ${esc(err.message || String(err))}</span>`);
+        if (notify) toast("Upload failed: " + (err.message || "Error"));
+      }
+    }
+
+    function setupRealtimeSubscriptions() {
+      if (!supabaseClient) return;
+      if (realtimeChannel) {
+        try { supabaseClient.removeChannel(realtimeChannel); } catch (e) { }
+      }
+
+      realtimeChannel = supabaseClient.channel("calendar-db-sync")
+        .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, payload => {
+          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+            const r = payload.new;
+            state.orders[r.id] = {
+              id: r.id,
+              so: r.so || "",
+              type: r.type || "SALE",
+              customer: r.customer || "",
+              dest: r.dest || "",
+              qty: r.qty || "",
+              unit: r.unit || "",
+              received: r.received || "",
+              ship: r.ship || "",
+              remark: r.remark || "",
+              updated: r.updated || new Date().toISOString()
+            };
+            try { localStorage.setItem(LS_ORD, JSON.stringify(state.orders)); } catch (e) { }
+            renderAll();
+            if (state.selectedDate) refreshSide();
+            toast(`⚡ Realtime: ${r.so} (${r.type}) updated`);
+          } else if (payload.eventType === "DELETE") {
+            const id = payload.old ? payload.old.id : null;
+            if (id && state.orders[id]) {
+              const soNum = state.orders[id].so;
+              delete state.orders[id];
+              try { localStorage.setItem(LS_ORD, JSON.stringify(state.orders)); } catch (e) { }
+              renderAll();
+              if (state.selectedDate) refreshSide();
+              toast(`⚡ Realtime: ${soNum || "Order"} deleted`);
+            }
+          }
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "day_marks" }, payload => {
+          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+            const m = payload.new;
+            state.marks[m.date] = { color: m.color, label: m.label || "" };
+          } else if (payload.eventType === "DELETE") {
+            const d = payload.old ? payload.old.date : null;
+            if (d) delete state.marks[d];
+          }
+          try { localStorage.setItem(LS_MARK, JSON.stringify(state.marks)); } catch (e) { }
+          renderAll();
+          if (admBack.classList.contains("show")) renderAdmin();
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "holidays" }, payload => {
+          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+            const h = payload.new;
+            state.holidays[h.date] = { name: h.name };
+          } else if (payload.eventType === "DELETE") {
+            const d = payload.old ? payload.old.date : null;
+            if (d) delete state.holidays[d];
+          }
+          try { localStorage.setItem(LS_HOL, JSON.stringify(state.holidays)); } catch (e) { }
+          renderAll();
+          if (admBack.classList.contains("show")) renderAdmin();
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "mark_names" }, payload => {
+          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+            const mn = payload.new;
+            state.markNames[mn.color] = mn.label;
+          }
+          try { localStorage.setItem(LS_MKNAME, JSON.stringify(state.markNames)); } catch (e) { }
+          renderAll();
+          if (admBack.classList.contains("show")) renderAdmin();
+        })
+        .subscribe((status, err) => {
+          if (status === "SUBSCRIBED") {
+            updateCloudStatusUI("connected");
+          } else if (status === "CHANNEL_ERROR") {
+            console.warn("Realtime channel error:", err);
+            updateCloudStatusUI("error", "Realtime error: " + (err?.message || "Check connection"));
+          } else if (status === "TIMED_OUT") {
+            updateCloudStatusUI("error", "Realtime connection timed out");
+          } else if (status === "CLOSED") {
+            updateCloudStatusUI("disconnected");
+          }
+        });
+    }
+
+    async function initSupabase(autoSync = true) {
+      if (typeof window.supabase === "undefined" || !window.supabase.createClient) {
+        updateCloudStatusUI("disconnected", "Supabase JS library not available");
+        return;
+      }
+
+      const cfg = getSupabaseConfig();
+      const urlInp = document.getElementById("sbUrlInput");
+      const keyInp = document.getElementById("sbKeyInput");
+      if (urlInp) urlInp.value = cfg.url;
+      if (keyInp) keyInp.value = cfg.key;
+
+      if (!cfg.url || !cfg.key) {
+        updateCloudStatusUI("disconnected", "Not configured (Working in local mode)");
+        return;
+      }
+
+      try {
+        updateCloudStatusUI("connecting", "Connecting to Supabase...");
+        supabaseClient = window.supabase.createClient(cfg.url, cfg.key, {
+          auth: { persistSession: false, autoRefreshToken: false }
+        });
+
+        if (autoSync) {
+          await pullCloudData(false);
+          setupRealtimeSubscriptions();
+        } else {
+          updateCloudStatusUI("connected");
+        }
+      } catch (err) {
+        console.error("Supabase init error:", err);
+        updateCloudStatusUI("error", `Init failed: ${esc(err.message || String(err))}`);
+      }
+    }
 
     /* ---------- State ---------- */
     let state = {
@@ -1930,11 +2507,17 @@
       } catch (e) { }
       return o;
     }
-    function saveOrders() { try { localStorage.setItem(LS_ORD, JSON.stringify(state.orders)); } catch (e) { toast("Save failed: storage full"); } }
+    function saveOrders() {
+      try { localStorage.setItem(LS_ORD, JSON.stringify(state.orders)); } catch (e) { toast("Save failed: storage full"); }
+    }
     function loadMarks() { try { return JSON.parse(localStorage.getItem(LS_MARK)) || {}; } catch (e) { return {}; } }
-    function saveMarks() { try { localStorage.setItem(LS_MARK, JSON.stringify(state.marks)); } catch (e) { } }
+    function saveMarks() {
+      try { localStorage.setItem(LS_MARK, JSON.stringify(state.marks)); } catch (e) { }
+    }
     function loadMarkNames() { try { return Object.assign({}, DEFAULT_MARKNAMES, JSON.parse(localStorage.getItem(LS_MKNAME)) || {}); } catch (e) { return { ...DEFAULT_MARKNAMES }; } }
-    function saveMarkNames() { try { localStorage.setItem(LS_MKNAME, JSON.stringify(state.markNames)); } catch (e) { } }
+    function saveMarkNames() {
+      try { localStorage.setItem(LS_MKNAME, JSON.stringify(state.markNames)); } catch (e) { }
+    }
     function loadHolidays() {
       try {
         const s = localStorage.getItem(LS_HOL);
@@ -1944,12 +2527,16 @@
         return out;
       } catch (e) { return { ...SEED_HOLIDAYS }; }
     }
-    function saveHolidays() { try { localStorage.setItem(LS_HOL, JSON.stringify(state.holidays)); } catch (e) { } }
+    function saveHolidays() {
+      try { localStorage.setItem(LS_HOL, JSON.stringify(state.holidays)); } catch (e) { }
+    }
     function loadLog() { try { return JSON.parse(localStorage.getItem(LS_LOG)) || []; } catch (e) { return []; } }
     function appendLog(action, ref, before, after) {
       const log = loadLog();
-      log.push({ ts: new Date().toISOString(), action, ref: ref || "", before: before || "", after: after || "" });
+      const entry = { ts: new Date().toISOString(), action, ref: ref || "", before: before || "", after: after || "" };
+      log.push(entry);
       try { localStorage.setItem(LS_LOG, JSON.stringify(log.slice(-800))); } catch (e) { }
+      cloudAppendLog(entry);
     }
 
     /* ---------- PIN ---------- */
@@ -2417,11 +3004,13 @@
           appendLog("edit", order.id, `${order.so} ${order.type} ${order.received || "—"}→${order.ship || "—"}`,
             `${rec.so} ${rec.type} ${rec.received || "—"}→${rec.ship || "—"}`);
           state.orders[order.id] = { ...order, ...rec, updated: new Date().toISOString() };
+          cloudUpsertOrder(state.orders[order.id]);
           toast("Order updated");
         } else {
           const id = uid();
           state.orders[id] = { id, ...rec, created: new Date().toISOString(), updated: new Date().toISOString() };
           appendLog("add", id, "", `${rec.so} ${rec.type} ${rec.received || "—"}→${rec.ship || "—"}`);
+          cloudUpsertOrder(state.orders[id]);
           toast("Order added");
         }
         saveOrders(); state.adding = false; state.editing = null; renderAll(); refreshSide();
@@ -2432,6 +3021,7 @@
       const o = state.orders[id]; if (!o) return;
       if (!confirm(`Delete ${o.so}?\nลบออเดอร์นี้?`)) return;
       appendLog("del", id, `${o.so} ${o.type} ${o.received || "—"}→${o.ship || "—"}`, "");
+      cloudDeleteOrder(id);
       delete state.orders[id]; saveOrders(); renderAll(); refreshSide(); toast("Order deleted");
     }
 
@@ -2636,6 +3226,7 @@
           del.onclick = () => {
             if (!confirm(`Remove the marker on ${k}?`)) return;
             appendLog("del", k, `marker: ${cur.color} ${cur.label || ""}`, "");
+            cloudDeleteMark(k);
             delete state.marks[k]; saveMarks(); renderAll(); renderAdmin(); toast("Marker removed");
           };
           tdA.appendChild(del);
@@ -2645,7 +3236,9 @@
             if (nd !== k && state.marks[nd]) { inD.value = k; toast("That date already has a marker"); return; }
             if (nd === k && nc === cur.color && nl === (cur.label || "")) return;
             appendLog("edit", nd, `marker: ${k} ${cur.color} ${cur.label || ""}`, `marker: ${nd} ${nc} ${nl}`);
+            if (nd !== k) cloudDeleteMark(k);
             delete state.marks[k]; state.marks[nd] = { color: nc, label: nl };
+            cloudUpsertMark(nd, nc, nl);
             saveMarks(); renderAll(); renderAdmin(); toast("Marker updated");
           };
           inD.onchange = commit; sel.onchange = commit; inL.onblur = commit;
@@ -2662,6 +3255,7 @@
         if (state.marks[d]) { toast("That date already has a marker"); return; }
         state.marks[d] = { color: MARKS[0], label: "" };
         appendLog("add", d, "", `marker: ${d} ${MARKS[0]}`);
+        cloudUpsertMark(d, MARKS[0], "");
         saveMarks(); state.year = Number(d.slice(0, 4)); renderAll(); renderAdmin(); toast("Marker added, set colour below");
       };
 
@@ -2679,6 +3273,7 @@
         inp.onblur = () => {
           if (inp.value === before) return;
           appendLog("edit", "", "marker name: " + before, "marker name: " + inp.value);
+          cloudUpsertMarkName(c, inp.value);
           before = inp.value;
         };
         inp.oninput = () => { state.markNames[c] = inp.value; saveMarkNames(); renderAll(); };
@@ -2713,6 +3308,7 @@
           del.onclick = () => {
             if (!confirm(`Delete holiday ${k} (${state.holidays[k].name})?`)) return;
             appendLog("del", k, "holiday: " + state.holidays[k].name, "");
+            cloudDeleteHoliday(k);
             delete state.holidays[k]; saveHolidays(); renderAll(); renderAdmin(); toast("Holiday deleted");
           };
           tdA.appendChild(del);
@@ -2723,8 +3319,10 @@
             if (nd !== k && state.holidays[nd]) { inD.value = k; toast("That date already has a holiday"); return; }
             if (nd === k && nn === state.holidays[k].name) return;
             const before = k + " · " + state.holidays[k].name;
+            if (nd !== k) cloudDeleteHoliday(k);
             delete state.holidays[k]; state.holidays[nd] = { name: nn };
             appendLog("edit", nd, "holiday: " + before, "holiday: " + nd + " · " + nn);
+            cloudUpsertHoliday(nd, nn);
             saveHolidays(); renderAll(); renderAdmin(); toast("Holiday updated");
           };
           inD.onchange = commit; inN.onblur = commit; inN.onkeydown = e => { if (e.key === "Enter") inN.blur(); };
@@ -2738,6 +3336,7 @@
         if (state.holidays[d]) { toast("That date already has a holiday"); return; }
         const n = prompt("Holiday name", ""); if (!n || !n.trim()) { toast("Cancelled"); return; }
         state.holidays[d] = { name: n.trim() }; appendLog("add", d, "", "holiday: " + d + " · " + n.trim());
+        cloudUpsertHoliday(d, n.trim());
         saveHolidays(); state.year = Number(d.slice(0, 4)); renderAll(); renderAdmin(); toast("Holiday added");
       };
       exp.onclick = () => {
@@ -2882,12 +3481,86 @@
       const t = new Date(); state.year = t.getFullYear(); state.month = t.getMonth(); selectDay(todayKey());
     };
 
+    /* ---- Cloud Modal Events ---- */
+    const cloudBack = document.getElementById("cloudBack");
+    document.getElementById("cloudBtn").onclick = () => {
+      const cfg = getSupabaseConfig();
+      document.getElementById("sbUrlInput").value = cfg.url;
+      document.getElementById("sbKeyInput").value = cfg.key;
+      cloudBack.classList.add("show");
+    };
+    document.getElementById("cloudClose").onclick = () => cloudBack.classList.remove("show");
+    document.getElementById("cloudDone").onclick = () => cloudBack.classList.remove("show");
+    cloudBack.addEventListener("mousedown", e => { if (e.target === cloudBack) cloudBack.classList.remove("show"); });
+
+    document.getElementById("btnSbSaveConnect").onclick = async () => {
+      const url = document.getElementById("sbUrlInput").value.trim();
+      const key = document.getElementById("sbKeyInput").value.trim();
+      if (!url || !key) {
+        toast("Please provide both Supabase URL and Anon Key");
+        return;
+      }
+      saveSupabaseConfig(url, key);
+      await initSupabase(true);
+      toast("Supabase settings saved & connected");
+    };
+
+    document.getElementById("btnSbPush").onclick = async () => {
+      if (!confirm("Push all local orders, day markers, and holidays to Supabase?\nอัปโหลดข้อมูลทั้งหมดขึ้น Supabase?")) return;
+      await pushLocalDataToCloud(true);
+    };
+
+    document.getElementById("btnSbPull").onclick = async () => {
+      if (!confirm("Pull latest data from Supabase and update local view?\nดึงข้อมูลล่าสุดจาก Supabase?")) return;
+      await pullCloudData(true);
+    };
+
+    document.getElementById("btnCloudRefresh").onclick = async () => {
+      if (!supabaseClient) {
+        const cfg = getSupabaseConfig();
+        if (cfg.url && cfg.key) await initSupabase(true);
+        else toast("Configure Supabase first");
+      } else {
+        await pullCloudData(true);
+      }
+    };
+
+    document.getElementById("btnSbDisconnect").onclick = () => {
+      if (!confirm("Disconnect from Supabase? (Local data will be kept)\nตัดการเชื่อมต่อกับ Supabase?")) return;
+      if (realtimeChannel && supabaseClient) {
+        try { supabaseClient.removeChannel(realtimeChannel); } catch (e) { }
+      }
+      supabaseClient = null;
+      realtimeChannel = null;
+      saveSupabaseConfig("", "");
+      document.getElementById("sbUrlInput").value = "";
+      document.getElementById("sbKeyInput").value = "";
+      updateCloudStatusUI("disconnected", "Disconnected (Working in local offline mode)");
+      toast("Disconnected from Supabase");
+    };
+
+    document.getElementById("btnCopySql").onclick = () => {
+      const sql = document.getElementById("sqlSchemaBox").textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(sql).then(() => toast("SQL copied to clipboard!"));
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = sql;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast("SQL copied to clipboard!");
+      }
+    };
+
     /* ---- Init ---- */
     document.getElementById("editBtn").onclick = () => setEditLock(!state.editUnlocked);
     ensurePinRecord();
     applyEditUI(state.editUnlocked);
     renderAll();
     if (state.editUnlocked) resetEditIdle();
+    initSupabase(true);
   </script>
 </body>
 
