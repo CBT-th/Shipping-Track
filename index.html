@@ -34,27 +34,27 @@
       --c-holiday-fill: #fef2f2;
       --c-holiday-dot: #ef4444;
       --c-holiday-ink: #991b1b;
-      --c-slate-fill: #e8edf3;
-      --c-slate-dot: #64748b;
-      --c-slate-ink: #334155;
-      --c-blue-fill: #dbeafe;
-      --c-blue-dot: #3b82f6;
-      --c-blue-ink: #1e40af;
-      --c-amber-fill: #fdeccd;
-      --c-amber-dot: #f59e0b;
-      --c-amber-ink: #8a5a00;
-      --c-purple-fill: #eadcff;
-      --c-purple-dot: #8b5cf6;
-      --c-purple-ink: #5b2ea6;
-      --c-teal-fill: #cff3ef;
-      --c-teal-dot: #14b8a6;
-      --c-teal-ink: #0b6f66;
-      --c-green-fill: #d7f2e3;
-      --c-green-dot: #10b981;
-      --c-green-ink: #0b6b47;
-      --c-rose-fill: #ffe0e6;
-      --c-rose-dot: #f43f5e;
-      --c-rose-ink: #a01235;
+      --c-slate-fill: #f1f5f9;
+      --c-slate-dot: #94a3b8;
+      --c-slate-ink: #475569;
+      --c-blue-fill: #eff6ff;
+      --c-blue-dot: #60a5fa;
+      --c-blue-ink: #2563eb;
+      --c-amber-fill: #fef8ee;
+      --c-amber-dot: #fbbf24;
+      --c-amber-ink: #b45309;
+      --c-purple-fill: #f5f0ff;
+      --c-purple-dot: #a78bfa;
+      --c-purple-ink: #6d28d9;
+      --c-teal-fill: #f0fdfa;
+      --c-teal-dot: #2dd4bf;
+      --c-teal-ink: #0f766e;
+      --c-green-fill: #f0fdf4;
+      --c-green-dot: #4ade80;
+      --c-green-ink: #15803d;
+      --c-rose-fill: #fff1f2;
+      --c-rose-dot: #fb7185;
+      --c-rose-ink: #be123c;
     }
 
     * {
@@ -1811,7 +1811,7 @@
           </svg></div>
         <div>
           <h1>Shipping Calendar</h1>
-          <p>SALE / FREE orders · received and ship dates <span class="th">วันรับออเดอร์และวันจัดส่ง</span></p>
+          <p>SALE / FREE orders · received and shipping dates <span class="th">วันรับออเดอร์และวันจัดส่ง</span></p>
         </div>
       </div>
 
@@ -1979,8 +1979,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
     type TEXT NOT NULL DEFAULT 'SALE',
     customer TEXT DEFAULT '',
     dest TEXT DEFAULT '',
-    qty TEXT DEFAULT '',
-    unit TEXT DEFAULT '',
+    dn TEXT DEFAULT '',
     received TEXT DEFAULT '',
     ship TEXT DEFAULT '',
     remark TEXT DEFAULT '',
@@ -2081,13 +2080,13 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     const ty = k => TY[k] || TY.SALE;
 
     /* ---------- Day markers ---------- */
-    const MARKS = ["blue", "amber", "purple", "rose", "slate"];
+    const MARKS = ["blue", "amber", "purple", "green", "slate"];
     const MK = {}; MARKS.forEach(k => MK[k] = pal(k));
     const DEFAULT_MARKNAMES = {
       blue: "Export day · วันส่งออก",
       amber: "Order receiving · วันรับออเดอร์",
       purple: "Delivery day · วันส่งออกสินค้า",
-      rose: "Production period · กำหนดการผลิต",
+      green: "Production period · กำหนดการผลิต",
       slate: "Other note · อื่น ๆ"
     };
 
@@ -2162,8 +2161,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
           type: order.type || "SALE",
           customer: order.customer || "",
           dest: order.dest || "",
-          qty: order.qty || "",
-          unit: order.unit || "",
+          dn: order.dn || "",
           received: order.received || "",
           ship: order.ship || "",
           remark: order.remark || "",
@@ -2255,8 +2253,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
               type: r.type || "SALE",
               customer: r.customer || "",
               dest: r.dest || "",
-              qty: r.qty || "",
-              unit: r.unit || "",
+              dn: r.dn || "",
               received: r.received || "",
               ship: r.ship || "",
               remark: r.remark || "",
@@ -2324,8 +2321,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
           type: o.type || "SALE",
           customer: o.customer || "",
           dest: o.dest || "",
-          qty: o.qty || "",
-          unit: o.unit || "",
+          dn: o.dn || "",
           received: o.received || "",
           ship: o.ship || "",
           remark: o.remark || "",
@@ -2385,8 +2381,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
               type: r.type || "SALE",
               customer: r.customer || "",
               dest: r.dest || "",
-              qty: r.qty || "",
-              unit: r.unit || "",
+              dn: r.dn || "",
               received: r.received || "",
               ship: r.ship || "",
               remark: r.remark || "",
@@ -2525,13 +2520,24 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     function saveOrders() {
       try { localStorage.setItem(LS_ORD, JSON.stringify(state.orders)); } catch (e) { toast("Save failed: storage full"); }
     }
-    function loadMarks() { try { return JSON.parse(localStorage.getItem(LS_MARK)) || {}; } catch (e) { return {}; } }
+    function loadMarks() {
+      try {
+        const o = JSON.parse(localStorage.getItem(LS_MARK)) || {};
+        for (const k in o) {
+          if (o[k] && o[k].color === "rose") o[k].color = "green";
+        }
+        return o;
+      } catch (e) { return {}; }
+    }
     function saveMarks() {
       try { localStorage.setItem(LS_MARK, JSON.stringify(state.marks)); } catch (e) { }
     }
     function loadMarkNames() {
       try {
         const saved = JSON.parse(localStorage.getItem(LS_MKNAME)) || {};
+        if (saved.rose && !saved.green) saved.green = saved.rose;
+        delete saved.rose;
+        delete saved.teal;
         const res = Object.assign({}, DEFAULT_MARKNAMES);
         for (const k in saved) {
           if (MARKS.includes(k) && saved[k] && saved[k].trim()) res[k] = saved[k];
@@ -2621,7 +2627,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       if (state.typeFilter !== "all" && o.type !== state.typeFilter) return false;
       const q = state.query.trim().toLowerCase();
       if (!q) return true;
-      return (o.so + " " + o.customer + " " + o.dest + " " + (o.remark || "")).toLowerCase().includes(q);
+      return (o.so + " " + (o.dn || "") + " " + o.dest + " " + (o.remark || "")).toLowerCase().includes(q);
     }
     /* entries on a date: {o, role:"in"|"out"} */
     function entriesOn(k) {
@@ -2894,20 +2900,20 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     function orderCard(o, role, key) {
       const t = ty(o.type);
       const card = document.createElement("div"); card.className = "socard " + role; card.style.borderLeftColor = t.dot;
-      const qty = o.qty ? `${esc(o.qty)}${o.unit ? " " + esc(o.unit) : ""}` : "";
       const ld = lead(o);
       const done = o.ship && o.ship <= todayKey();
       card.innerHTML = `
     <div class="r1">
       <span class="so">${esc(o.so)}</span>
       <span class="ttag" style="background:${t.dot}">${o.type}</span>
+      ${o.dn ? `<span class="stag" style="background:#f1f5f9;color:var(--ink-soft);border:1px solid var(--line);font-weight:700">D/N: ${esc(o.dn)}</span>` : ""}
       <span class="stag" style="background:${done ? "var(--c-green-fill)" : "var(--c-slate-fill)"};color:${done ? "var(--c-green-ink)" : "var(--c-slate-ink)"}">
-        ${o.ship ? (done ? "Shipped" : "Scheduled") : "No ship date"}</span>
+        ${o.ship ? (done ? "Shipped" : "Scheduled") : "No shipping date"}</span>
     </div>
-    <div class="r2">${o.customer ? `<b>${esc(o.customer)}</b>` : ""}${o.dest ? ` · ${esc(o.dest)}` : ""}${qty ? ` · ${qty}` : ""}</div>
+    <div class="r2">${o.dest ? `<b>${esc(o.dest)}</b>` : ""}</div>
     <div class="dates">
       <span>↓ Received <b>${fmtDate(o.received)}</b></span>
-      <span>↑ Ship <b>${fmtDate(o.ship)}</b></span>
+      <span>↑ Shipping <b>${fmtDate(o.ship)}</b></span>
       ${ld != null ? `<span>${ld} d lead</span>` : ""}
     </div>
     ${o.remark ? `<div class="rem">${esc(o.remark)}</div>` : ""}`;
@@ -2969,37 +2975,41 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     /* ---- Order form ---- */
     function buildForm(key, order) {
       const box = document.createElement("div"); box.className = "formbox";
-      const o = order || { so: "", type: "SALE", customer: "", dest: "", qty: "", unit: "kg", received: "", ship: key, remark: "" };
-      let chosenType = o.type;
+      const o = order || { so: "", type: "SALE", customer: "", dest: "", dn: "", received: key, ship: key, remark: "" };
+      let chosenType = o.type || "SALE";
+
       box.innerHTML = `
     <h4>${order ? "Edit order" : "New order"} <span class="th">${order ? "แก้ไข" : "เพิ่มออเดอร์"}</span></h4>
     <div class="field"><label>Order type <span class="th">ประเภท</span></label>
       <div class="segs" id="fSegs"></div></div>
-    <div class="field"><label>SO number <span class="th">เลขที่ SO</span></label>
-      <input id="fSo" maxlength="32" placeholder="SO-2026-0142" value="${esc(o.so)}"></div>
+    <div class="field">
+      <label id="fSoLbl">${chosenType === "FREE" ? 'FS number <span class="th">เลขที่ FS *</span>' : 'SO number <span class="th">เลขที่ SO *</span>'}</label>
+      <input id="fSo" maxlength="32" placeholder="${chosenType === "FREE" ? 'FS-xxxx (เช่น FS-0001)' : 'SOyymmxxxx (เช่น SO26090001)'}" value="${esc(o.so)}">
+    </div>
+    <div class="field" id="fDnField" style="${chosenType === "FREE" ? "display:none;" : ""}">
+      <label>D/N number (Delivery Note) <span class="th">เลขที่ D/N / ใบส่งของ</span></label>
+      <input id="fDn" maxlength="32" placeholder="PLyyyymm-xx (เช่น PL202609-01)" value="${esc(o.dn || "")}">
+    </div>
     <div class="row2">
-      <div class="field"><label>Received date <span class="th">วันรับออเดอร์</span></label>
+      <div class="field"><label>Received date <span class="th">วันรับออเดอร์ *</span></label>
         <input id="fRec" type="date" value="${esc(o.received || "")}"></div>
-      <div class="field"><label>Ship date <span class="th">วันจัดส่ง</span></label>
+      <div class="field"><label>Shipping date <span class="th">วันจัดส่ง *</span></label>
         <input id="fShip" type="date" value="${esc(o.ship || "")}"></div>
     </div>
-    <div class="field"><label>Customer <span class="th">ลูกค้า</span></label>
-      <input id="fCus" maxlength="60" value="${esc(o.customer)}"></div>
-    <div class="row3">
-      <div class="field"><label>Destination <span class="th">ปลายทาง</span></label>
-        <input id="fDest" maxlength="40" value="${esc(o.dest)}"></div>
-      <div class="field"><label>Qty <span class="th">จำนวน</span></label>
-        <input id="fQty" inputmode="decimal" value="${esc(o.qty)}"></div>
-      <div class="field"><label>Unit <span class="th">หน่วย</span></label>
-        <input id="fUnit" maxlength="10" value="${esc(o.unit)}"></div>
-    </div>
+    <div class="field"><label>Destination <span class="th">ปลายทาง *</span></label>
+      <input id="fDest" maxlength="40" placeholder="Destination / Country (เช่น Bangkok, Tokyo, Hamburg)" value="${esc(o.dest)}"></div>
     <div class="field"><label>Remark <span class="th">หมายเหตุ</span></label>
-      <textarea id="fRem" placeholder="Booking no., forwarder, reason for free issue...">${esc(o.remark)}</textarea></div>
+      <textarea id="fRem" placeholder="Booking no., forwarder, special instructions...">${esc(o.remark)}</textarea></div>
     <div class="formacts">
       <button class="btn primary" id="fSave">Save <span class="th">บันทึก</span></button>
       <button class="btn" id="fCancel">Cancel</button>
     </div>`;
+
       const segs = box.querySelector("#fSegs");
+      const soLbl = box.querySelector("#fSoLbl");
+      const soInp = box.querySelector("#fSo");
+      const dnField = box.querySelector("#fDnField");
+
       TYPES.forEach(t => {
         const b = document.createElement("button"); b.type = "button";
         b.className = "seg" + (t.key === chosenType ? " on" : "");
@@ -3009,21 +3019,57 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
           chosenType = t.key;
           segs.querySelectorAll(".seg").forEach(x => { x.classList.remove("on"); x.style.background = ""; });
           b.classList.add("on"); b.style.background = ty(t.key).dot;
+          if (chosenType === "FREE") {
+            soLbl.innerHTML = 'FS number <span class="th">เลขที่ FS *</span>';
+            soInp.placeholder = 'FS-xxxx (เช่น FS-0001)';
+            dnField.style.display = "none";
+          } else {
+            soLbl.innerHTML = 'SO number <span class="th">เลขที่ SO *</span>';
+            soInp.placeholder = 'SOyymmxxxx (เช่น SO26090001)';
+            dnField.style.display = "block";
+          }
         };
         segs.appendChild(b);
       });
+
       box.querySelector("#fCancel").onclick = () => { state.adding = false; state.editing = null; refreshSide(); };
       box.querySelector("#fSave").onclick = () => {
         const rec = {
-          so: box.querySelector("#fSo").value.trim(), type: chosenType,
-          received: box.querySelector("#fRec").value, ship: box.querySelector("#fShip").value,
-          customer: box.querySelector("#fCus").value.trim(), dest: box.querySelector("#fDest").value.trim(),
-          qty: box.querySelector("#fQty").value.trim(), unit: box.querySelector("#fUnit").value.trim(),
+          so: box.querySelector("#fSo").value.trim(),
+          type: chosenType,
+          dn: chosenType === "SALE" ? box.querySelector("#fDn").value.trim() : "",
+          received: box.querySelector("#fRec").value,
+          ship: box.querySelector("#fShip").value,
+          customer: "",
+          dest: box.querySelector("#fDest").value.trim(),
           remark: box.querySelector("#fRem").value.trim()
         };
-        if (!rec.so) { toast("SO number is required"); return; }
-        if (!rec.received && !rec.ship) { toast("Enter a received date or a ship date"); return; }
-        if (rec.received && rec.ship && rec.ship < rec.received) { toast("Ship date is before the received date"); return; }
+
+        if (!rec.so) {
+          toast(chosenType === "FREE" ? "FS number is required\nกรุณาระบุเลขที่ FS" : "SO number is required\nกรุณาระบุเลขที่ SO");
+          box.querySelector("#fSo").focus();
+          return;
+        }
+        if (!rec.received) {
+          toast("Received date is required\nกรุณาระบุวันรับออเดอร์");
+          box.querySelector("#fRec").focus();
+          return;
+        }
+        if (!rec.ship) {
+          toast("Shipping date is required\nกรุณาระบุวันจัดส่ง");
+          box.querySelector("#fShip").focus();
+          return;
+        }
+        if (rec.received > rec.ship) {
+          toast("Received date must be before or equal to Shipping date\nวันรับออเดอร์ต้องมาก่อนหรือตรงกับวันจัดส่ง");
+          return;
+        }
+        if (!rec.dest) {
+          toast("Destination is required\nกรุณาระบุปลายทาง");
+          box.querySelector("#fDest").focus();
+          return;
+        }
+
         if (order) {
           appendLog("edit", order.id, `${order.so} ${order.type} ${order.received || "—"}→${order.ship || "—"}`,
             `${rec.so} ${rec.type} ${rec.received || "—"}→${rec.ship || "—"}`);
@@ -3067,7 +3113,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       box.appendChild(e1);
       const e2 = document.createElement("div"); e2.className = "legrow";
       e2.innerHTML = `<span class="bar3" style="background:var(--ink-soft)"></span>
-    <span class="en">↑ Ship date</span> <span class="th">วันจัดส่ง</span>`;
+    <span class="en">↑ Shipping date</span> <span class="th">วันจัดส่ง</span>`;
       box.appendChild(e2);
 
       const h2 = document.createElement("h4"); h2.style.marginTop = "16px";
@@ -3103,8 +3149,8 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       h += list.slice(0, 5).map(e => {
         const t = ty(e.o.type), other = e.role === "out" ? e.o.received : e.o.ship;
         return `<div><span style="color:${t.dot}">▌</span>${e.role === "in" ? "↓" : "↑"} <b>${esc(e.o.so)}</b> · ${e.o.type}`
-          + (e.o.customer ? " · " + esc(e.o.customer) : "")
-          + (other ? `<br><span style="color:#9fb0c2">${e.role === "out" ? "received" : "ship"} ${fmtDate(other)}</span>` : "") + `</div>`;
+          + (e.o.dest ? " · " + esc(e.o.dest) : "")
+          + (other ? `<br><span style="color:#9fb0c2">${e.role === "out" ? "received" : "shipping"} ${fmtDate(other)}</span>` : "") + `</div>`;
       }).join("");
       if (list.length > 5) h += `<div style="color:#9fb0c2">+${list.length - 5} more</div>`;
       if (hol) h += `<div class="thol">Holiday: ${esc(hol.name)}</div>`;
@@ -3481,7 +3527,8 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
                 const o = p.orders[id];
                 state.orders[id] = {
                   id, so: String(o.so || "").slice(0, 32), type: o.type === "FREE" ? "FREE" : "SALE",
-                  customer: o.customer || "", dest: o.dest || "", qty: o.qty || "", unit: o.unit || "",
+                  dn: String(o.dn || "").slice(0, 32),
+                  customer: o.customer || "", dest: o.dest || "",
                   received: /^\d{4}-\d{2}-\d{2}$/.test(o.received || "") ? o.received : "",
                   ship: /^\d{4}-\d{2}-\d{2}$/.test(o.ship || "") ? o.ship : "",
                   remark: o.remark || "", updated: o.updated || new Date().toISOString()
