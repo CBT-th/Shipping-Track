@@ -2535,13 +2535,16 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     function loadMarkNames() {
       try {
         const saved = JSON.parse(localStorage.getItem(LS_MKNAME)) || {};
-        if (saved.rose && !saved.green) saved.green = saved.rose;
-        delete saved.rose;
+        if (saved.rose) {
+          if (!saved.green || !saved.green.trim()) saved.green = saved.rose;
+          delete saved.rose;
+        }
         delete saved.teal;
         const res = Object.assign({}, DEFAULT_MARKNAMES);
         for (const k in saved) {
           if (MARKS.includes(k) && saved[k] && saved[k].trim()) res[k] = saved[k];
         }
+        if (!res.green || !res.green.trim()) res.green = DEFAULT_MARKNAMES.green;
         return res;
       } catch (e) { return { ...DEFAULT_MARKNAMES }; }
     }
@@ -2975,9 +2978,8 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     /* ---- Order form ---- */
     function buildForm(key, order) {
       const box = document.createElement("div"); box.className = "formbox";
-      const o = order || { so: "", type: "SALE", customer: "", dest: "", dn: "", received: key, ship: key, remark: "" };
+      const o = order || { so: "", type: "SALE", dest: "", dn: "", received: key, ship: key, remark: "" };
       let chosenType = o.type || "SALE";
-
       box.innerHTML = `
     <h4>${order ? "Edit order" : "New order"} <span class="th">${order ? "แก้ไข" : "เพิ่มออเดอร์"}</span></h4>
     <div class="field"><label>Order type <span class="th">ประเภท</span></label>
