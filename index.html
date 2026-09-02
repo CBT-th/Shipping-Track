@@ -98,6 +98,7 @@
       flex-wrap: wrap;
       margin-bottom: 16px;
     }
+
     .top-actions {
       display: flex;
       align-items: center;
@@ -2339,12 +2340,12 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
             if (r.id) newOrders[r.id] = {
               id: r.id,
               so: r.so || "",
-              type: r.type || "SALE",
+              type: (r.type || "SALE").toUpperCase(),
               customer: r.customer || "",
               dest: r.dest || "",
               dn: r.dn || "",
-              received: r.received || "",
-              ship: r.ship || "",
+              received: normDate(r.received),
+              ship: normDate(r.ship),
               remark: r.remark || "",
               updated: r.updated || new Date().toISOString()
             };
@@ -2588,7 +2589,17 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     function saveEditLock() { try { localStorage.setItem(LS_EDIT, state.editUnlocked ? "1" : "0"); } catch (e) { } }
     const uid = () => "o_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     function loadOrders() {
-      let o = {}; try { o = JSON.parse(localStorage.getItem(LS_ORD)) || {}; } catch (e) { }
+      let o = {};
+      try {
+        o = JSON.parse(localStorage.getItem(LS_ORD)) || {};
+        for (const id in o) {
+          if (o[id]) {
+            o[id].received = normDate(o[id].received);
+            o[id].ship = normDate(o[id].ship);
+            o[id].type = (o[id].type || "SALE").toUpperCase();
+          }
+        }
+      } catch (e) { }
       if (Object.keys(o).length) return o;
       try { // migrate v3/v4 (keyed by ship date)
         const old = JSON.parse(localStorage.getItem(LS_ORD4)) || {};
@@ -2701,6 +2712,24 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
 
     /* ---------- Helpers ---------- */
     const pad = n => String(n).padStart(2, "0");
+    function normDate(s) {
+      if (!s) return "";
+      s = String(s).trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+      if (/^\d{4}-\d{1,2}-\d{1,2}/.test(s)) {
+        const [y, m, d] = s.split("-");
+        return `${y}-${pad(m)}-${pad(d)}`;
+      }
+      if (/^\d{4}\/\d{1,2}\/\d{1,2}/.test(s)) {
+        const [y, m, d] = s.split("/");
+        return `${y}-${pad(m)}-${pad(d)}`;
+      }
+      if (/^\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(s)) {
+        const parts = s.split(/[/-]/);
+        return `${parts[2]}-${pad(parts[1])}-${pad(parts[0])}`;
+      }
+      return s.slice(0, 10);
+    }
     const keyOf = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
     const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const daysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
@@ -2716,27 +2745,33 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       return Math.round((new Date(o.ship) - new Date(o.received)) / 864e5);
     }
     function matches(o) {
-      if (state.typeFilter !== "all" && o.type !== state.typeFilter) return false;
+      if (!o) return false;
+      const oType = (o.type || "SALE").toUpperCase();
+      if (state.typeFilter !== "all" && oType !== state.typeFilter) return false;
       const q = state.query.trim().toLowerCase();
       if (!q) return true;
-      return (o.so + " " + (o.dn || "") + " " + o.dest + " " + (o.remark || "")).toLowerCase().includes(q);
+      const text = `${o.so || ""} ${o.dn || ""} ${o.dest || ""} ${o.remark || ""} ${o.customer || ""}`.toLowerCase();
+      return text.includes(q);
     }
     /* entries on a date: {o, role:"in"|"out"} */
     function entriesOn(k) {
       const out = [];
+      const targetK = normDate(k);
       for (const id in state.orders) {
         const o = state.orders[id];
         if (!matches(o)) continue;
-        if (o.received === k && state.eventFilter !== "out") out.push({ o, role: "in" });
-        if (o.ship === k && state.eventFilter !== "in") out.push({ o, role: "out" });
+        const recD = normDate(o.received);
+        const shipD = normDate(o.ship);
+        if (recD && recD === targetK && state.eventFilter !== "out") out.push({ o, role: "in" });
+        if (shipD && shipD === targetK && state.eventFilter !== "in") out.push({ o, role: "out" });
       }
-      return out.sort((a, b) => a.role === b.role ? String(a.o.so).localeCompare(String(b.o.so)) : (a.role === "out" ? -1 : 1));
+      return out.sort((a, b) => a.role === b.role ? String(a.o.so || "").localeCompare(String(b.o.so || "")) : (a.role === "out" ? -1 : 1));
     }
     function countRole(y, m, role) {
       let c = 0; const p = m == null ? `${y}-` : `${y}-${pad(m + 1)}-`;
       for (const id in state.orders) {
         const o = state.orders[id]; if (!matches(o)) continue;
-        const d = role === "in" ? o.received : o.ship;
+        const d = normDate(role === "in" ? o.received : o.ship);
         if (d && d.startsWith(p)) c++;
       }
       return c;
@@ -2745,8 +2780,10 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       let c = 0; const p = m == null ? `${y}-` : `${y}-${pad(m + 1)}-`;
       for (const id in state.orders) {
         const o = state.orders[id]; if (!matches(o)) continue;
-        if (state.eventFilter !== "out" && o.received && o.received.startsWith(p)) c++;
-        if (state.eventFilter !== "in" && o.ship && o.ship.startsWith(p)) c++;
+        const recD = normDate(o.received);
+        const shipD = normDate(o.ship);
+        if (state.eventFilter !== "out" && recD && recD.startsWith(p)) c++;
+        if (state.eventFilter !== "in" && shipD && shipD.startsWith(p)) c++;
       }
       return c;
     }
@@ -2754,19 +2791,28 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       let c = 0; const p = `${y}-`;
       for (const id in state.orders) {
         const o = state.orders[id];
-        if (t !== "all" && o.type !== t) continue;
-        if ((o.ship && o.ship.startsWith(p)) || (o.received && o.received.startsWith(p))) c++;
+        const oType = (o.type || "SALE").toUpperCase();
+        if (t !== "all" && oType !== t) continue;
+        const recD = normDate(o.received);
+        const shipD = normDate(o.ship);
+        if ((shipD && shipD.startsWith(p)) || (recD && recD.startsWith(p))) c++;
       }
       return c;
     }
     function markCount(y, c) {
       let n = 0; const p = `${y}-`;
-      for (const k in state.marks) if (k.startsWith(p) && state.marks[k].color === c) n++;
+      for (const k in state.marks) {
+        const normK = normDate(k);
+        if (normK.startsWith(p) && state.marks[k].color === c) n++;
+      }
       return n;
     }
     function holidayCount(y, m) {
       let c = 0; const p = m == null ? `${y}-` : `${y}-${pad(m + 1)}-`;
-      for (const k in state.holidays) if (k.startsWith(p)) c++;
+      for (const k in state.holidays) {
+        const normK = normDate(k);
+        if (normK.startsWith(p)) c++;
+      }
       return c;
     }
 
@@ -3127,10 +3173,10 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       box.querySelector("#fSave").onclick = () => {
         const rec = {
           so: box.querySelector("#fSo").value.trim(),
-          type: chosenType,
+          type: (chosenType || "SALE").toUpperCase(),
           dn: chosenType === "SALE" ? box.querySelector("#fDn").value.trim() : "",
-          received: box.querySelector("#fRec").value,
-          ship: box.querySelector("#fShip").value,
+          received: normDate(box.querySelector("#fRec").value),
+          ship: normDate(box.querySelector("#fShip").value),
           customer: "",
           dest: box.querySelector("#fDest").value.trim(),
           remark: box.querySelector("#fRem").value.trim()
@@ -3914,4 +3960,5 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     initSupabase(true);
   </script>
 </body>
+
 </html>
