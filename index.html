@@ -2309,8 +2309,9 @@
 
       <form id="loginForm" onsubmit="return false;">
         <div class="field">
-          <label>Work Email <span class="th">อีเมลในการทำงานของคุณ *</span></label>
-          <input id="lpEmail" type="email" placeholder="e.g. yourname@company.com" autocomplete="email" required>
+          <label>User ID / Username <span class="th">รหัสผู้ใช้ / ชื่อล็อกอินเข้าสู่ระบบ *</span></label>
+          <input id="lpEmail" type="text" placeholder="e.g. admin, somchai, sale01 หรือ email" autocomplete="username"
+            required>
         </div>
         <div class="field">
           <label>Full Name / Display Name <span class="th">ชื่อ-นามสกุล / ชื่อเรียก *</span></label>
@@ -2321,7 +2322,6 @@
           <select id="lpDept"
             style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--ink);">
             <option value="Management">👔 Management (ฝ่ายผู้บริหาร)</option>
-            <option value="Management">👔 Management (ฝ่ายผู้บริหาร)</option>
             <option value="Marketing & Sales">💼 Marketing &amp; Sales (ฝ่ายขาย)</option>
             <option value="General Affair">🏢 General Affair (ฝ่ายสำนักงาน)</option>
             <option value="Accounting">💰 Accounting (ฝ่ายบัญชี)</option>
@@ -2329,7 +2329,6 @@
             <option value="R&D - Downstream">📦 R&D - Downstream (ฝ่าย R&D - คลังสินค้า)</option>
             <option value="R&D - Upstream">🧪 R&D - Upstream (ฝ่ายคลังวัตถุดิบ)</option>
             <option value="R&D - Engineering">⚙️ R&D - Engineering (ฝ่ายวิศวกรรม)</option>
-            <option value="Other">🏷️ Other (อื่น ๆ)</option>
             <option value="Other">🏷️ Other (อื่น ๆ)</option>
           </select>
         </div>
@@ -2474,8 +2473,8 @@
       </div>
       <div class="mbody">
         <div class="field">
-          <label>Work Email <span class="th">อีเมลของคุณ *</span></label>
-          <input id="uEmailInp" type="email" placeholder="e.g. yourname@company.com" autocomplete="email" required>
+          <label>User ID / Username <span class="th">รหัสผู้ใช้ / ชื่อล็อกอิน *</span></label>
+          <input id="uEmailInp" type="text" placeholder="e.g. admin, somchai, sale01" autocomplete="username" required>
         </div>
         <div class="field">
           <label>Full Name / Display Name <span class="th">ชื่อ-นามสกุล / ชื่อเรียก *</span></label>
@@ -2485,6 +2484,7 @@
           <label>Department / Team <span class="th">แผนก / ฝ่าย</span></label>
           <select id="uDeptSel"
             style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--ink);">
+            <option value="Management">👔 Management (ฝ่ายผู้บริหาร)</option>
             <option value="Marketing & Sales">💼 Marketing &amp; Sales (ฝ่ายขาย)</option>
             <option value="General Affair">🏢 General Affair (ฝ่ายสำนักงาน)</option>
             <option value="Accounting">💰 Accounting (ฝ่ายบัญชี)</option>
@@ -2492,6 +2492,7 @@
             <option value="R&D - Downstream">📦 R&D - Downstream (ฝ่าย R&D - คลังสินค้า)</option>
             <option value="R&D - Upstream">🧪 R&D - Upstream (ฝ่ายคลังวัตถุดิบ)</option>
             <option value="R&D - Engineering">⚙️ R&D - Engineering (ฝ่ายวิศวกรรม)</option>
+            <option value="Other">🏷️ Other (อื่น ๆ)</option>
           </select>
         </div>
         <div class="field" id="uPassField">
@@ -2981,6 +2982,36 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
       }
     }
 
+    async function cloudUpsertUser(user) {
+      if (!supabaseClient || !user || !user.email) return;
+      try {
+        const payload = {
+          email: user.email.toLowerCase().trim(),
+          name: user.name || "",
+          dept: user.dept || "",
+          password: user.password || "CBTUDON22",
+          role: user.role || "SALES",
+          status: user.status || "active",
+          mobile_readonly: user.mobile_readonly !== false,
+          updated_at: new Date().toISOString()
+        };
+        const { error } = await supabaseClient.from("users").upsert(payload);
+        if (error) console.warn("Supabase user upsert error:", error.message || error);
+      } catch (e) {
+        console.warn("Supabase user upsert fail:", e);
+      }
+    }
+
+    async function cloudDeleteUser(email) {
+      if (!supabaseClient || !email) return;
+      try {
+        const { error } = await supabaseClient.from("users").delete().eq("email", email.toLowerCase().trim());
+        if (error) console.warn("Supabase user delete error:", error.message || error);
+      } catch (e) {
+        console.warn("Supabase user delete fail:", e);
+      }
+    }
+
     async function pullCloudData(notify = true) {
       if (!supabaseClient) return;
       updateCloudStatusUI("connecting", "Fetching latest data from Supabase...");
@@ -3041,6 +3072,19 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
           try { localStorage.setItem(LS_MKNAME, JSON.stringify(state.markNames)); } catch (e) { }
         }
 
+        // 5. Users
+        try {
+          const { data: dUsers, error: uErr } = await supabaseClient.from("users").select("*");
+          if (!uErr && Array.isArray(dUsers) && dUsers.length > 0) {
+            const newUsers = {};
+            dUsers.forEach(u => {
+              if (u.email) newUsers[u.email.toLowerCase()] = u;
+            });
+            state.users = newUsers;
+            saveUsers();
+          }
+        } catch (e) { }
+
         updateCloudStatusUI("connected", `<strong>Connected</strong> · Synced ${Object.keys(state.orders).length} orders`);
         renderAll();
         if (state.selectedDate) refreshSide();
@@ -3082,6 +3126,20 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
         if (markList.length > 0) {
           const { error: mErr } = await supabaseClient.from("day_marks").upsert(markList);
           if (mErr) throw mErr;
+        }
+
+        const uList = Object.values(state.users || {}).map(u => ({
+          email: u.email.toLowerCase().trim(),
+          name: u.name || "",
+          dept: u.dept || "",
+          password: u.password || "CBTUDON22",
+          role: u.role || "SALES",
+          status: u.status || "active",
+          mobile_readonly: u.mobile_readonly !== false,
+          updated_at: new Date().toISOString()
+        }));
+        if (uList.length > 0) {
+          try { await supabaseClient.from("users").upsert(uList); } catch (e) { }
         }
 
         const holList = Object.entries(state.holidays).map(([date, h]) => ({
@@ -3273,6 +3331,10 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
 
     /* ---------- Users State & Storage ---------- */
     const SEED_USERS = {
+      "admin": { email: "admin", name: "System Administrator", dept: "Management", password: "CBTUDON22", role: "ADMIN", status: "active", mobile_readonly: false },
+      "editor": { email: "editor", name: "Logistics Specialist", dept: "R&D - Downstream", password: "CBTUDON22", role: "EDITOR", status: "active", mobile_readonly: true },
+      "sales": { email: "sales", name: "Sales Representative", dept: "Marketing & Sales", password: "CBTUDON22", role: "SALES", status: "active", mobile_readonly: true },
+      "office": { email: "office", name: "Office Staff (LAN)", dept: "General Affair", password: "CBTUDON22", role: "VIEWER", status: "active", mobile_readonly: true },
       "admin@company.com": { email: "admin@company.com", name: "System Administrator", dept: "Management", password: "CBTUDON22", role: "ADMIN", status: "active", mobile_readonly: false },
       "editor@company.com": { email: "editor@company.com", name: "Logistics Specialist", dept: "R&D - Downstream", password: "CBTUDON22", role: "EDITOR", status: "active", mobile_readonly: true },
       "sales@company.com": { email: "sales@company.com", name: "Sales Representative", dept: "Marketing & Sales", password: "CBTUDON22", role: "SALES", status: "active", mobile_readonly: true },
@@ -3282,8 +3344,11 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
 
     function loadUsers() {
       try {
-        const u = JSON.parse(localStorage.getItem(LS_USERS));
-        if (u && typeof u === "object" && Object.keys(u).length > 0) return u;
+        const raw = localStorage.getItem(LS_USERS);
+        if (raw !== null) {
+          const u = JSON.parse(raw);
+          if (u && typeof u === "object") return u;
+        }
       } catch (e) { }
       return { ...SEED_USERS };
     }
@@ -4596,7 +4661,7 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
           <table class="htable" style="font-size:12px;width:100%;">
             <thead>
               <tr>
-                <th>User / Email</th>
+                <th>User ID / Username</th>
                 <th>Name &amp; Department</th>
                 <th>Assigned Role</th>
                 <th>Mobile Security</th>
@@ -4657,15 +4722,23 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
           }, 50);
         };
 
-        tr.querySelector(".btn-del-user").onclick = () => {
-          if (u.email === "admin@company.com" || u.email === (state.currentUser && state.currentUser.email)) {
-            toast("Cannot delete default admin or currently logged in account");
+        tr.querySelector(".btn-del-user").onclick = async () => {
+          if (state.currentUser && state.currentUser.email && state.currentUser.email.toLowerCase() === u.email.toLowerCase()) {
+            toast("Cannot delete currently logged in account\nไม่สามารถลบบัญชีที่กำลังล็อกอินใช้งานอยู่ได้");
             return;
           }
-          if (!confirm("Delete user " + u.email + " (" + u.name + ")?\nลบผู้ใช้งานนี้?")) return;
-          cloudDeleteUser(u.email);
+          const adminCount = Object.values(state.users).filter(x => x.role === "ADMIN").length;
+          if (u.role === "ADMIN" && adminCount <= 1) {
+            toast("Cannot delete the only Admin account\nไม่สามารถลบ Admin บัญชีสุดท้ายในระบบได้");
+            return;
+          }
+          if (!confirm("Delete user " + u.email + " (" + u.name + ")?\nยืนยันการลบผู้ใช้งานนี้?")) return;
+
           delete state.users[u.email];
           saveUsers();
+          if (typeof cloudDeleteUser === "function") {
+            await cloudDeleteUser(u.email);
+          }
           appendLog("security", "", "", "deleted user: " + u.email);
           renderAdmin();
           toast("User deleted: " + u.email);
