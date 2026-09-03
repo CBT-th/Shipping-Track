@@ -3005,16 +3005,31 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
     async function cloudAppendLog(entry) {
       if (!supabaseClient) return;
       try {
+        const profile = state.currentUser || loadUserProfile();
         const payload = {
           ts: entry.ts || new Date().toISOString(),
           action: entry.action || "",
           ref: entry.ref || "",
           before: entry.before || "",
-          after: entry.after || ""
+          after: entry.after || "",
+          user_name: entry.user_name || (profile ? (profile.name || profile.email) : "User"),
+          role: entry.role || (profile ? profile.role : "EDITOR"),
+          device: entry.device || getDeviceInfo()
         };
         const { error } = await supabaseClient.from("calendar_logs").insert(payload);
         if (error) {
           console.warn("Supabase calendar_log insert notice:", error.message || error);
+          // Fallback if user_name/role/device columns are not in table schema
+          if (error.code === "PGRST204" || error.code === "42703") {
+            const fallbackPayload = {
+              ts: payload.ts,
+              action: payload.action,
+              ref: payload.ref,
+              before: payload.before,
+              after: payload.after
+            };
+            await supabaseClient.from("calendar_logs").insert(fallbackPayload);
+          }
         }
       } catch (e) {
         console.warn("Supabase calendar_log error:", e);
@@ -3543,7 +3558,17 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
     function loadLog() { try { return JSON.parse(localStorage.getItem(LS_LOG)) || []; } catch (e) { return []; } }
     function appendLog(action, ref, before, after) {
       const log = loadLog();
-      const entry = { ts: new Date().toISOString(), action, ref: ref || "", before: before || "", after: after || "" };
+      const profile = state.currentUser || loadUserProfile();
+      const entry = {
+        ts: new Date().toISOString(),
+        action,
+        ref: ref || "",
+        before: before || "",
+        after: after || "",
+        user_name: profile ? (profile.name || profile.email) : "User",
+        role: profile ? profile.role : "EDITOR",
+        device: getDeviceInfo()
+      };
       log.push(entry);
       try { localStorage.setItem(LS_LOG, JSON.stringify(log.slice(-800))); } catch (e) { }
       cloudAppendLog(entry);
@@ -4080,26 +4105,19 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
         }
         if (list.length) {
           const box = document.createElement("div"); box.className = "celllist";
-          const maxShown = 3;
+          const maxShown = 6;
           list.slice(0, maxShown).forEach(e => {
             const t = ty(e.o.type);
             const mi = getMethodInfo(e.o.method);
             const l = document.createElement("div");
             l.className = "soline " + e.role;
             l.style.borderLeftColor = t.dot;
-            const hasSub = e.o.dest || e.o.customer;
             l.innerHTML = `
               <div class="soline-top">
-                <span class="soline-role role-${e.role}">${e.role === "in" ? "↓" : "↑"}</span>
-                <span class="sn">${esc(e.o.so)}</span>
+                <span class="soline-role role-${e.role}" title="${e.role === "in" ? "Received Date (วันรับออเดอร์)" : "Shipping Date (วันจัดส่ง)"}">${e.role === "in" ? "↓" : "↑"}</span>
+                <span class="sn" title="${esc(e.o.so)}">${esc(e.o.so)}</span>
                 <span class="soline-method-tag" style="background:${mi.bg};color:${mi.ink};border:1px solid ${mi.bd};">${mi.badge}</span>
               </div>
-              ${hasSub ? `
-                <div class="soline-sub">
-                  ${e.o.dest ? `<span class="soline-dest">📍 ${esc(e.o.dest)}</span>` : ""}
-                  ${e.o.customer ? `<span class="soline-cust">(${esc(e.o.customer)})</span>` : ""}
-                </div>
-              ` : ""}
             `;
             box.appendChild(l);
           });
@@ -4438,17 +4456,19 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
         }
 
         if (order) {
-          appendLog("edit", order.id, `${order.so} ${order.type} ${order.received || "—"}→${order.ship || "—"}`,
-            `${rec.so} ${rec.type} ${rec.received || "—"}→${rec.ship || "—"}`);
+          const prevDesc = `${order.so} (${order.type} · ${order.method || "TRUCK"}${order.dest ? ' 📍' + order.dest : ''}) [${order.received || "—"} → ${order.ship || "—"}]`;
+          const newDesc = `${rec.so} (${rec.type} · ${rec.method || "TRUCK"}${rec.dest ? ' 📍' + rec.dest : ''}) [${rec.received || "—"} → ${rec.ship || "—"}]`;
+          appendLog("edit", rec.so || order.id, prevDesc, newDesc);
           state.orders[order.id] = { ...order, ...rec, updated: new Date().toISOString() };
           cloudUpsertOrder(state.orders[order.id]);
-          toast("Order updated");
+          toast("✅ Order updated & logged to Cloud");
         } else {
           const id = uid();
           state.orders[id] = { id, ...rec, created: new Date().toISOString(), updated: new Date().toISOString() };
-          appendLog("add", id, "", `${rec.so} ${rec.type} ${rec.received || "—"}→${rec.ship || "—"}`);
+          const newDesc = `${rec.so} (${rec.type} · ${rec.method || "TRUCK"}${rec.dest ? ' 📍' + rec.dest : ''}) [${rec.received || "—"} → ${rec.ship || "—"}]`;
+          appendLog("add", rec.so || id, "", newDesc);
           cloudUpsertOrder(state.orders[id]);
-          toast("Order added");
+          toast("✅ Order added & logged to Cloud");
         }
         saveOrders(); state.adding = false; state.editing = null; renderAll(); refreshSide();
       };
@@ -4456,10 +4476,11 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
     }
     function removeOrder(id) {
       const o = state.orders[id]; if (!o) return;
-      if (!confirm(`Delete ${o.so}?\nลบออเดอร์นี้?`)) return;
-      appendLog("del", id, `${o.so} ${o.type} ${o.received || "—"}→${o.ship || "—"}`, "");
+      if (!confirm(`Delete order ${o.so} (${o.dest || ""})?\nยืนยันการลบออเดอร์นี้?`)) return;
+      const desc = `${o.so} (${o.type} · ${o.method || "TRUCK"}${o.dest ? ' 📍' + o.dest : ''}) [${o.received || "—"} → ${o.ship || "—"}]`;
+      appendLog("del", o.so || id, desc, "");
       cloudDeleteOrder(id);
-      delete state.orders[id]; saveOrders(); renderAll(); refreshSide(); toast("Order deleted");
+      delete state.orders[id]; saveOrders(); renderAll(); refreshSide(); toast("✅ Order deleted & logged to Cloud");
     }
 
     /* ---- Legend ---- */
@@ -5532,15 +5553,30 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
           e.innerHTML = `No operation entries yet<br><span class="th">ยังไม่มีประวัติการแก้ไข</span>`;
           cSec.appendChild(e);
         } else {
-          const N = { add: "Add", edit: "Edit", del: "Delete", pin: "PIN", unlock: "Unlock", lockout: "Lockout", import: "Import", security: "Security" };
+          const N = { add: "+ Add", edit: "✏️ Edit", del: "🗑️ Delete", pin: "PIN", unlock: "Unlock", lockout: "Lockout", import: "Import", security: "Security" };
           const C = { add: "add", edit: "edit", del: "del", pin: "pin", security: "edit" };
+          const t = document.createElement("table");
+          t.className = "htable";
+          t.style.fontSize = "11.5px";
+          t.innerHTML = `<thead><tr><th style="width:115px">Time <span class="th">เวลา</span></th><th>User / Dept</th><th style="width:85px">Action</th><th>Movement &amp; Order Details <span class="th">รายละเอียดการเปลี่ยนแปลง</span></th></tr></thead>`;
+          const tb = document.createElement("tbody");
           log.forEach(l => {
-            const d = new Date(l.ts), row = document.createElement("div"); row.className = "logitem";
-            row.innerHTML = `<span class="lts">${d.toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}</span>
-          <span class="lact ${C[l.action] || ""}">${N[l.action] || l.action}</span>
-          <span>${esc(l.after || l.before || l.ref || "")}${l.before && l.after ? ` <span style="color:var(--muted)">(was: ${esc(l.before)})</span>` : ""}</span>`;
-            cSec.appendChild(row);
+            const tr = document.createElement("tr");
+            const d = new Date(l.ts);
+            tr.innerHTML = `
+              <td style="color:var(--muted);white-space:nowrap;font-size:11px;">${d.toLocaleString("en-GB", { dateStyle: "short", timeStyle: "medium" })}</td>
+              <td><strong>${esc(l.user_name || "User")}</strong><br><span style="font-size:10px;color:var(--muted)">${esc(l.role || "EDITOR")} · ${esc(l.device || "—")}</span></td>
+              <td><span class="lact ${C[l.action] || ""}" style="font-weight:700;">${N[l.action] || l.action}</span></td>
+              <td style="line-height:1.4;">
+                ${l.ref ? `<b style="color:var(--ink);">[${esc(l.ref)}]</b> ` : ""}
+                <span>${esc(l.after || l.before || "")}</span>
+                ${l.before && l.after ? `<div style="font-size:10.5px;color:var(--muted);margin-top:2px;">(เดิม: ${esc(l.before)})</div>` : ""}
+              </td>
+            `;
+            tb.appendChild(tr);
           });
+          t.appendChild(tb);
+          cSec.appendChild(t);
         }
         box.querySelector("#btnExportCurrentLog").onclick = () => {
           downloadJson({ type: "calendar_logs", exportedAt: new Date().toISOString(), logs: loadLog() },
