@@ -1495,9 +1495,36 @@
 
     .socard .acts {
       display: flex;
+      align-items: center;
       gap: 6px;
-      margin-top: 9px;
+      margin-top: 10px;
       flex-wrap: wrap
+    }
+
+    .btn.reorder {
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      border-radius: 7px;
+      transition: .12s;
+    }
+
+    .btn.reorder:hover:not(:disabled) {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+      color: var(--ink);
+    }
+
+    .btn.reorder:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      border-color: #e2e8f0;
     }
 
     .field {
@@ -3075,6 +3102,7 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
         received: order.received || "",
         ship: order.ship || "",
         remark: order.remark || "",
+        seq: order.seq != null ? Number(order.seq) : null,
         updated: order.updated || new Date().toISOString()
       };
 
@@ -3826,7 +3854,15 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
         if (recD && recD === targetK && state.eventFilter !== "out") out.push({ o, role: "in" });
         if (shipD && shipD === targetK && state.eventFilter !== "in") out.push({ o, role: "out" });
       }
-      return out.sort((a, b) => a.role === b.role ? String(a.o.so || "").localeCompare(String(b.o.so || "")) : (a.role === "out" ? -1 : 1));
+      return out.sort((a, b) => {
+        if (a.role !== b.role) return a.role === "out" ? -1 : 1;
+        const seqA = a.o.seq != null ? Number(a.o.seq) : null;
+        const seqB = b.o.seq != null ? Number(b.o.seq) : null;
+        if (seqA !== null && seqB !== null && seqA !== seqB) {
+          return seqA - seqB;
+        }
+        return String(a.o.so || "").localeCompare(String(b.o.so || ""));
+      });
     }
     function countRole(y, m, role) {
       let c = 0; const p = m == null ? `${y}-` : `${y}-${pad(m + 1)}-`;
@@ -4120,7 +4156,7 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
 
       // Month chips
       for (let m = 0; m < 12; m++) {
-        const c = countCells(state.year, m);
+        const c = countRole(state.year, m, "out");
         const isSelectedInCompare = isCompare && state.selectedMonths.includes(m);
         const isSingleActive = !isCompare && state.month === m;
 
@@ -4139,9 +4175,17 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
         });
 
         if (isSelectedInCompare) el.classList.add("compare-active");
-        el.title = isCompare ? "Click to toggle this month in comparison" : "Click to view · Hold Ctrl/Shift or click Compare to select multiple";
+        el.title = isCompare
+          ? `Toggle ${MONTHS[m]} in comparison (${c} ship out)`
+          : `${MONTHS[m]} ${state.year} · ${c} ship out (วันจัดส่ง)`;
 
-        if (c) { const b = document.createElement("span"); b.className = "cnt"; b.textContent = c; el.appendChild(b); }
+        if (c > 0) {
+          const b = document.createElement("span");
+          b.className = "cnt";
+          b.textContent = c;
+          b.title = `${c} ship out in ${MONTHS[m]}`;
+          el.appendChild(b);
+        }
         bar.appendChild(el);
       }
 
@@ -4465,13 +4509,53 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
       side.appendChild(bodySec);
       return side;
     }
+    function moveOrderInDate(groupList, index, dir, key) {
+      const targetIndex = index + dir;
+      if (targetIndex < 0 || targetIndex >= groupList.length) return;
+
+      // Ensure all items in groupList have distinct sequential seq values
+      groupList.forEach((item, i) => {
+        if (item.o.seq == null) {
+          item.o.seq = (i + 1) * 10;
+        }
+      });
+
+      const currentOrder = groupList[index].o;
+      const targetOrder = groupList[targetIndex].o;
+
+      const tempSeq = currentOrder.seq;
+      currentOrder.seq = targetOrder.seq;
+      targetOrder.seq = tempSeq;
+
+      if (currentOrder.seq === targetOrder.seq) {
+        currentOrder.seq = (targetIndex + 1) * 10;
+        targetOrder.seq = (index + 1) * 10;
+      }
+
+      currentOrder.updated = new Date().toISOString();
+      targetOrder.updated = new Date().toISOString();
+
+      state.orders[currentOrder.id] = { ...currentOrder };
+      state.orders[targetOrder.id] = { ...targetOrder };
+
+      saveOrders();
+      cloudUpsertOrder(state.orders[currentOrder.id]);
+      cloudUpsertOrder(state.orders[targetOrder.id]);
+
+      appendLog("edit", currentOrder.so, "", `reordered position on ${key} (${dir < 0 ? "Up ▲" : "Down ▼"})`);
+
+      renderAll();
+      refreshSide();
+      toast(`↕️ Reordered: ${currentOrder.so}`);
+    }
+
     function group(arrow, en, th, list, key) {
       const frag = document.createDocumentFragment();
       const h = document.createElement("div"); h.className = "grouphead";
       h.innerHTML = `<span class="ar">${arrow}</span><span>${en}</span> <span class="th">${th}</span>
     <span class="n">${list.length}</span>`;
       frag.appendChild(h);
-      list.forEach(e => frag.appendChild(orderCard(e.o, e.role, key)));
+      list.forEach((e, idx) => frag.appendChild(orderCard(e.o, e.role, key, idx, list.length, list)));
       const box = document.createElement("div"); box.appendChild(frag); return box;
     }
     /* ---------- Shipping Methods & Badge Helpers ---------- */
@@ -4498,7 +4582,7 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
       };
     }
 
-    function orderCard(o, role, key) {
+    function orderCard(o, role, key, index, totalInGroup, groupList) {
       const t = ty(o.type);
       const card = document.createElement("div"); card.className = "socard " + role; card.style.borderLeftColor = t.dot;
       const ld = lead(o);
@@ -4526,6 +4610,37 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
     ${o.remark ? `<div class="rem">${esc(o.remark)}</div>` : ""}`;
       if (state.editUnlocked) {
         const acts = document.createElement("div"); acts.className = "acts";
+
+        if (groupList && totalInGroup > 1) {
+          const upBtn = document.createElement("button");
+          upBtn.type = "button";
+          upBtn.className = "btn tiny reorder";
+          upBtn.innerHTML = "▲ Up";
+          upBtn.title = "Move order up · เลื่อนลำดับขึ้น";
+          if (index === 0) {
+            upBtn.disabled = true;
+          } else {
+            upBtn.onclick = () => moveOrderInDate(groupList, index, -1, key);
+          }
+          acts.appendChild(upBtn);
+
+          const downBtn = document.createElement("button");
+          downBtn.type = "button";
+          downBtn.className = "btn tiny reorder";
+          downBtn.innerHTML = "▼ Down";
+          downBtn.title = "Move order down · เลื่อนลำดับลง";
+          if (index === totalInGroup - 1) {
+            downBtn.disabled = true;
+          } else {
+            downBtn.onclick = () => moveOrderInDate(groupList, index, 1, key);
+          }
+          acts.appendChild(downBtn);
+
+          const sep = document.createElement("div");
+          sep.style.cssText = "width:1px;height:18px;background:var(--line);margin:0 2px;";
+          acts.appendChild(sep);
+        }
+
         const eb = document.createElement("button"); eb.className = "btn tiny"; eb.textContent = "Edit";
         eb.onclick = () => { state.editing = o.id; state.adding = false; refreshSide(); };
         const db = document.createElement("button"); db.className = "btn tiny danger"; db.textContent = "Delete";
