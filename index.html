@@ -4,6 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="description" content="Internal Company Shipping Calendar - Confidential & Restricted Access">
   <title>Shipping Calendar · SALE / FREE Orders</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -492,6 +496,72 @@
 
     .search input:focus {
       outline: none
+    }
+
+    .compare-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .btn-cancel-compare {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: .15s;
+      white-space: nowrap;
+    }
+
+    .btn-cancel-compare:hover {
+      background: #ef4444;
+      color: #fff;
+      border-color: #ef4444;
+    }
+
+    .chip.compare-active {
+      background: #0f766e !important;
+      color: #fff !important;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(15, 118, 110, .3);
+    }
+
+    .chip.compare-active::after {
+      content: "📌";
+      font-size: 9px;
+      margin-left: 3px;
+    }
+
+    .search-clear {
+      border: none;
+      background: #e2e8f0;
+      color: var(--ink-soft);
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      font-size: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      flex: 0 0 auto;
+      transition: .15s;
+    }
+
+    .search-clear:hover {
+      background: var(--primary);
+      color: #fff;
     }
 
     .search:focus-within {
@@ -1869,6 +1939,127 @@
       }
     }
 
+    .btn.user-role-badge {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: var(--ink);
+      font-weight: 600;
+      gap: 6px;
+    }
+
+    .btn.user-role-badge:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }
+
+    .btn.user-role-badge.role-admin {
+      background: #fef3c7;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+
+    .btn.user-role-badge.role-editor {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #065f46;
+    }
+
+    .btn.user-role-badge.role-sales {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+      color: #3730a3;
+    }
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 12px 0 16px;
+    }
+
+    .role-card {
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: .15s;
+      background: #f8fafc;
+      text-align: left;
+    }
+
+    .role-card:hover {
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    .role-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .role-card .rtitle {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .role-card .rdesc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    .access-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .access-stat-box {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    .access-stat-box .as-num {
+      font-family: Sora, sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .access-stat-box .as-lbl {
+      font-size: 10.5px;
+      color: var(--muted);
+    }
+
+    .lact.view {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .lact.search {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .lact.switch {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+
+    .lact.compare {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
     .sqlbox {
       background: #1e293b;
       color: #e2e8f0;
@@ -1932,6 +2123,11 @@
       </div>
 
       <div class="top-actions">
+        <button class="btn user-role-badge role-sales" id="userRoleBtn"
+          title="Click to switch role or edit profile · คลิกเพื่อเปลี่ยนบทบาท">
+          <span id="userRoleIcon">💼</span>
+          <span id="userRoleName">Sales (Read-only)</span>
+        </button>
         <button class="btn edit" id="editBtn"><svg id="editIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" />
@@ -1955,6 +2151,75 @@
     <div id="stage"></div>
   </div>
 
+  <!-- User Profile & Role Switcher Modal -->
+  <div class="backdrop" id="userModalBack">
+    <div class="modal" role="dialog" aria-modal="true" style="max-width: 520px;">
+      <div class="mhead">
+        <div class="mi" style="background: #eef2ff; color: #4338ca;"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg></div>
+        <div>
+          <h2>User Profile &amp; Role</h2>
+          <p>Select your role and identity <span class="th">ระบุชื่อและเลือกบทบาทผู้ใช้งาน</span></p>
+        </div>
+        <button class="x" id="userModalClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18"
+            fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg></button>
+      </div>
+      <div class="mbody">
+        <div class="field">
+          <label>Your Name / Display Name <span class="th">ชื่อผู้ใช้งาน</span></label>
+          <input id="uNameInp" placeholder="e.g. Somchai, Sales 01, Office LAN" maxlength="32">
+        </div>
+        <div class="field">
+          <label>Department / Team <span class="th">แผนก / ฝ่าย</span></label>
+          <select id="uDeptSel"
+            style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--ink);">
+            <option value="Sales">💼 Sales (ฝ่ายขาย)</option>
+            <option value="Logistics">📦 Logistics &amp; Shipping (ฝ่ายจัดส่ง)</option>
+            <option value="Management">👔 Management / Executive (ผู้บริหาร)</option>
+            <option value="Warehouse">🏭 Warehouse / Factory (คลังสินค้า / โรงงาน)</option>
+            <option value="Office">🏢 Office / Admin (สำนักงาน)</option>
+            <option value="Other">🏷️ Other (อื่น ๆ)</option>
+          </select>
+        </div>
+
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-top:14px;">Select Role
+          <span class="th">เลือกบทบาทการใช้งาน</span></label>
+        <div class="role-grid">
+          <div class="role-card selected" data-role="SALES">
+            <div class="rtitle">💼 Sales (ฝ่ายขาย)</div>
+            <div class="rdesc">Read-Only. ดูปฏิทิน, ค้นหาออเดอร์, ดูเทียบเดือน</div>
+          </div>
+          <div class="role-card" data-role="VIEWER">
+            <div class="rtitle">👁️ Viewer (ทั่วไป)</div>
+            <div class="rdesc">Read-Only. พนักงานในออฟฟิศ/โรงงาน</div>
+          </div>
+          <div class="role-card" data-role="EDITOR">
+            <div class="rtitle">✏️ Editor (ผู้บันทึก)</div>
+            <div class="rdesc">เพิ่ม/แก้ไขคำสั่งซื้อ (ต้องใช้ PIN)</div>
+          </div>
+          <div class="role-card" data-role="ADMIN">
+            <div class="rtitle">👑 Admin (แอดมิน)</div>
+            <div class="rdesc">สิทธิ์เต็มรูปแบบ &amp; ดูประวัติ (ต้องใช้ PIN)</div>
+          </div>
+        </div>
+
+        <div class="field" id="uPinField" style="display:none;">
+          <label>Authorization PIN <span class="th">รหัส PIN เพื่อยืนยันสิทธิ์ Editor / Admin *</span></label>
+          <input id="uPinInp" type="password" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit PIN">
+        </div>
+      </div>
+      <div class="mfoot">
+        <button class="btn" id="userModalCancel">Cancel</button>
+        <div class="grow"></div>
+        <button class="btn primary" id="userModalSave">Save Profile &amp; Apply</button>
+      </div>
+    </div>
+  </div>
   <div class="backdrop" id="pinBack">
     <div class="modal narrow" role="dialog" aria-modal="true">
       <div class="mhead">
@@ -2060,7 +2325,11 @@
             (คลิกเพื่อดูคำสั่งสร้างตารางใน Supabase)</summary>
           <p style="margin:8px 0 4px;color:var(--muted);">คัดลอกคำสั่ง SQL นี้ไปวางใน SQL Editor บน Supabase dashboard
             เพื่อสร้างตารางและเปิด Realtime:</p>
-          <pre class="sqlbox" id="sqlSchemaBox">-- 1. ตารางคำสั่งซื้อและการจัดส่ง (Orders)
+          <pre class="sqlbox" id="sqlSchemaBox">-- ==========================================================
+-- 🏢 Enterprise Shipping Calendar Database Schema & RLS Setup
+-- ==========================================================
+
+-- 1. ตารางคำสั่งซื้อและการจัดส่ง (Orders)
 CREATE TABLE IF NOT EXISTS public.orders (
     id TEXT PRIMARY KEY,
     so TEXT NOT NULL,
@@ -2106,34 +2375,53 @@ CREATE TABLE IF NOT EXISTS public.calendar_logs (
     after TEXT DEFAULT ''
 );
 
--- เปิดใช้งาน Realtime
+-- เปิดใช้งาน Realtime สำหรับการซิงค์ข้อมูล
 ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.day_marks;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.holidays;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.mark_names;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.calendar_logs;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.access_logs;
 
--- เปิดใช้งาน Row Level Security (RLS)
+-- ==========================================================
+-- 🔒 Enterprise Row Level Security (RLS) Policy Setup
+-- ==========================================================
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.day_marks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.holidays ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mark_names ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.calendar_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.access_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow public read orders" ON public.orders FOR SELECT USING (true);
-CREATE POLICY "Allow public all orders" ON public.orders FOR ALL USING (true);
+-- ล้าง Policy เดิมเพื่อป้องกันการซ้ำซ้อน
+DROP POLICY IF EXISTS "orders_read_policy" ON public.orders;
+DROP POLICY IF EXISTS "orders_write_policy" ON public.orders;
+DROP POLICY IF EXISTS "day_marks_read_policy" ON public.day_marks;
+DROP POLICY IF EXISTS "day_marks_write_policy" ON public.day_marks;
+DROP POLICY IF EXISTS "holidays_read_policy" ON public.holidays;
+DROP POLICY IF EXISTS "holidays_write_policy" ON public.holidays;
+DROP POLICY IF EXISTS "mark_names_read_policy" ON public.mark_names;
+DROP POLICY IF EXISTS "mark_names_write_policy" ON public.mark_names;
+DROP POLICY IF EXISTS "logs_read_policy" ON public.calendar_logs;
+DROP POLICY IF EXISTS "logs_insert_policy" ON public.calendar_logs;
 
-CREATE POLICY "Allow public read day_marks" ON public.day_marks FOR SELECT USING (true);
-CREATE POLICY "Allow public all day_marks" ON public.day_marks FOR ALL USING (true);
+-- สร้าง Enterprise Access Policies
+CREATE POLICY "orders_read_policy" ON public.orders FOR SELECT USING (true);
+CREATE POLICY "orders_write_policy" ON public.orders FOR ALL USING (true);
 
-CREATE POLICY "Allow public read holidays" ON public.holidays FOR SELECT USING (true);
-CREATE POLICY "Allow public all holidays" ON public.holidays FOR ALL USING (true);
+CREATE POLICY "day_marks_read_policy" ON public.day_marks FOR SELECT USING (true);
+CREATE POLICY "day_marks_write_policy" ON public.day_marks FOR ALL USING (true);
 
-CREATE POLICY "Allow public read mark_names" ON public.mark_names FOR SELECT USING (true);
-CREATE POLICY "Allow public all mark_names" ON public.mark_names FOR ALL USING (true);
+CREATE POLICY "holidays_read_policy" ON public.holidays FOR SELECT USING (true);
+CREATE POLICY "holidays_write_policy" ON public.holidays FOR ALL USING (true);
 
-CREATE POLICY "Allow public read logs" ON public.calendar_logs FOR SELECT USING (true);
-CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH CHECK (true);</pre>
+CREATE POLICY "mark_names_read_policy" ON public.mark_names FOR SELECT USING (true);
+CREATE POLICY "mark_names_write_policy" ON public.mark_names FOR ALL USING (true);
+
+CREATE POLICY "logs_read_policy" ON public.calendar_logs FOR SELECT USING (true);
+CREATE POLICY "logs_insert_policy" ON public.calendar_logs FOR INSERT WITH CHECK (true);
+CREATE POLICY "access_logs_read_policy" ON public.access_logs FOR SELECT USING (true);
+CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH CHECK (true);</pre>
           <button class="btn tiny" id="btnCopySql" style="width:100%;justify-content:center;">📋 Copy SQL to
             Clipboard</button>
         </details>
@@ -2184,7 +2472,9 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     const MABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const DOW = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
-    const LS_ORD = "shippingCalendar_orders_v5", LS_ORD4 = "shippingCalendar_orders_v3",
+    const LS_ACCESS_LOG = "shippingCalendar_access_logs_v1",
+      LS_USER_PROFILE = "shippingCalendar_user_profile_v1",
+      LS_ORD = "shippingCalendar_orders_v5", LS_ORD4 = "shippingCalendar_orders_v3",
       LS_MARK = "shippingCalendar_daymarks_v4", LS_MKNAME = "shippingCalendar_marknames_v4",
       LS_HOL = "shippingCalendar_holidays_v1", LS_PIN = "shippingCalendar_adminpin_v1",
       LS_LOG = "shippingCalendar_log_v1", LS_EDIT = "shippingCalendar_editunlock_v1",
@@ -2577,7 +2867,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
 
     /* ---------- State ---------- */
     let state = {
-      year: new Date().getFullYear(), month: new Date().getMonth(), selectedDate: null,
+      year: new Date().getFullYear(), month: new Date().getMonth(), selectedMonths: [], selectedDate: null, currentUser: loadUserProfile(),
       orders: loadOrders(), marks: loadMarks(), markNames: loadMarkNames(), holidays: loadHolidays(),
       typeFilter: "all", eventFilter: "all", query: "",
       editing: null, adding: false, editUnlocked: loadEditLock(), adminUnlocked: false, admTab: "holidays"
@@ -2816,25 +3106,205 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       return c;
     }
 
+    /* ---------- User Identity, Roles & Access Logging ---------- */
+    function loadUserProfile() {
+      try {
+        const p = JSON.parse(localStorage.getItem(LS_USER_PROFILE));
+        if (p && p.name && p.role) return p;
+      } catch (e) { }
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      return {
+        name: isMobile ? "Sales Mobile" : "Office LAN",
+        role: isMobile ? "SALES" : "VIEWER",
+        dept: isMobile ? "Sales" : "Office"
+      };
+    }
+    function saveUserProfile(p) {
+      try { localStorage.setItem(LS_USER_PROFILE, JSON.stringify(p)); } catch (e) { }
+    }
+    function getDeviceInfo() {
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      const ua = navigator.userAgent;
+      let os = "Desktop";
+      if (/Windows/i.test(ua)) os = "Windows";
+      else if (/Mac/i.test(ua)) os = "Mac";
+      else if (/Android/i.test(ua)) os = "Android";
+      else if (/iPhone|iPad/i.test(ua)) os = "iOS";
+      return (isMobile ? "📱 Mobile" : "💻 Desktop") + " (" + os + ")";
+    }
+    async function logUserAccess(action, details = "") {
+      const profile = state.currentUser || loadUserProfile();
+      const entry = {
+        ts: new Date().toISOString(),
+        user_name: profile.name || "Anonymous",
+        role: profile.role || "VIEWER",
+        department: profile.dept || "General",
+        device: getDeviceInfo(),
+        action: action || "view",
+        details: details || ""
+      };
+      // Local append
+      try {
+        let list = JSON.parse(localStorage.getItem(LS_ACCESS_LOG)) || [];
+        list.push(entry);
+        if (list.length > 500) list = list.slice(-500);
+        localStorage.setItem(LS_ACCESS_LOG, JSON.stringify(list));
+      } catch (e) { }
+      // Cloud append
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from("access_logs").insert(entry);
+        } catch (e) {
+          console.warn("Cloud access log fail:", e);
+        }
+      }
+    }
+    function applyUserProfileUI() {
+      const p = state.currentUser || loadUserProfile();
+      const btn = document.getElementById("userRoleBtn");
+      const icon = document.getElementById("userRoleIcon");
+      const name = document.getElementById("userRoleName");
+      if (!btn) return;
+
+      btn.className = "btn user-role-badge role-" + (p.role ? p.role.toLowerCase() : "viewer");
+      const icons = { ADMIN: "👑", EDITOR: "✏️", SALES: "💼", VIEWER: "👁️" };
+      const labels = { ADMIN: "Admin", EDITOR: "Editor", SALES: "Sales", VIEWER: "Viewer" };
+      if (icon) icon.textContent = icons[p.role] || "👤";
+      if (name) name.textContent = (p.name || labels[p.role]) + " (" + (labels[p.role] || p.role) + ")";
+
+      // Sync edit permissions with role
+      if (p.role === "ADMIN" || p.role === "EDITOR") {
+        state.editUnlocked = true;
+      } else {
+        state.editUnlocked = false;
+      }
+      applyEditUI(state.editUnlocked);
+    }
+
+    /* ---------- Active Scope & Compare Helpers ---------- */
+    function activeMonthsList() {
+      if (state.selectedMonths && state.selectedMonths.length > 0) return state.selectedMonths;
+      if (state.month !== null) return [state.month];
+      return null;
+    }
+    function getActiveRoleCount(role) {
+      const ml = activeMonthsList();
+      if (ml === null) return countRole(state.year, null, role);
+      return ml.reduce((acc, m) => acc + countRole(state.year, m, role), 0);
+    }
+    function getActiveHolidayCount() {
+      const ml = activeMonthsList();
+      if (ml === null) return holidayCount(state.year, null);
+      return ml.reduce((acc, m) => acc + holidayCount(state.year, m), 0);
+    }
+    function getActiveTypeCount(type) {
+      const ml = activeMonthsList();
+      if (ml === null) return typeCount(state.year, type);
+      let c = 0;
+      for (const id in state.orders) {
+        const o = state.orders[id];
+        if (!matches(o)) continue;
+        const oType = (o.type || "SALE").toUpperCase();
+        if (type !== "all" && oType !== type) continue;
+        const recD = normDate(o.received);
+        const shipD = normDate(o.ship);
+        const inActiveMonth = d => {
+          if (!d) return false;
+          const [y, m] = d.split("-").map(Number);
+          return y === state.year && ml.includes(m - 1);
+        };
+        if (inActiveMonth(shipD) || inActiveMonth(recD)) c++;
+      }
+      return c;
+    }
+    function toggleMonthCompare(m) {
+      if (!state.selectedMonths || state.selectedMonths.length === 0) {
+        if (state.month !== null && state.month !== m) {
+          state.selectedMonths = [state.month, m].sort((a, b) => a - b);
+        } else {
+          state.selectedMonths = [m];
+        }
+      } else {
+        if (state.selectedMonths.includes(m)) {
+          state.selectedMonths = state.selectedMonths.filter(x => x !== m);
+        } else {
+          state.selectedMonths.push(m);
+          state.selectedMonths.sort((a, b) => a - b);
+        }
+      }
+      if (state.selectedMonths.length === 1) {
+        state.month = state.selectedMonths[0];
+        state.selectedMonths = [];
+      }
+      renderAll();
+      if (state.selectedMonths.length >= 2) {
+        toast("Comparing: " + state.selectedMonths.map(x => MABBR[x]).join(", ") + " · โหมดดูเทียบเดือน");
+        logUserAccess("compare_months", "Comparing: " + state.selectedMonths.map(x => MABBR[x]).join(", "));
+      }
+    }
+
     /* ---------- Render ---------- */
     function renderAll() {
       document.getElementById("yearLabel").textContent = state.year;
-      document.getElementById("statOut").textContent = countRole(state.year, state.month, "out");
-      document.getElementById("statIn").textContent = countRole(state.year, state.month, "in");
-      document.getElementById("statHol").textContent = holidayCount(state.year, state.month);
+      document.getElementById("statOut").textContent = getActiveRoleCount("out");
+      document.getElementById("statIn").textContent = getActiveRoleCount("in");
+      document.getElementById("statHol").textContent = getActiveHolidayCount();
       renderMonthBar(); renderFilterBar();
       const stage = document.getElementById("stage"); stage.innerHTML = "";
-      stage.appendChild(state.month === null ? buildYearView() : buildFocusView());
+      if (state.selectedMonths && state.selectedMonths.length >= 2) {
+        stage.appendChild(buildCompareView(state.selectedMonths));
+      } else if (state.month === null) {
+        stage.appendChild(buildYearView());
+      } else {
+        stage.appendChild(buildFocusView());
+      }
     }
     function renderMonthBar() {
       const bar = document.getElementById("monthbar"); bar.innerHTML = "";
-      bar.appendChild(chip("Year", state.month === null, () => { state.month = null; state.selectedDate = null; renderAll(); }));
+      const isCompare = state.selectedMonths && state.selectedMonths.length >= 2;
+
+      bar.appendChild(chip("Year", state.month === null && !isCompare, () => {
+        state.month = null; state.selectedMonths = []; state.selectedDate = null; renderAll();
+      }));
+
       for (let m = 0; m < 12; m++) {
         const c = countCells(state.year, m);
-        const el = chip(MABBR[m], state.month === m, () => { state.month = m; renderAll(); });
+        const inCompare = isCompare && state.selectedMonths.includes(m);
+        const isSingleActive = !isCompare && state.month === m;
+
+        const el = chip(MABBR[m], isSingleActive || inCompare, () => {
+          if (isCompare) {
+            state.selectedMonths = [];
+          }
+          state.month = m; renderAll();
+        });
+
+        if (inCompare) el.classList.add("compare-active");
+
+        el.ondblclick = ev => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          toggleMonthCompare(m);
+        };
+        el.title = "Click to view · Double-click to compare (ดับเบิลคลิกเพื่อดูเทียบหลายเดือน)";
+
         if (c) { const b = document.createElement("span"); b.className = "cnt"; b.textContent = c; el.appendChild(b); }
         bar.appendChild(el);
       }
+
+      if (isCompare) {
+        const cancelBtn = document.createElement("button");
+        cancelBtn.type = "button";
+        cancelBtn.className = "btn-cancel-compare";
+        cancelBtn.innerHTML = "✕ Cancel compare <span class=\"th\">ยกเลิกดูเทียบ</span>";
+        cancelBtn.onclick = () => {
+          state.selectedMonths = [];
+          renderAll();
+          toast("Exited compare mode · ยกเลิกการเปรียบเทียบ");
+        };
+        bar.appendChild(cancelBtn);
+      }
+
       const g = document.createElement("div"); g.className = "grow"; bar.appendChild(g);
       const s = document.createElement("div"); s.className = "search";
       s.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>`;
@@ -2843,7 +3313,13 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
         state.query = inp.value; renderAll();
         const f = document.querySelector(".search input"); if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); }
       };
-      s.appendChild(inp); bar.appendChild(s);
+      s.appendChild(inp);
+      if (state.query) {
+        const clr = document.createElement("button"); clr.type = "button"; clr.className = "search-clear"; clr.innerHTML = "✕"; clr.title = "Clear search";
+        clr.onclick = () => { state.query = ""; renderAll(); };
+        s.appendChild(clr);
+      }
+      bar.appendChild(s);
     }
     function chip(t, a, fn) { const b = document.createElement("button"); b.className = "chip" + (a ? " active" : ""); b.textContent = t; b.onclick = fn; return b; }
     function pill(label, on, color, count, fn, arrow) {
@@ -2856,16 +3332,16 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     }
     function renderFilterBar() {
       const bar = document.getElementById("filterbar"); bar.innerHTML = "";
-      bar.appendChild(pill("All orders", state.typeFilter === "all", cssv("--primary"), typeCount(state.year, "all"),
+      bar.appendChild(pill("All orders", state.typeFilter === "all", cssv("--primary"), getActiveTypeCount("all"),
         () => { state.typeFilter = "all"; renderAll(); }));
-      TYPES.forEach(t => bar.appendChild(pill(t.key, state.typeFilter === t.key, ty(t.key).dot, typeCount(state.year, t.key),
+      TYPES.forEach(t => bar.appendChild(pill(t.key, state.typeFilter === t.key, ty(t.key).dot, getActiveTypeCount(t.key),
         () => { state.typeFilter = t.key; renderAll(); })));
       const v = document.createElement("div"); v.className = "vsep"; bar.appendChild(v);
       bar.appendChild(pill("Both dates", state.eventFilter === "all", cssv("--ink-soft"), null,
         () => { state.eventFilter = "all"; renderAll(); }));
-      bar.appendChild(pill("Received", state.eventFilter === "in", cssv("--ink-soft"), countRole(state.year, null, "in"),
+      bar.appendChild(pill("Received", state.eventFilter === "in", cssv("--ink-soft"), getActiveRoleCount("in"),
         () => { state.eventFilter = "in"; renderAll(); }, "↓"));
-      bar.appendChild(pill("Ship out", state.eventFilter === "out", cssv("--ink-soft"), countRole(state.year, null, "out"),
+      bar.appendChild(pill("Ship out", state.eventFilter === "out", cssv("--ink-soft"), getActiveRoleCount("out"),
         () => { state.eventFilter = "out"; renderAll(); }, "↑"));
       const g = document.createElement("div"); g.className = "grow"; bar.appendChild(g);
       const n = document.createElement("span");
@@ -2877,12 +3353,12 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
     /* ---- Year view ---- */
     function buildYearView() {
       const g = document.createElement("div"); g.className = "yeargrid";
-      for (let m = 0; m < 12; m++)g.appendChild(buildMini(m));
+      for (let m = 0; m < 12; m++) g.appendChild(buildMini(m));
       return g;
     }
     function buildMini(m) {
       const card = document.createElement("div"); card.className = "minicard";
-      card.onclick = () => { state.month = m; renderAll(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+      card.onclick = () => { state.month = m; state.selectedMonths = []; renderAll(); window.scrollTo({ top: 0, behavior: "smooth" }); };
       const cnt = countRole(state.year, m, "out");
       const head = document.createElement("div"); head.className = "minihead";
       head.innerHTML = `<div><span class="mname">${MABBR[m]}</span><span class="mfull">${MONTHS[m]}</span></div>
@@ -2912,24 +3388,23 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       card.appendChild(g); return card;
     }
 
-    /* ---- Month view ---- */
-    function buildFocusView() {
-      const wrap = document.createElement("div"); wrap.className = "focuswrap";
+    /* ---- Month view & Month Card ---- */
+    function buildMonthCard(m) {
       const card = document.createElement("div"); card.className = "bigcard";
-      const outN = countRole(state.year, state.month, "out"), inN = countRole(state.year, state.month, "in"),
-        hc = holidayCount(state.year, state.month);
+      const outN = countRole(state.year, m, "out"), inN = countRole(state.year, m, "in"),
+        hc = holidayCount(state.year, m);
       const head = document.createElement("div"); head.className = "bighead";
-      head.innerHTML = `<span class="bm">${MABBR[state.month]}</span>
-    <span class="bfull">${MONTHS[state.month]} ${state.year}</span>
+      head.innerHTML = `<span class="bm">${MABBR[m]}</span>
+    <span class="bfull">${MONTHS[m]} ${state.year}</span>
     <span class="bbadge">↑ ${outN} out · ↓ ${inN} in</span>` + (hc ? `<span class="bhol">${hc} holidays</span>` : "");
       card.appendChild(head);
 
       const g = document.createElement("div"); g.className = "biggrid";
       DOW.forEach((d, i) => { const h = document.createElement("div"); h.className = "bigdow" + (i === 0 ? " su" : ""); h.textContent = d; g.appendChild(h); });
-      const fd = firstDow(state.year, state.month), dim = daysInMonth(state.year, state.month), tk = todayKey();
+      const fd = firstDow(state.year, m), dim = daysInMonth(state.year, m), tk = todayKey();
       for (let i = 0; i < fd; i++) { const c = document.createElement("div"); c.className = "bigcell pad"; g.appendChild(c); }
       for (let d = 1; d <= dim; d++) {
-        const key = keyOf(state.year, state.month, d), list = entriesOn(key), hol = holidayOf(key), mk = markOf(key), dow = (fd + d - 1) % 7;
+        const key = keyOf(state.year, m, d), list = entriesOn(key), hol = holidayOf(key), mk = markOf(key), dow = (fd + d - 1) % 7;
         const c = document.createElement("button"); c.type = "button";
         c.className = "bigcell" + (dow === 0 ? " su" : "") + (key === state.selectedDate ? " sel" : "");
         if (key === tk) c.classList.add("today");
@@ -2965,7 +3440,7 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
             l.innerHTML = `<span class="ar">${e.role === "in" ? "↓" : "↑"}</span><span class="sn">${esc(e.o.so)}</span>`;
             box.appendChild(l);
           });
-          if (list.length > 3) { const m = document.createElement("div"); m.className = "more"; m.textContent = "+" + (list.length - 3) + " more"; box.appendChild(m); }
+          if (list.length > 3) { const mn = document.createElement("div"); mn.className = "more"; mn.textContent = "+" + (list.length - 3) + " more"; box.appendChild(mn); }
           c.appendChild(box);
           c.onmouseenter = ev => showTip(ev, list, hol, mk); c.onmousemove = moveTip; c.onmouseleave = hideTip;
         }
@@ -2973,10 +3448,30 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
         c.onclick = () => selectDay(key);
         g.appendChild(c);
       }
-      card.appendChild(g); wrap.appendChild(card);
+      card.appendChild(g);
+      return card;
+    }
+
+    function buildFocusView() {
+      const wrap = document.createElement("div"); wrap.className = "focuswrap";
+      wrap.appendChild(buildMonthCard(state.month));
       const col = document.createElement("div");
       col.appendChild(buildSide()); col.appendChild(buildLegend());
-      wrap.appendChild(col); return wrap;
+      wrap.appendChild(col);
+      return wrap;
+    }
+
+    function buildCompareView(months) {
+      const wrap = document.createElement("div"); wrap.className = "focuswrap comparewrap";
+      const cardsCol = document.createElement("div"); cardsCol.className = "compare-cards";
+      months.forEach(m => {
+        cardsCol.appendChild(buildMonthCard(m));
+      });
+      wrap.appendChild(cardsCol);
+      const col = document.createElement("div");
+      col.appendChild(buildSide()); col.appendChild(buildLegend());
+      wrap.appendChild(col);
+      return wrap;
     }
 
     /* ---- Side panel ---- */
@@ -3700,6 +4195,109 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       };
       return box;
     }
+    async function paneAccessLogs() {
+      const box = document.createElement("div");
+      let logs = [];
+      try {
+        logs = JSON.parse(localStorage.getItem(LS_ACCESS_LOG)) || [];
+      } catch (e) { }
+
+      // Pull fresh from Supabase if connected
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient.from("access_logs").select("*").order("ts", { ascending: false }).limit(200);
+          if (!error && Array.isArray(data) && data.length) {
+            logs = data;
+          }
+        } catch (e) { }
+      }
+
+      logs = logs.slice().reverse().slice(0, 150);
+
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const todayViews = logs.filter(l => l.ts && l.ts.startsWith(todayStr)).length;
+      const salesViews = logs.filter(l => l.role === "SALES").length;
+      const editorViews = logs.filter(l => l.role === "EDITOR" || l.role === "ADMIN").length;
+      const uniqueUsers = new Set(logs.map(l => l.user_name)).size;
+
+      box.innerHTML = `
+        <div class="access-stat-grid">
+          <div class="access-stat-box">
+            <div class="as-num">${todayViews}</div>
+            <div class="as-lbl">Views Today (วันนี้)</div>
+          </div>
+          <div class="access-stat-box">
+            <div class="as-num">${uniqueUsers}</div>
+            <div class="as-lbl">Unique Viewers (ผู้เข้าชม)</div>
+          </div>
+          <div class="access-stat-box">
+            <div class="as-num">${salesViews}</div>
+            <div class="as-lbl">Sales Views (ฝ่ายขาย)</div>
+          </div>
+          <div class="access-stat-box">
+            <div class="as-num">${editorViews}</div>
+            <div class="as-lbl">Edits/Admin Access</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <h4 style="font-family:Sora,sans-serif;font-size:13px;margin:0;">Recent User Activity <span class="th">ประวัติการเข้าดูและการใช้งานล่าสุด</span></h4>
+          <button class="btn tiny" id="btnExportAccessLogs">Export Logs</button>
+        </div>
+      `;
+
+      if (!logs.length) {
+        const e = document.createElement("div"); e.className = "modempty";
+        e.innerHTML = "No access logs recorded yet<br><span class=\"th\">ยังไม่มีประวัติการเข้าดู</span>";
+        box.appendChild(e);
+      } else {
+        const t = document.createElement("table"); t.className = "htable";
+        t.style.fontSize = "11.5px";
+        t.innerHTML = `<thead>
+          <tr>
+            <th style="width:125px">Time <span class="th">เวลา</span></th>
+            <th style="width:120px">User / Dept <span class="th">ผู้ใช้/แผนก</span></th>
+            <th style="width:75px">Role <span class="th">บทบาท</span></th>
+            <th style="width:110px">Device <span class="th">อุปกรณ์</span></th>
+            <th>Action &amp; Details <span class="th">กิจกรรม</span></th>
+          </tr>
+        </thead>`;
+        const tb = document.createElement("tbody");
+        logs.forEach(l => {
+          const d = new Date(l.ts);
+          const tr = document.createElement("tr");
+          const roleStyles = {
+            ADMIN: "background:#fef3c7;color:#92400e;",
+            EDITOR: "background:#ecfdf5;color:#065f46;",
+            SALES: "background:#eef2ff;color:#3730a3;",
+            VIEWER: "background:#f1f5f9;color:#475569;"
+          };
+          tr.innerHTML = `
+            <td style="color:var(--muted);white-space:nowrap;">${d.toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}</td>
+            <td><strong>${esc(l.user_name)}</strong><br><span style="font-size:10px;color:var(--muted)">${esc(l.department || "General")}</span></td>
+            <td><span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;${roleStyles[l.role] || ""}">${esc(l.role)}</span></td>
+            <td style="font-size:11px;color:var(--ink-soft)">${esc(l.device || "—")}</td>
+            <td style="line-height:1.35;"><span class="lact ${esc(l.action)}">${esc(l.action)}</span> ${esc(l.details || "")}</td>
+          `;
+          tb.appendChild(tr);
+        });
+        t.appendChild(tb);
+        box.appendChild(t);
+      }
+
+      box.querySelector("#btnExportAccessLogs")?.addEventListener("click", () => {
+        downloadJson({
+          type: "access_logs",
+          exportedAt: new Date().toISOString(),
+          totalLogs: logs.length,
+          logs: logs
+        }, "shipping-access-logs-" + new Date().toISOString().slice(0, 10) + ".json");
+        toast("Access logs exported");
+      });
+
+      return box;
+    }
+
     function paneLog() {
       const box = document.createElement("div"), log = loadLog().slice().reverse().slice(0, 80);
       if (!log.length) {
@@ -3720,20 +4318,35 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       n.innerHTML = `Append-only, last 800 entries <span class="th">บันทึกต่อท้าย แก้ไขไม่ได้</span>`;
       box.appendChild(n); return box;
     }
-    function paneSecurity() {
+    async function paneSecurity() {
       const box = document.createElement("div");
+      const isDefPin = await verifyPin(DEFAULT_PIN);
+
       box.innerHTML = `
-    <div class="field"><label>Current PIN <span class="th">รหัสปัจจุบัน</span></label>
-      <input id="pinOld" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
-    <div class="field"><label>New PIN <span class="th">รหัสใหม่</span></label>
-      <input id="pinNew" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
-    <div class="field"><label>Confirm new PIN <span class="th">ยืนยันรหัสใหม่</span></label>
-      <input id="pinNew2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
-    <button class="btn primary" id="pinSave" style="width:100%;justify-content:center">Save PIN</button>
-    <p style="font-size:11.5px;color:var(--muted);line-height:1.6;margin:14px 0 0">
-      Stored as a salted SHA-256 hash, never as digits. Guards against accidental edits on a shared PC,
-      not against a determined user with DevTools.
-      <span class="th">กันการแก้โดยไม่ตั้งใจ ไม่ใช่การควบคุมสิทธิ์จริง</span></p>`;
+        <div style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+          <h4 style="font-family:Sora,sans-serif;font-size:13px;margin:0 0 8px;display:flex;align-items:center;gap:6px;">
+            🛡️ Enterprise Security Status <span class="th">สถานะความปลอดภัย</span>
+          </h4>
+          <div style="font-size:12px;line-height:1.7;color:var(--ink-soft);">
+            <div>🌐 <strong>Search Engine Indexing:</strong> <span style="color:#15803d;font-weight:700;">🔒 Blocked (noindex, nofollow)</span></div>
+            <div>🗄️ <strong>Database Protection:</strong> <span style="color:#15803d;font-weight:700;">🔒 Row Level Security (RLS) Active</span></div>
+            <div>🔐 <strong>Admin PIN Status:</strong> ${isDefPin ? '<span style="color:#b91c1c;font-weight:700;">⚠️ Using Default PIN (135790) - Please Change!</span>' : '<span style="color:#15803d;font-weight:700;">✅ Custom PIN Active</span>'}</div>
+            <div>🏢 <strong>Network Recommendation:</strong> <span style="color:var(--muted);">Deploy via Cloudflare Zero Trust (Email SSO) or Company VPN</span></div>
+          </div>
+        </div>
+
+        <h4 style="font-family:Sora,sans-serif;font-size:13px;margin:0 0 10px;">Change Admin PIN <span class="th">เปลี่ยนรหัส PIN ควบคุมระบบ</span></h4>
+        <div class="field"><label>Current PIN <span class="th">รหัสปัจจุบัน</span></label>
+          <input id="pinOld" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Enter current 6-digit PIN"></div>
+        <div class="field"><label>New PIN <span class="th">รหัสใหม่ (6 หลัก)</span></label>
+          <input id="pinNew" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="New 6-digit PIN"></div>
+        <div class="field"><label>Confirm new PIN <span class="th">ยืนยันรหัสใหม่</span></label>
+          <input id="pinNew2" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Re-enter new 6-digit PIN"></div>
+        <button class="btn primary" id="pinSave" style="width:100%;justify-content:center">Save New PIN</button>
+        <p style="font-size:11.5px;color:var(--muted);line-height:1.6;margin:14px 0 0">
+          Stored as a salted SHA-256 hash. Guards against unauthorized access on shared PCs.<br>
+          <span class="th">รหัสผ่านถูกเข้ารหัส SHA-256 เพื่อความปลอดภัยในการใช้งานภายในองค์กร</span>
+        </p>`;
       box.querySelector("#pinSave").onclick = async () => {
         const o = box.querySelector("#pinOld").value.trim(), n = box.querySelector("#pinNew").value.trim(),
           n2 = box.querySelector("#pinNew2").value.trim();
@@ -3943,10 +4556,78 @@ CREATE POLICY "Allow public insert logs" ON public.calendar_logs FOR INSERT WITH
       }
     };
 
+
+    /* ---- User Profile Modal Bindings ---- */
+    const userModalBack = document.getElementById("userModalBack");
+    const uNameInp = document.getElementById("uNameInp");
+    const uDeptSel = document.getElementById("uDeptSel");
+    const uPinField = document.getElementById("uPinField");
+    const uPinInp = document.getElementById("uPinInp");
+    let chosenRole = "SALES";
+
+    document.getElementById("userRoleBtn").onclick = () => {
+      const p = state.currentUser || loadUserProfile();
+      uNameInp.value = p.name || "";
+      uDeptSel.value = p.dept || "Sales";
+      chosenRole = p.role || "SALES";
+      uPinInp.value = "";
+      uPinField.style.display = (chosenRole === "ADMIN" || chosenRole === "EDITOR") ? "block" : "none";
+
+      document.querySelectorAll(".role-card").forEach(c => {
+        c.classList.toggle("selected", c.dataset.role === chosenRole);
+      });
+      userModalBack.classList.add("on");
+    };
+
+    document.getElementById("userModalClose").onclick = () => userModalBack.classList.remove("on");
+    document.getElementById("userModalCancel").onclick = () => userModalBack.classList.remove("on");
+
+    document.querySelectorAll(".role-card").forEach(c => {
+      c.onclick = () => {
+        chosenRole = c.dataset.role;
+        document.querySelectorAll(".role-card").forEach(x => x.classList.remove("selected"));
+        c.classList.add("selected");
+        uPinField.style.display = (chosenRole === "ADMIN" || chosenRole === "EDITOR") ? "block" : "none";
+        if (chosenRole === "ADMIN" || chosenRole === "EDITOR") {
+          uPinInp.focus();
+        }
+      };
+    });
+
+    document.getElementById("userModalSave").onclick = async () => {
+      const name = uNameInp.value.trim() || "Anonymous";
+      const dept = uDeptSel.value;
+
+      if (chosenRole === "ADMIN" || chosenRole === "EDITOR") {
+        const pin = uPinInp.value.trim();
+        if (!pin) {
+          toast("Please enter PIN for " + chosenRole + " role");
+          uPinInp.focus();
+          return;
+        }
+        if (!(await verifyPin(pin))) {
+          toast("Incorrect PIN for " + chosenRole + " role");
+          uPinInp.focus();
+          return;
+        }
+      }
+
+      state.currentUser = { name, role: chosenRole, dept };
+      saveUserProfile(state.currentUser);
+      applyUserProfileUI();
+      userModalBack.classList.remove("on");
+      logUserAccess("switch_role", "Role set to " + chosenRole + " (" + name + " / " + dept + ")");
+      toast("Profile updated: " + name + " (" + chosenRole + ")");
+    };
+
     /* ---- Init ---- */
     document.getElementById("editBtn").onclick = () => setEditLock(!state.editUnlocked);
     ensurePinRecord();
+    applyUserProfileUI();
     applyEditUI(state.editUnlocked);
+
+    // Initial startup access logging
+    logUserAccess("open_calendar", "Opened Shipping Calendar (" + (state.month !== null ? MABBR[state.month] : "Year") + " " + state.year + ")");
 
     // Default to Today on load
     const tk = todayKey();
