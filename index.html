@@ -1479,8 +1479,9 @@
       overflow: auto
     }
 
-    .backdrop.show {
-      display: flex
+    .backdrop.show,
+    .backdrop.on {
+      display: flex;
     }
 
     .modal {
@@ -4576,11 +4577,11 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       document.querySelectorAll(".role-card").forEach(c => {
         c.classList.toggle("selected", c.dataset.role === chosenRole);
       });
-      userModalBack.classList.add("on");
+      userModalBack.classList.add("show"); userModalBack.classList.add("on");
     };
 
-    document.getElementById("userModalClose").onclick = () => userModalBack.classList.remove("on");
-    document.getElementById("userModalCancel").onclick = () => userModalBack.classList.remove("on");
+    document.getElementById("userModalClose").onclick = () => { userModalBack.classList.remove("show"); userModalBack.classList.remove("on"); };
+    document.getElementById("userModalCancel").onclick = () => { userModalBack.classList.remove("show"); userModalBack.classList.remove("on"); };
 
     document.querySelectorAll(".role-card").forEach(c => {
       c.onclick = () => {
@@ -4615,7 +4616,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       state.currentUser = { name, role: chosenRole, dept };
       saveUserProfile(state.currentUser);
       applyUserProfileUI();
-      userModalBack.classList.remove("on");
+      userModalBack.classList.remove("show"); userModalBack.classList.remove("on");
       logUserAccess("switch_role", "Role set to " + chosenRole + " (" + name + " / " + dept + ")");
       toast("Profile updated: " + name + " (" + chosenRole + ")");
     };
