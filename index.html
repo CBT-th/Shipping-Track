@@ -2649,6 +2649,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
     id TEXT PRIMARY KEY,
     so TEXT NOT NULL,
     type TEXT NOT NULL DEFAULT 'SALE',
+    method TEXT NOT NULL DEFAULT 'TRUCK',
     customer TEXT DEFAULT '',
     dest TEXT DEFAULT '',
     dn TEXT DEFAULT '',
@@ -2658,6 +2659,11 @@ CREATE TABLE IF NOT EXISTS public.orders (
     created TIMESTAMPTZ DEFAULT NOW(),
     updated TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- เพิ่มคอลัมน์ใหม่อัตโนมัติ (กรณีสร้างตารางไว้ก่อนหน้า)
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS method TEXT DEFAULT 'TRUCK';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer TEXT DEFAULT '';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS dn TEXT DEFAULT '';
 
 -- 2. ตารางป้ายสีกำกับวัน (Day Markers)
 CREATE TABLE IF NOT EXISTS public.day_marks (
@@ -2865,6 +2871,18 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
       } catch (e) { }
     }
 
+    function updateCloudSyncStatusBadge() {
+      const lbl = document.getElementById("cloudLbl");
+      const dot = document.getElementById("cloudDot");
+      const ordCount = Object.keys(state.orders || {}).length;
+      if (!lbl || !dot) return;
+      if (supabaseClient) {
+        lbl.innerHTML = `Cloud Synced (${ordCount})`;
+      } else {
+        lbl.innerHTML = `Local (${ordCount})`;
+      }
+    }
+
     function updateCloudStatusUI(st, msg) {
       cloudStatus = st;
       const btn = document.getElementById("cloudBtn");
@@ -2891,24 +2909,45 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
     }
 
     async function cloudUpsertOrder(order) {
-      if (!supabaseClient) return;
+      if (!supabaseClient || !order || !order.id) return { success: false, reason: "no_client" };
+      const payload = {
+        id: order.id,
+        so: order.so || "",
+        type: order.type || "SALE",
+        method: order.method || "TRUCK",
+        customer: order.customer || "",
+        dest: order.dest || "",
+        dn: order.dn || "",
+        received: order.received || "",
+        ship: order.ship || "",
+        remark: order.remark || "",
+        updated: order.updated || new Date().toISOString()
+      };
+
       try {
-        const payload = {
-          id: order.id,
-          so: order.so || "",
-          type: order.type || "SALE",
-          method: order.method || "SEA",
-          customer: order.customer || "",
-          dest: order.dest || "",
-          dn: order.dn || "",
-          received: order.received || "",
-          ship: order.ship || "",
-          remark: order.remark || "",
-          updated: order.updated || new Date().toISOString()
-        };
         const { error } = await supabaseClient.from("orders").upsert(payload);
-        if (error) console.error("Cloud order upsert error:", error);
-      } catch (e) { console.error("Cloud order upsert fail:", e); }
+        if (error) {
+          console.warn("Cloud order upsert notice:", error.message || error);
+          // Fallback if 'method' column is not created in Supabase yet
+          if (error.message && (error.message.includes("method") || error.code === "PGRST204" || error.code === "42703")) {
+            const fallbackPayload = { ...payload };
+            delete fallbackPayload.method;
+            const { error: fErr } = await supabaseClient.from("orders").upsert(fallbackPayload);
+            if (!fErr) {
+              updateCloudSyncStatusBadge();
+              return { success: true, fallback: true };
+            }
+          }
+          updateCloudSyncStatusBadge();
+          return { success: false, error };
+        }
+        updateCloudSyncStatusBadge();
+        return { success: true };
+      } catch (e) {
+        console.warn("Cloud order upsert fail:", e);
+        updateCloudSyncStatusBadge();
+        return { success: false, error: e };
+      }
     }
 
     async function cloudDeleteOrder(id) {
@@ -3016,49 +3055,69 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
       if (!supabaseClient) return;
       updateCloudStatusUI("connecting", "Fetching latest data from Supabase...");
       try {
-        // 1. Orders
+        const existingLocalOrders = loadOrders();
+        const existingLocalMarks = loadMarks();
+        const existingLocalHols = loadHolidays();
+        const existingLocalUsers = loadUsers();
+
+        // 1. Orders Smart Merge (Zero Loss Guarantee)
         const { data: ords, error: ordErr } = await supabaseClient.from("orders").select("*");
         if (ordErr) throw ordErr;
+
         if (Array.isArray(ords)) {
-          const newOrders = {};
+          const mergedOrders = { ...existingLocalOrders };
           ords.forEach(r => {
-            if (r.id) newOrders[r.id] = {
-              id: r.id,
-              so: r.so || "",
-              type: (r.type || "SALE").toUpperCase(),
-              customer: r.customer || "",
-              dest: r.dest || "",
-              dn: r.dn || "",
-              received: normDate(r.received),
-              ship: normDate(r.ship),
-              remark: r.remark || "",
-              updated: r.updated || new Date().toISOString()
-            };
+            if (r.id) {
+              const local = mergedOrders[r.id];
+              // Use cloud version if no local version, or if cloud updated is newer or equal
+              if (!local || !local.updated || (r.updated && new Date(r.updated) >= new Date(local.updated))) {
+                mergedOrders[r.id] = {
+                  id: r.id,
+                  so: r.so || "",
+                  type: (r.type || "SALE").toUpperCase(),
+                  method: (r.method || "TRUCK").toUpperCase(),
+                  customer: r.customer || "",
+                  dest: r.dest || "",
+                  dn: r.dn || "",
+                  received: normDate(r.received),
+                  ship: normDate(r.ship),
+                  remark: r.remark || "",
+                  updated: r.updated || new Date().toISOString()
+                };
+              }
+            }
           });
-          state.orders = newOrders;
+          state.orders = mergedOrders;
           try { localStorage.setItem(LS_ORD, JSON.stringify(state.orders)); } catch (e) { }
+
+          // Auto-push any local orders that are not yet in Supabase
+          const localOnly = Object.values(existingLocalOrders).filter(loc => !ords.some(c => c.id === loc.id));
+          if (localOnly.length > 0) {
+            console.log(`Auto-pushing ${localOnly.length} local orders to Supabase...`);
+            pushLocalDataToCloud(false);
+          }
         }
 
-        // 2. Day Marks
+        // 2. Day Marks Smart Merge
         const { data: dMarks, error: dmarksErr } = await supabaseClient.from("day_marks").select("*");
         if (!dmarksErr && Array.isArray(dMarks)) {
-          const newMarks = {};
+          const mergedMarks = { ...existingLocalMarks };
           dMarks.forEach(m => {
-            if (m.date && m.color) newMarks[m.date] = { color: m.color, label: m.label || "" };
+            if (m.date && m.color) mergedMarks[m.date] = { color: m.color, label: m.label || "" };
           });
-          state.marks = newMarks;
+          state.marks = mergedMarks;
           try { localStorage.setItem(LS_MARK, JSON.stringify(state.marks)); } catch (e) { }
         }
 
-        // 3. Holidays
+        // 3. Holidays Smart Merge
         const { data: dHols, error: dholErr } = await supabaseClient.from("holidays").select("*");
         if (!dholErr && Array.isArray(dHols)) {
-          const newHols = {};
+          const mergedHols = { ...existingLocalHols };
           dHols.forEach(h => {
-            if (h.date && h.name) newHols[h.date] = { name: h.name };
+            if (h.date && h.name) mergedHols[h.date] = { name: h.name };
           });
-          if (Object.keys(newHols).length) {
-            state.holidays = newHols;
+          if (Object.keys(mergedHols).length) {
+            state.holidays = mergedHols;
             try { localStorage.setItem(LS_HOL, JSON.stringify(state.holidays)); } catch (e) { }
           }
         }
@@ -3072,23 +3131,24 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
           try { localStorage.setItem(LS_MKNAME, JSON.stringify(state.markNames)); } catch (e) { }
         }
 
-        // 5. Users
+        // 5. Users Smart Merge
         try {
           const { data: dUsers, error: uErr } = await supabaseClient.from("users").select("*");
           if (!uErr && Array.isArray(dUsers) && dUsers.length > 0) {
-            const newUsers = {};
+            const mergedUsers = { ...existingLocalUsers };
             dUsers.forEach(u => {
-              if (u.email) newUsers[u.email.toLowerCase()] = u;
+              if (u.email) mergedUsers[u.email.toLowerCase()] = u;
             });
-            state.users = newUsers;
+            state.users = mergedUsers;
             saveUsers();
           }
         } catch (e) { }
 
-        updateCloudStatusUI("connected", `<strong>Connected</strong> · Synced ${Object.keys(state.orders).length} orders`);
+        updateCloudStatusUI("connected", `<strong>Connected</strong> · ${Object.keys(state.orders).length} orders in system`);
+        updateCloudSyncStatusBadge();
         renderAll();
         if (state.selectedDate) refreshSide();
-        if (notify) toast(`Cloud synced: ${Object.keys(state.orders).length} orders`);
+        if (notify) toast(`✅ Cloud Synced: ${Object.keys(state.orders).length} orders loaded`);
       } catch (err) {
         console.error("Failed to fetch cloud data:", err);
         updateCloudStatusUI("error", `<span style="color:var(--sun-ink)">Sync failed: ${esc(err.message || String(err))}</span>`);
@@ -3400,8 +3460,42 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
       } catch (e) { }
       return o;
     }
+    const LS_SNAPSHOTS = "shippingCalendar_recovery_snapshots_v1";
+
     function saveOrders() {
-      try { localStorage.setItem(LS_ORD, JSON.stringify(state.orders)); } catch (e) { toast("Save failed: storage full"); }
+      try {
+        localStorage.setItem(LS_ORD, JSON.stringify(state.orders));
+        createRecoverySnapshot("Orders updated");
+        updateCloudSyncStatusBadge();
+      } catch (e) {
+        toast("Save failed: storage full");
+      }
+    }
+
+    function createRecoverySnapshot(reason = "Manual change") {
+      try {
+        const orderCount = Object.keys(state.orders || {}).length;
+        if (orderCount === 0) return; // Don't take empty snapshot over good data
+        let snapshots = [];
+        try { snapshots = JSON.parse(localStorage.getItem(LS_SNAPSHOTS)) || []; } catch (e) { }
+        const now = new Date().toISOString();
+        snapshots.unshift({
+          ts: now,
+          reason,
+          count: orderCount,
+          orders: JSON.parse(JSON.stringify(state.orders)),
+          marks: JSON.parse(JSON.stringify(state.marks || {})),
+          holidays: JSON.parse(JSON.stringify(state.holidays || {}))
+        });
+        if (snapshots.length > 10) snapshots = snapshots.slice(0, 10);
+        localStorage.setItem(LS_SNAPSHOTS, JSON.stringify(snapshots));
+      } catch (e) { }
+    }
+
+    function getRecoverySnapshots() {
+      try {
+        return JSON.parse(localStorage.getItem(LS_SNAPSHOTS)) || [];
+      } catch (e) { return []; }
     }
     function loadMarks() {
       try {
@@ -4798,6 +4892,165 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
         renderAdmin();
         toast("User saved successfully: " + email);
       };
+
+      return box;
+    }
+
+    function paneBackup() {
+      const box = document.createElement("div");
+      const ordCount = Object.keys(state.orders || {}).length;
+      const markCount = Object.keys(state.marks || {}).length;
+      const holCount = Object.keys(state.holidays || {}).length;
+      const userCount = Object.keys(state.users || {}).length;
+      const snapshots = getRecoverySnapshots();
+
+      box.innerHTML = `
+        <div class="access-stat-grid" style="margin-bottom:14px;">
+          <div class="access-stat-box">
+            <div class="as-num">${ordCount}</div>
+            <div class="as-lbl">Local Orders (ออเดอร์ในเครื่อง)</div>
+          </div>
+          <div class="access-stat-box">
+            <div class="as-num">${markCount}</div>
+            <div class="as-lbl">Day Markers (แต้มสี)</div>
+          </div>
+          <div class="access-stat-box">
+            <div class="as-num">${userCount}</div>
+            <div class="as-lbl">Users (ผู้ใช้งาน)</div>
+          </div>
+          <div class="access-stat-box">
+            <div class="as-num">${supabaseClient ? "🟢 Active" : "⚪ Offline"}</div>
+            <div class="as-lbl">Supabase Cloud Sync</div>
+          </div>
+        </div>
+
+        <div style="background:#f8fafc;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+          <h4 style="font-family:Sora,sans-serif;font-size:13px;margin:0 0 8px;display:flex;align-items:center;gap:6px;">
+            ☁️ Supabase Cloud Synchronization <span class="th">การซิงค์ข้อมูลกับคลาวด์</span>
+          </h4>
+          <p style="font-size:12px;color:var(--ink-soft);line-height:1.5;margin:0 0 12px;">
+            บันทึกข้อมูลทั้งหมดขึ้นสู่ Cloud เพื่อความปลอดภัย หรือดึงข้อมูลล่าสุดจากเซิร์ฟเวอร์
+          </p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn primary tiny" id="btnBackupPushCloud">⬆️ Push All Data to Cloud (บันทึกขึ้น Cloud ทันที)</button>
+            <button type="button" class="btn tiny" id="btnBackupPullCloud">⬇️ Pull from Cloud (ดึงข้อมูลล่าสุดจาก Cloud)</button>
+          </div>
+        </div>
+
+        <div style="background:#f8fafc;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+          <h4 style="font-family:Sora,sans-serif;font-size:13px;margin:0 0 8px;">
+            💾 JSON Backup &amp; Restore <span class="th">สำรองและกู้คืนไฟล์ข้อมูล</span>
+          </h4>
+          <p style="font-size:12px;color:var(--ink-soft);line-height:1.5;margin:0 0 12px;">
+            ดาวน์โหลดไฟล์สำรองข้อมูลฉบับเต็ม (.json) เก็บไว้ในเครื่องคอมพิวเตอร์ของคุณ
+          </p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn tiny" id="btnExportFullBackup">💾 Export Full Backup (.json)</button>
+            <label class="btn tiny" style="cursor:pointer;margin:0;">
+              📂 Import Backup (.json)
+              <input type="file" id="fileImportBackup" accept=".json" style="display:none;">
+            </label>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;">
+          <h4 style="font-family:Sora,sans-serif;font-size:13px;margin:0 0 6px;display:flex;align-items:center;justify-content:space-between;">
+            <span>🕒 Automatic Recovery Snapshots <span class="th">ประวัติการสำรองข้อมูลอัตโนมัติ</span></span>
+            <span style="font-size:11px;color:var(--muted);font-weight:normal;">(Auto-saved on change)</span>
+          </h4>
+          <div id="snapshotListSec" style="margin-top:10px;"></div>
+        </div>
+      `;
+
+      // Event Bindings
+      box.querySelector("#btnBackupPushCloud").onclick = () => pushLocalDataToCloud(true);
+      box.querySelector("#btnBackupPullCloud").onclick = () => pullCloudData(true);
+
+      box.querySelector("#btnExportFullBackup").onclick = () => {
+        const fullBackup = {
+          type: "shipping_calendar_full_backup",
+          version: 5,
+          exportedAt: new Date().toISOString(),
+          orders: state.orders,
+          marks: state.marks,
+          markNames: state.markNames,
+          holidays: state.holidays,
+          users: state.users
+        };
+        downloadJson(fullBackup, "shipping-calendar-full-backup-" + new Date().toISOString().slice(0, 10) + ".json");
+        toast("Full backup exported successfully");
+      };
+
+      const fileInp = box.querySelector("#fileImportBackup");
+      fileInp.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (data.orders) state.orders = data.orders;
+            if (data.marks) state.marks = data.marks;
+            if (data.markNames) state.markNames = data.markNames;
+            if (data.holidays) state.holidays = data.holidays;
+            if (data.users) state.users = data.users;
+
+            saveOrders();
+            saveMarks();
+            saveMarkNames();
+            saveHolidays();
+            saveUsers();
+
+            renderAll();
+            renderAdmin();
+            toast("✅ Backup restored successfully! (" + Object.keys(state.orders).length + " orders restored)");
+            if (supabaseClient) pushLocalDataToCloud(false);
+          } catch (err) {
+            toast("Invalid backup JSON file: " + err.message);
+          }
+        };
+        reader.readAsText(file);
+      };
+
+      // Populate Snapshots
+      const snapSec = box.querySelector("#snapshotListSec");
+      if (!snapshots.length) {
+        snapSec.innerHTML = `<div style="font-size:12px;color:var(--muted);padding:8px 0;">No snapshots recorded yet. Snapshots are created automatically when orders change.</div>`;
+      } else {
+        const t = document.createElement("table");
+        t.className = "htable";
+        t.style.fontSize = "12px";
+        t.innerHTML = `<thead><tr><th>Time <span class="th">เวลา</span></th><th>Reason</th><th>Orders</th><th style="text-align:right;">Action</th></tr></thead>`;
+        const tb = document.createElement("tbody");
+        snapshots.forEach((s, idx) => {
+          const tr = document.createElement("tr");
+          const d = new Date(s.ts);
+          tr.innerHTML = `
+            <td style="color:var(--muted);white-space:nowrap;">${d.toLocaleString("en-GB", { dateStyle: "short", timeStyle: "medium" })}</td>
+            <td><strong>${esc(s.reason || "Auto snapshot")}</strong></td>
+            <td><span style="font-weight:700;color:var(--primary);">${s.count || 0} orders</span></td>
+            <td style="text-align:right;">
+              <button class="btn tiny primary btn-restore-snap" style="padding:2px 8px;">⚡ Restore (${s.count})</button>
+            </td>
+          `;
+          tr.querySelector(".btn-restore-snap").onclick = () => {
+            if (!confirm(`Restore snapshot from ${d.toLocaleTimeString()} with ${s.count} orders?\nกู้คืนข้อมูลคำสั่งซื้อจำนวน ${s.count} รายการนี้?`)) return;
+            if (s.orders) state.orders = s.orders;
+            if (s.marks) state.marks = s.marks;
+            if (s.holidays) state.holidays = s.holidays;
+            saveOrders();
+            saveMarks();
+            saveHolidays();
+            renderAll();
+            renderAdmin();
+            if (supabaseClient) pushLocalDataToCloud(false);
+            toast(`✅ Restored ${s.count} orders successfully!`);
+          };
+          tb.appendChild(tr);
+        });
+        t.appendChild(tb);
+        snapSec.appendChild(t);
+      }
 
       return box;
     }
