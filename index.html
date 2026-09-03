@@ -1010,13 +1010,19 @@
     }
 
     .soline-method-tag {
-      font-size: 9px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 1px 4px;
+      padding: 0 3px;
+      min-width: 18px;
+      height: 17px;
       border-radius: 4px;
-      line-height: 1.2;
+      line-height: 1;
       white-space: nowrap;
       flex: 0 0 auto;
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .soline-sub {
@@ -4116,7 +4122,7 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
               <div class="soline-top">
                 <span class="soline-role role-${e.role}" title="${e.role === "in" ? "Received Date (วันรับออเดอร์)" : "Shipping Date (วันจัดส่ง)"}">${e.role === "in" ? "↓" : "↑"}</span>
                 <span class="sn" title="${esc(e.o.so)}">${esc(e.o.so)}</span>
-                <span class="soline-method-tag" style="background:${mi.bg};color:${mi.ink};border:1px solid ${mi.bd};">${mi.badge}</span>
+                <span class="soline-method-tag" style="background:${mi.bg};color:${mi.ink};border:1px solid ${mi.bd};" title="${esc(mi.label)} (${esc(mi.th)})">${mi.icon}</span>
               </div>
             `;
             box.appendChild(l);
