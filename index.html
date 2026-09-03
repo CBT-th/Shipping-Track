@@ -2061,6 +2061,80 @@
       color: #15803d;
     }
 
+    .login-screen-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background: radial-gradient(circle at 10% 20%, #e2e8f0 0%, #cbd5e1 90%);
+      font-family: Inter, "Noto Sans Thai", sans-serif;
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px -15px rgba(15, 23, 42, .18), 0 0 0 1px rgba(15, 23, 42, .05);
+      width: 100%;
+      max-width: 520px;
+      padding: 32px 28px;
+      animation: fadeInLogin .3s ease-out;
+    }
+
+    @keyframes fadeInLogin {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+    }
+
+    .login-logo .logo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .login-logo h2 {
+      font-family: Sora, sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0;
+    }
+
+    .login-logo p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .login-foot {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
     .sqlbox {
       background: #1e293b;
       color: #e2e8f0;
@@ -2078,7 +2152,91 @@
 </head>
 
 <body>
-  <div class="wrap">
+  <!-- Dedicated First-Time Login Screen Portal -->
+  <div id="loginScreen" class="login-screen-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7l9-4 9 4v10l-9 4-9-4z" />
+            <path d="M3 7l9 4 9-4M12 11v10" />
+          </svg>
+        </div>
+        <div>
+          <h2>Shipping Calendar</h2>
+          <p>User Authentication &amp; Sign In · ระบุตัวตนเพื่อเข้าใช้งาน</p>
+        </div>
+      </div>
+
+      <form id="loginForm" onsubmit="return false;">
+        <div class="field">
+          <label>Work Email <span class="th">อีเมลในการทำงานของคุณ *</span></label>
+          <input id="lpEmail" type="email" placeholder="e.g. yourname@company.com" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label>Full Name / Display Name <span class="th">ชื่อ-นามสกุล / ชื่อเรียก *</span></label>
+          <input id="lpName" placeholder="e.g. สมชาย (ฝ่ายขาย)" maxlength="40" required>
+        </div>
+        <div class="field">
+          <label>Department / Team <span class="th">แผนก / ฝ่าย</span></label>
+          <select id="lpDept"
+            style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--ink);">
+            <option value="Sales">💼 Sales (ฝ่ายขาย)</option>
+            <option value="Logistics">📦 Logistics &amp; Shipping (ฝ่ายจัดส่ง)</option>
+            <option value="Management">👔 Management / Executive (ผู้บริหาร)</option>
+            <option value="Warehouse">🏭 Warehouse / Factory (คลังสินค้า / โรงงาน)</option>
+            <option value="Office">🏢 Office / Admin (สำนักงาน)</option>
+            <option value="Other">🏷️ Other (อื่น ๆ)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>System Access Password <span class="th">รหัสผ่านเข้าใช้งานระบบ * (Default: CBTUDON22)</span></label>
+          <input id="lpPass" type="password" placeholder="ระบุรหัสผ่านเข้าใช้งาน" autocomplete="current-password"
+            required>
+        </div>
+
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-top:14px;">Select Role
+          <span class="th">เลือกบทบาทการใช้งาน</span></label>
+        <div class="role-grid" id="lpRoleGrid">
+          <div class="role-card selected" data-role="SALES">
+            <div class="rtitle">💼 Sales (ฝ่ายขาย)</div>
+            <div class="rdesc">🔒 Read-Only. ดูปฏิทิน, ค้นหาออเดอร์, ดูเทียบเดือน</div>
+          </div>
+          <div class="role-card" data-role="VIEWER">
+            <div class="rtitle">👁️ Viewer (Office LAN)</div>
+            <div class="rdesc">🔒 Read-Only. ดูข้อมูลตารางการจัดส่งทั่วไป</div>
+          </div>
+          <div class="role-card" data-role="EDITOR">
+            <div class="rtitle">✏️ Editor (ฝ่ายจัดส่ง)</div>
+            <div class="rdesc">✏️ เพิ่ม/แก้ไขออเดอร์ (ต้องใช้รหัส PIN)</div>
+          </div>
+          <div class="role-card" data-role="ADMIN">
+            <div class="rtitle">👑 Admin (แอดมิน)</div>
+            <div class="rdesc">👑 สิทธิ์เต็มรูปแบบ &amp; ดู Access Logs (ใช้ PIN)</div>
+          </div>
+        </div>
+
+        <div class="field" id="lpPinField" style="display:none;">
+          <label>Authorization PIN <span class="th">รหัส PIN เพื่อยืนยันสิทธิ์ Editor / Admin *</span></label>
+          <input id="lpPin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit PIN">
+        </div>
+
+        <button class="btn primary" id="btnLoginSubmit"
+          style="width:100%;justify-content:center;padding:12px;font-size:14px;margin-top:14px;">
+          🚀 Enter Shipping Calendar <span class="th">เข้าสู่ระบบ</span>
+        </button>
+      </form>
+
+      <div class="login-foot">
+        🔒 Confidential &amp; Internal Use Only · ข้อมูลลับเฉพาะภายในองค์กร<br>
+        Access is monitored and recorded for security compliance.
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application Wrapper (Hidden until authenticated) -->
+  <div class="wrap" id="appContainer" style="display:none;">
 
     <header class="top">
       <div class="brand">
@@ -4608,7 +4766,103 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     };
 
 
-    /* ---- User Profile & Authentication Modal Bindings ---- */
+    /* ---- First-Time Login Screen & App Entry Controller ---- */
+    const loginScreen = document.getElementById("loginScreen");
+    const appContainer = document.getElementById("appContainer");
+    const lpEmail = document.getElementById("lpEmail");
+    const lpName = document.getElementById("lpName");
+    const lpDept = document.getElementById("lpDept");
+    const lpPass = document.getElementById("lpPass");
+    const lpPin = document.getElementById("lpPin");
+    const lpPinField = document.getElementById("lpPinField");
+    let lpChosenRole = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "SALES" : "VIEWER";
+
+    // Setup role grid in login portal
+    document.querySelectorAll("#lpRoleGrid .role-card").forEach(c => {
+      if (c.dataset.role === lpChosenRole) c.classList.add("selected");
+      else c.classList.remove("selected");
+      c.onclick = () => {
+        lpChosenRole = c.dataset.role;
+        document.querySelectorAll("#lpRoleGrid .role-card").forEach(x => x.classList.remove("selected"));
+        c.classList.add("selected");
+        lpPinField.style.display = (lpChosenRole === "ADMIN" || lpChosenRole === "EDITOR") ? "block" : "none";
+        if (lpChosenRole === "ADMIN" || lpChosenRole === "EDITOR") lpPin.focus();
+      };
+    });
+
+    document.getElementById("btnLoginSubmit").onclick = async () => {
+      const email = lpEmail.value.trim();
+      const name = lpName.value.trim();
+      const dept = lpDept.value;
+      const pass = lpPass.value.trim();
+      const correctPass = getSystemAccessPassword();
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        toast("Please enter a valid work email\nกรุณาระบุอีเมลที่ถูกต้อง (เช่น yourname@company.com)");
+        lpEmail.focus();
+        return;
+      }
+      if (!name) {
+        toast("Please enter your name\nกรุณาระบุชื่อของคุณ");
+        lpName.focus();
+        return;
+      }
+      if (!pass) {
+        toast("Please enter system access password\nกรุณาระบุรหัสผ่านเข้าใช้งาน (Default: CBTUDON22)");
+        lpPass.focus();
+        return;
+      }
+      if (pass !== correctPass) {
+        toast("Incorrect access password\nรหัสผ่านเข้าใช้งานไม่ถูกต้อง");
+        lpPass.focus();
+        return;
+      }
+
+      if (lpChosenRole === "ADMIN" || lpChosenRole === "EDITOR") {
+        const pin = lpPin.value.trim();
+        if (!pin) {
+          toast("Please enter 6-digit PIN for " + lpChosenRole + " role");
+          lpPin.focus();
+          return;
+        }
+        if (!(await verifyPin(pin))) {
+          toast("Incorrect PIN for " + lpChosenRole + " role");
+          lpPin.focus();
+          return;
+        }
+      }
+
+      state.currentUser = { email, name, role: lpChosenRole, dept, loggedInAt: new Date().toISOString() };
+      saveUserProfile(state.currentUser);
+      logUserAccess("login", "Logged in as " + lpChosenRole + " (" + email + " · " + dept + ")");
+      toast("Welcome, " + name + " (" + lpChosenRole + ")");
+      showMainCalendarApp();
+    };
+
+    function showMainCalendarApp() {
+      if (loginScreen) loginScreen.style.display = "none";
+      if (appContainer) appContainer.style.display = "block";
+      applyUserProfileUI();
+      renderAll();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showLoginPortal() {
+      if (loginScreen) loginScreen.style.display = "flex";
+      if (appContainer) appContainer.style.display = "none";
+      lpEmail.value = "";
+      lpName.value = "";
+      lpPass.value = "";
+      lpPin.value = "";
+      lpPinField.style.display = "none";
+      lpDept.value = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "Sales" : "Office";
+      lpChosenRole = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "SALES" : "VIEWER";
+      document.querySelectorAll("#lpRoleGrid .role-card").forEach(c => {
+        c.classList.toggle("selected", c.dataset.role === lpChosenRole);
+      });
+    }
+
+    /* ---- Header User Profile Modal Bindings ---- */
     const userModalBack = document.getElementById("userModalBack");
     const uEmailInp = document.getElementById("uEmailInp");
     const uNameInp = document.getElementById("uNameInp");
@@ -4624,64 +4878,40 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     const userModalLogout = document.getElementById("userModalLogout");
     let chosenRole = "SALES";
 
-    function openUserAuthModal(isFirstTime = false) {
-      const p = state.currentUser;
-      if (isFirstTime || !p) {
-        uModalTitle.textContent = "🔐 User Authentication & Identity";
-        uModalSub.innerHTML = "Mandatory first-time identification <span class=\"th\">กรุณาระบุอีเมลและตัวตนเพื่อเริ่มใช้งาน</span>";
-        userModalClose.style.display = "none";
-        userModalCancel.style.display = "none";
-        userModalLogout.style.display = "none";
-        uEmailInp.value = "";
-        uNameInp.value = "";
-        uPassInp.value = "";
-        uPassField.style.display = "block";
-        uDeptSel.value = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "Sales" : "Office";
-        chosenRole = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "SALES" : "VIEWER";
-      } else {
-        uModalTitle.textContent = "User Profile & Role";
-        uModalSub.innerHTML = "Manage your identity &amp; role <span class=\"th\">จัดการโปรไฟล์และสิทธิ์การใช้งาน</span>";
-        userModalClose.style.display = "grid";
-        userModalCancel.style.display = "inline-flex";
-        userModalLogout.style.display = "inline-flex";
-        uEmailInp.value = p.email || "";
-        uNameInp.value = p.name || "";
-        uPassInp.value = "";
-        uPassField.style.display = "none";
-        uDeptSel.value = p.dept || "Sales";
-        chosenRole = p.role || "SALES";
-      }
+    function openUserAuthModal() {
+      const p = state.currentUser || loadUserProfile();
+      if (!p) { showLoginPortal(); return; }
+      uModalTitle.textContent = "User Profile & Role";
+      uModalSub.innerHTML = "Manage your identity &amp; role <span class=\"th\">จัดการโปรไฟล์และสิทธิ์การใช้งาน</span>";
+      userModalClose.style.display = "grid";
+      userModalCancel.style.display = "inline-flex";
+      userModalLogout.style.display = "inline-flex";
+      uEmailInp.value = p.email || "";
+      uNameInp.value = p.name || "";
+      uPassInp.value = "";
+      uPassField.style.display = "none";
+      uDeptSel.value = p.dept || "Sales";
+      chosenRole = p.role || "SALES";
       uPinInp.value = "";
       uPinField.style.display = (chosenRole === "ADMIN" || chosenRole === "EDITOR") ? "block" : "none";
 
-      document.querySelectorAll(".role-card").forEach(c => {
+      document.querySelectorAll("#userModalBack .role-card").forEach(c => {
         c.classList.toggle("selected", c.dataset.role === chosenRole);
       });
       userModalBack.classList.add("show"); userModalBack.classList.add("on");
     }
 
-    document.getElementById("userRoleBtn").onclick = () => openUserAuthModal(false);
+    document.getElementById("userRoleBtn").onclick = () => openUserAuthModal();
     userModalClose.onclick = () => { userModalBack.classList.remove("show"); userModalBack.classList.remove("on"); };
     userModalCancel.onclick = () => { userModalBack.classList.remove("show"); userModalBack.classList.remove("on"); };
 
-    userModalLogout.onclick = () => {
-      if (!confirm("Log out from this device?\nออกจากระบบบนเครื่องนี้?")) return;
-      localStorage.removeItem(LS_USER_PROFILE);
-      state.currentUser = null;
-      applyUserProfileUI();
-      toast("Logged out successfully");
-      openUserAuthModal(true);
-    };
-
-    document.querySelectorAll(".role-card").forEach(c => {
+    document.querySelectorAll("#userModalBack .role-card").forEach(c => {
       c.onclick = () => {
         chosenRole = c.dataset.role;
-        document.querySelectorAll(".role-card").forEach(x => x.classList.remove("selected"));
+        document.querySelectorAll("#userModalBack .role-card").forEach(x => x.classList.remove("selected"));
         c.classList.add("selected");
         uPinField.style.display = (chosenRole === "ADMIN" || chosenRole === "EDITOR") ? "block" : "none";
-        if (chosenRole === "ADMIN" || chosenRole === "EDITOR") {
-          uPinInp.focus();
-        }
+        if (chosenRole === "ADMIN" || chosenRole === "EDITOR") uPinInp.focus();
       };
     });
 
@@ -4691,7 +4921,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       const dept = uDeptSel.value;
 
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        toast("Please enter a valid work email\nกรุณาระบุอีเมลที่ถูกต้อง (เช่น yourname@company.com)");
+        toast("Please enter a valid work email\nกรุณาระบุอีเมลที่ถูกต้อง");
         uEmailInp.focus();
         return;
       }
@@ -4699,22 +4929,6 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
         toast("Please enter your name\nกรุณาระบุชื่อของคุณ");
         uNameInp.focus();
         return;
-      }
-
-      // Check system access password on first-time login
-      if (!state.currentUser) {
-        const pass = uPassInp.value.trim();
-        const correctPass = getSystemAccessPassword();
-        if (!pass) {
-          toast("Please enter the access password\nกรุณาระบุรหัสผ่านเข้าใช้งาน (Default: CBTUDON22)");
-          uPassInp.focus();
-          return;
-        }
-        if (pass !== correctPass) {
-          toast("Incorrect access password\nรหัสผ่านเข้าใช้งานไม่ถูกต้อง");
-          uPassInp.focus();
-          return;
-        }
       }
 
       if (chosenRole === "ADMIN" || chosenRole === "EDITOR") {
@@ -4735,31 +4949,30 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       saveUserProfile(state.currentUser);
       applyUserProfileUI();
       userModalBack.classList.remove("show"); userModalBack.classList.remove("on");
-      logUserAccess("login", "Logged in as " + chosenRole + " (" + email + " · " + dept + ")");
-      toast("Welcome, " + name + " (" + chosenRole + ")");
+      logUserAccess("switch_role", "Role set to " + chosenRole + " (" + email + " · " + dept + ")");
+      toast("Profile updated: " + name + " (" + chosenRole + ")");
     };
+
+    userModalLogout.onclick = () => {
+      if (!confirm("Log out from this device?\nออกจากระบบบนเครื่องนี้?")) return;
+      localStorage.removeItem(LS_USER_PROFILE);
+      state.currentUser = null;
+      userModalBack.classList.remove("show");
+      userModalBack.classList.remove("on");
+      toast("Logged out successfully");
+      showLoginPortal();
+    };
+
     /* ---- Init ---- */
     ensurePinRecord();
     state.currentUser = loadUserProfile();
-    applyUserProfileUI();
 
-    // Check First-Time Mandatory Login Gate
-    if (!state.currentUser) {
-      setTimeout(() => openUserAuthModal(true), 150);
+    if (state.currentUser) {
+      showMainCalendarApp();
+      logUserAccess("open_calendar", "Opened Shipping Calendar (" + (state.month !== null ? MABBR[state.month] : "Year") + " " + state.year + ")");
+    } else {
+      showLoginPortal();
     }
-    document.getElementById("editBtn").onclick = () => {
-      if (!state.currentUser || state.currentUser.role === "SALES" || state.currentUser.role === "VIEWER") {
-        toast("🔒 Read-Only Mode (" + (state.currentUser ? state.currentUser.role : "Viewer") + ")\nบทบาทของคุณคือดูข้อมูลอย่างเดียว ไม่สามารถแก้ไขหรือเพิ่มออเดอร์ได้");
-        return;
-      }
-      setEditLock(!state.editUnlocked);
-    };
-    ensurePinRecord();
-    applyUserProfileUI();
-    applyEditUI(state.editUnlocked);
-
-    // Initial startup access logging
-    logUserAccess("open_calendar", "Opened Shipping Calendar (" + (state.month !== null ? MABBR[state.month] : "Year") + " " + state.year + ")");
 
     // Default to Today on load
     const tk = todayKey();
@@ -4768,8 +4981,10 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     state.month = tM - 1;
     state.selectedDate = tk;
 
-    renderAll();
-    if (state.editUnlocked) resetEditIdle();
+    if (state.currentUser) {
+      renderAll();
+      if (state.editUnlocked) resetEditIdle();
+    }
     initSupabase(true);
   </script>
 </body>
