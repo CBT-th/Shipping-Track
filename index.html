@@ -754,12 +754,81 @@
       border-top-left-radius: 6px
     }
 
-    /* Month view */
+    /* Top Legend Bar */
+    .legend-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      padding: 9px 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .legend-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .legend-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+      margin-right: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 3px 8px;
+      white-space: nowrap;
+      transition: .12s;
+    }
+
+    .legend-item:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .legend-item .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .legend-item .count {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--primary);
+      background: #e6f7f5;
+      border-radius: 10px;
+      padding: 1px 5px;
+      margin-left: 2px;
+    }
+
+    /* Month view (Full Width) */
     .focuswrap {
-      display: grid;
-      grid-template-columns: 1fr 390px;
-      gap: 16px;
-      align-items: start
+      display: block;
+      width: 100%;
     }
 
     .bigcard {
@@ -767,7 +836,68 @@
       border: 1px solid var(--line);
       border-radius: var(--radius);
       padding: 20px 22px 24px;
-      box-shadow: var(--shadow)
+      box-shadow: var(--shadow);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Slide-over Drawer for Day Orders */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(3px);
+      z-index: 998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .order-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 460px;
+      max-width: 94vw;
+      background: var(--panel);
+      box-shadow: -10px 0 35px rgba(0, 0, 0, 0.18);
+      z-index: 999;
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .order-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-close {
+      border: none;
+      background: #f1f5f9;
+      color: var(--ink-soft);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      font-weight: 700;
+      transition: .15s;
+      flex: 0 0 auto;
+    }
+
+    .drawer-close:hover {
+      background: #fee2e2;
+      color: #ef4444;
     }
 
     .bighead {
@@ -1081,61 +1211,74 @@
       border-right: 14px solid transparent
     }
 
-    /* Side panel */
+    /* Side panel inside Drawer */
     .side {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
-      position: sticky;
-      top: 18px;
-      max-height: calc(100vh - 36px);
-      overflow: auto
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+      position: relative;
+      top: 0;
+      height: 100%;
+      max-height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
 
     .side .empty {
       text-align: center;
       color: var(--muted);
-      padding: 30px 10px
+      padding: 40px 16px;
     }
 
     .side .empty svg {
-      width: 44px;
-      height: 44px;
-      opacity: .5;
-      margin-bottom: 10px
+      width: 48px;
+      height: 48px;
+      opacity: .45;
+      margin-bottom: 12px;
     }
 
     .side .empty p {
-      font-size: 13px;
+      font-size: 13.5px;
       margin: 0;
-      line-height: 1.6
+      line-height: 1.6;
     }
 
     .sidehead {
       display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 14px
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1.5px solid var(--line);
+      background: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      flex: 0 0 auto;
     }
 
     .sidehead h3 {
       font-family: "Sora", sans-serif;
       margin: 0;
-      font-size: 19px;
-      font-weight: 700
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
     }
 
     .sidehead .datesub {
       font-size: 12px;
       color: var(--muted);
       font-weight: 600;
-      margin-top: 2px
+      margin-top: 2px;
     }
 
-    .sidehead .btn {
-      margin-left: auto
+    .side-content {
+      padding: 18px 20px 40px;
+      flex: 1;
+      overflow-y: auto;
     }
 
     .holbanner {
@@ -2455,8 +2598,13 @@
 
     <div class="bar" id="monthbar"></div>
     <div class="bar" id="filterbar"></div>
+    <div class="legend-bar" id="toplegend"></div>
     <div id="stage"></div>
   </div>
+
+  <!-- Slide-over Drawer Backdrop & Panel -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="order-drawer" id="orderDrawer" aria-label="Order details drawer"></aside>
 
   <!-- User Profile & Mandatory Authentication Modal -->
   <div class="backdrop" id="userModalBack">
@@ -3873,26 +4021,91 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
     }
 
     /* ---------- Render ---------- */
+    function renderTopLegend() {
+      const bar = document.getElementById("toplegend");
+      if (!bar) return;
+      bar.innerHTML = "";
+
+      // Group 1: Order Types & Direction
+      const secTypes = document.createElement("div");
+      secTypes.className = "legend-group";
+      secTypes.innerHTML = `<span class="legend-title">📦 Order Type:</span>`;
+      TYPES.forEach(t => {
+        const it = document.createElement("div");
+        it.className = "legend-item";
+        const cnt = typeCount(state.year, t.key);
+        it.innerHTML = `<span class="dot" style="background:${ty(t.key).dot}"></span><span>${t.key} · ${t.th || t.en}</span><span class="count">${cnt}</span>`;
+        secTypes.appendChild(it);
+      });
+      const rIn = document.createElement("div");
+      rIn.className = "legend-item";
+      rIn.innerHTML = `<span style="font-size:11.5px;font-weight:800;color:#f59e0b;">↓</span><span>Received (วันรับ)</span>`;
+      secTypes.appendChild(rIn);
+      const rOut = document.createElement("div");
+      rOut.className = "legend-item";
+      rOut.innerHTML = `<span style="font-size:11.5px;font-weight:800;color:#0f766e;">↑</span><span>Ship out (วันส่ง)</span>`;
+      secTypes.appendChild(rOut);
+      bar.appendChild(secTypes);
+
+      // Group 2: Day Markers & Holidays
+      const secMarks = document.createElement("div");
+      secMarks.className = "legend-group";
+      secMarks.innerHTML = `<span class="legend-title">🏷️ Day Markers:</span>`;
+      MARKS.forEach(c => {
+        if (!state.markNames[c] || !state.markNames[c].trim()) return;
+        const it = document.createElement("div");
+        it.className = "legend-item";
+        const cnt = markCount(state.year, c);
+        it.innerHTML = `<span class="dot" style="background:${MK[c].dot}"></span><span>${esc(state.markNames[c])}</span>${cnt ? `<span class="count">${cnt}</span>` : ""}`;
+        secMarks.appendChild(it);
+      });
+      const hCnt = holidayCount(state.year, null);
+      const hIt = document.createElement("div");
+      hIt.className = "legend-item";
+      hIt.innerHTML = `<span class="dot" style="background:${cssv("--c-holiday-dot")}"></span><span>Holiday (วันหยุด)</span>${hCnt ? `<span class="count" style="background:#fee2e2;color:#dc2626;">${hCnt}</span>` : ""}`;
+      secMarks.appendChild(hIt);
+      bar.appendChild(secMarks);
+
+      // Group 3: Shipping Methods
+      const secMethods = document.createElement("div");
+      secMethods.className = "legend-group";
+      secMethods.innerHTML = `<span class="legend-title">🚛 Shipping:</span>`;
+      [
+        { icon: "🟡", label: "DHL" },
+        { icon: "📮", label: "Thai Post" },
+        { icon: "🚛", label: "Truck" },
+        { icon: "🚚", label: "Lorry" },
+        { icon: "🏷️", label: "Other" }
+      ].forEach(m => {
+        const it = document.createElement("div");
+        it.className = "legend-item";
+        it.innerHTML = `<span>${m.icon}</span><span>${m.label}</span>`;
+        secMethods.appendChild(it);
+      });
+      bar.appendChild(secMethods);
+    }
+
     function renderAll() {
       document.getElementById("yearLabel").textContent = state.year;
       document.getElementById("statOut").textContent = getActiveRoleCount("out");
       document.getElementById("statIn").textContent = getActiveRoleCount("in");
       document.getElementById("statHol").textContent = getActiveHolidayCount();
-      renderMonthBar(); renderFilterBar();
-      const stage = document.getElementById("stage"); stage.innerHTML = "";
+      renderMonthBar();
+      renderFilterBar();
+      renderTopLegend();
+      const stage = document.getElementById("stage");
+      stage.innerHTML = "";
       if (state.compareMode && state.selectedMonths && state.selectedMonths.length >= 2) {
         stage.appendChild(buildCompareView(state.selectedMonths));
       } else if (state.compareMode && state.selectedMonths && state.selectedMonths.length === 1) {
         stage.appendChild(buildMonthCard(state.selectedMonths[0]));
-        const col = document.createElement("div");
-        col.appendChild(buildSide()); col.appendChild(buildLegend());
-        const wrap = document.createElement("div"); wrap.className = "focuswrap";
-        wrap.appendChild(stage.firstChild); wrap.appendChild(col);
-        stage.appendChild(wrap);
       } else if (state.month === null && !state.compareMode) {
         stage.appendChild(buildYearView());
       } else {
         stage.appendChild(buildFocusView());
+      }
+      if (state.selectedDate) {
+        refreshSide();
       }
     }
 
@@ -4147,9 +4360,6 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
     function buildFocusView() {
       const wrap = document.createElement("div"); wrap.className = "focuswrap";
       wrap.appendChild(buildMonthCard(state.month));
-      const col = document.createElement("div");
-      col.appendChild(buildSide()); col.appendChild(buildLegend());
-      wrap.appendChild(col);
       return wrap;
     }
 
@@ -4160,20 +4370,42 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
         cardsCol.appendChild(buildMonthCard(m));
       });
       wrap.appendChild(cardsCol);
-      const col = document.createElement("div");
-      col.appendChild(buildSide()); col.appendChild(buildLegend());
-      wrap.appendChild(col);
       return wrap;
     }
 
-    /* ---- Side panel ---- */
+    /* ---- Side Drawer Panel ---- */
+    function openDrawer() {
+      const drawer = document.getElementById("orderDrawer");
+      const backdrop = document.getElementById("drawerBackdrop");
+      if (drawer && backdrop) {
+        drawer.classList.add("open");
+        backdrop.classList.add("open");
+        refreshSide();
+      }
+    }
+
+    function closeDrawer() {
+      const drawer = document.getElementById("orderDrawer");
+      const backdrop = document.getElementById("drawerBackdrop");
+      if (drawer && backdrop) {
+        drawer.classList.remove("open");
+        backdrop.classList.remove("open");
+      }
+      state.selectedDate = null;
+      state.adding = false;
+      state.editing = null;
+      renderAll();
+    }
+
     function buildSide() {
       const side = document.createElement("div"); side.className = "side"; side.id = "side";
       if (!state.selectedDate) {
         side.innerHTML = `<div class="empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h.01M12 15h.01M16 15h.01"/></svg>
-      <p>Pick a date to mark the day or add an order<br><span class="th">เลือกวันเพื่อแต้มสีหรือเพิ่มออเดอร์</span></p></div>`;
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h.01M12 15h.01M16 15h.01"/>
+          </svg>
+          <p>Pick a date on the calendar to view orders<br><span class="th">เลือกวันบนปฏิทินเพื่อดูรายการ</span></p>
+        </div>`;
         return side;
       }
       const key = state.selectedDate, hol = holidayOf(key);
@@ -4181,36 +4413,56 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
       const outs = all.filter(e => e.role === "out"), ins = all.filter(e => e.role === "in");
 
       const head = document.createElement("div"); head.className = "sidehead";
-      head.innerHTML = `<div><h3>${fmtLong(key)}</h3>
-    <div class="datesub">↑ ${outs.length} ship out · ↓ ${ins.length} received <span class="th">ส่ง / รับ</span></div></div>`;
-      if (state.editUnlocked) {
-        const add = document.createElement("button"); add.className = "btn primary tiny"; add.textContent = "+ Add order";
-        add.onclick = () => { state.adding = true; state.editing = null; refreshSide(); };
-        head.appendChild(add);
+      head.innerHTML = `
+        <div style="flex:1;min-width:0;">
+          <h3>${fmtLong(key)}</h3>
+          <div class="datesub">↑ ${outs.length} ship out · ↓ ${ins.length} received <span class="th">ส่ง / รับ</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${state.editUnlocked && !state.adding && !state.editing ? `<button class="btn primary tiny" id="drawerAddBtn">+ Add order</button>` : ""}
+          <button class="drawer-close" id="drawerCloseBtn" title="Close · ปิด (Esc)">✕</button>
+        </div>
+      `;
+
+      if (state.editUnlocked && !state.adding && !state.editing) {
+        head.querySelector("#drawerAddBtn").onclick = () => { state.adding = true; state.editing = null; refreshSide(); };
       }
+      head.querySelector("#drawerCloseBtn").onclick = () => closeDrawer();
       side.appendChild(head);
-      if (!state.editUnlocked) side.appendChild(lockHint());
+
+      const bodySec = document.createElement("div");
+      bodySec.className = "side-content";
+
+      if (!state.editUnlocked) bodySec.appendChild(lockHint());
 
       if (hol) {
         const b = document.createElement("div"); b.className = "holbanner";
         b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       <div><div class="n">${esc(hol.name)}</div>
       <div class="s">Company holiday, not an order <span class="th">วันหยุด ไม่นับรวม</span></div></div>`;
-        side.appendChild(b);
+        bodySec.appendChild(b);
       }
 
-      const mkb = markBanner(key); if (mkb) side.appendChild(mkb);
+      const mkb = markBanner(key); if (mkb) bodySec.appendChild(mkb);
 
-      if (state.adding || state.editing)
-        side.appendChild(buildForm(key, state.editing ? state.orders[state.editing] : null));
+      if (state.adding || state.editing) {
+        bodySec.appendChild(buildForm(key, state.editing ? state.orders[state.editing] : null));
+      }
 
-      if (!all.length && !state.adding) {
+      if (!all.length && !state.adding && !state.editing) {
         const e = document.createElement("div"); e.className = "empty";
-        e.innerHTML = `<p>No order on this date<br><span class="th">ยังไม่มีออเดอร์ในวันนี้</span></p>`;
-        side.appendChild(e);
+        e.innerHTML = `
+          <p style="margin-bottom:12px;">No order on this date<br><span class="th">ยังไม่มีออเดอร์ในวันนี้</span></p>
+          ${state.editUnlocked ? `<button class="btn primary" id="emptyAddBtn">+ Add order for this date</button>` : ""}
+        `;
+        if (state.editUnlocked) {
+          e.querySelector("#emptyAddBtn").onclick = () => { state.adding = true; state.editing = null; refreshSide(); };
+        }
+        bodySec.appendChild(e);
       }
-      if (outs.length) side.appendChild(group("↑", "Ship out", "วันจัดส่ง", outs, key));
-      if (ins.length) side.appendChild(group("↓", "Received", "วันรับออเดอร์", ins, key));
+      if (outs.length) bodySec.appendChild(group("↑", "Ship out", "วันจัดส่ง", outs, key));
+      if (ins.length) bodySec.appendChild(group("↓", "Received", "วันรับออเดอร์", ins, key));
+      side.appendChild(bodySec);
       return side;
     }
     function group(arrow, en, th, list, key) {
@@ -4282,7 +4534,13 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
       }
       return card;
     }
-    function refreshSide() { const o = document.getElementById("side"); if (o) o.replaceWith(buildSide()); else renderAll(); }
+    function refreshSide() {
+      const drawer = document.getElementById("orderDrawer");
+      if (drawer) {
+        drawer.innerHTML = "";
+        drawer.appendChild(buildSide());
+      }
+    }
 
     /* ---- Edit lock (front of house) ---- */
     function lockHint() {
@@ -4532,9 +4790,9 @@ CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
 
     /* ---- Interaction ---- */
     function selectDay(key) {
-      state.selectedDate = key; state.adding = false; state.editing = null; renderAll();
-      const s = document.getElementById("side");
-      if (s && window.innerWidth < 1080) s.scrollIntoView({ behavior: "smooth", block: "start" });
+      state.selectedDate = key; state.adding = false; state.editing = null;
+      renderAll();
+      openDrawer();
     }
     const tip = document.getElementById("tip");
     function showTip(ev, list, hol, mk) {
