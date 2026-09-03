@@ -506,6 +506,62 @@
       min-width: 0;
     }
 
+    .btn-compare-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: var(--ink);
+      border: 1.5px solid #cbd5e1;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: .15s;
+      white-space: nowrap;
+    }
+
+    .btn-compare-toggle:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }
+
+    .btn-compare-toggle.active {
+      background: #0f766e;
+      color: #fff;
+      border-color: #0f766e;
+      box-shadow: 0 2px 8px rgba(15, 118, 110, .25);
+    }
+
+    .compare-presets {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f8fafc;
+      padding: 3px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    .preset-btn {
+      border: none;
+      background: transparent;
+      color: var(--ink-soft);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: .15s;
+    }
+
+    .preset-btn:hover {
+      background: #e2e8f0;
+      color: var(--ink);
+    }
+
     .btn-cancel-compare {
       display: inline-flex;
       align-items: center;
@@ -516,7 +572,7 @@
       font-family: inherit;
       font-weight: 700;
       font-size: 12px;
-      padding: 6px 12px;
+      padding: 5px 12px;
       border-radius: 9px;
       cursor: pointer;
       transition: .15s;
@@ -2716,6 +2772,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
           id: order.id,
           so: order.so || "",
           type: order.type || "SALE",
+          method: order.method || "SEA",
           customer: order.customer || "",
           dest: order.dest || "",
           dn: order.dn || "",
@@ -3042,12 +3099,33 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       }
     }
 
+    /* ---------- Users State & Storage ---------- */
+    const SEED_USERS = {
+      "admin@company.com": { email: "admin@company.com", name: "System Administrator", dept: "Management", password: "CBTUDON22", role: "ADMIN", status: "active", mobile_readonly: false },
+      "editor@company.com": { email: "editor@company.com", name: "Logistics Specialist", dept: "Logistics", password: "CBTUDON22", role: "EDITOR", status: "active", mobile_readonly: true },
+      "sales@company.com": { email: "sales@company.com", name: "Sales Representative", dept: "Sales", password: "CBTUDON22", role: "SALES", status: "active", mobile_readonly: true },
+      "office@company.com": { email: "office@company.com", name: "Office Staff (LAN)", dept: "Office", password: "CBTUDON22", role: "VIEWER", status: "active", mobile_readonly: true }
+    };
+    const LS_USERS = "shippingCalendar_users_v1";
+
+    function loadUsers() {
+      try {
+        const u = JSON.parse(localStorage.getItem(LS_USERS));
+        if (u && typeof u === "object" && Object.keys(u).length > 0) return u;
+      } catch (e) { }
+      return { ...SEED_USERS };
+    }
+
+    function saveUsers() {
+      try { localStorage.setItem(LS_USERS, JSON.stringify(state.users)); } catch (e) { }
+    }
+
     /* ---------- State ---------- */
     let state = {
-      year: new Date().getFullYear(), month: new Date().getMonth(), selectedMonths: [], selectedDate: null, currentUser: loadUserProfile(),
-      orders: loadOrders(), marks: loadMarks(), markNames: loadMarkNames(), holidays: loadHolidays(),
+      year: new Date().getFullYear(), month: new Date().getMonth(), compareMode: false, selectedMonths: [], selectedDate: null, currentUser: loadUserProfile(),
+      users: loadUsers(), orders: loadOrders(), marks: loadMarks(), markNames: loadMarkNames(), holidays: loadHolidays(),
       typeFilter: "all", eventFilter: "all", query: "",
-      editing: null, adding: false, editUnlocked: loadEditLock(), adminUnlocked: false, admTab: "holidays"
+      editing: null, adding: false, editUnlocked: loadEditLock(), adminUnlocked: false, admTab: "users"
     };
     let idleTimer = null, lockoutUntil = 0, tries = 0;
 
@@ -3064,6 +3142,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
             o[id].received = normDate(o[id].received);
             o[id].ship = normDate(o[id].ship);
             o[id].type = (o[id].type || "SALE").toUpperCase();
+            o[id].method = (o[id].method || "TRUCK").toUpperCase();
           }
         }
       } catch (e) { }
@@ -3193,7 +3272,12 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       }
       if (/^\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(s)) {
         const parts = s.split(/[/-]/);
-        return `${parts[2]}-${pad(parts[1])}-${pad(parts[0])}`;
+        const p0 = Number(parts[0]);
+        const p1 = Number(parts[1]);
+        const y = parts[2];
+        if (p0 > 12) return `${y}-${pad(p1)}-${pad(p0)}`;
+        if (p1 > 12) return `${y}-${pad(p0)}-${pad(p1)}`;
+        return `${y}-${pad(p0)}-${pad(p1)}`;
       }
       return s.slice(0, 10);
     }
@@ -3369,7 +3453,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
 
     /* ---------- Active Scope & Compare Helpers ---------- */
     function activeMonthsList() {
-      if (state.selectedMonths && state.selectedMonths.length > 0) return state.selectedMonths;
+      if (state.compareMode && state.selectedMonths && state.selectedMonths.length > 0) return state.selectedMonths;
       if (state.month !== null) return [state.month];
       return null;
     }
@@ -3404,27 +3488,24 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       return c;
     }
     function toggleMonthCompare(m) {
-      if (!state.selectedMonths || state.selectedMonths.length === 0) {
-        if (state.month !== null && state.month !== m) {
-          state.selectedMonths = [state.month, m].sort((a, b) => a - b);
-        } else {
-          state.selectedMonths = [m];
-        }
+      if (!state.compareMode) {
+        state.compareMode = true;
+        state.selectedMonths = (state.month !== null && state.month !== m) ? [state.month, m] : [m];
       } else {
         if (state.selectedMonths.includes(m)) {
           state.selectedMonths = state.selectedMonths.filter(x => x !== m);
         } else {
           state.selectedMonths.push(m);
-          state.selectedMonths.sort((a, b) => a - b);
         }
       }
-      if (state.selectedMonths.length === 1) {
-        state.month = state.selectedMonths[0];
-        state.selectedMonths = [];
+      state.selectedMonths.sort((a, b) => a - b);
+      if (state.selectedMonths.length === 0) {
+        state.compareMode = false;
+        state.month = m;
       }
       renderAll();
       if (state.selectedMonths.length >= 2) {
-        toast("Comparing: " + state.selectedMonths.map(x => MABBR[x]).join(", ") + " · โหมดดูเทียบเดือน");
+        toast("Comparing: " + state.selectedMonths.map(x => MABBR[x]).join(", ") + " · ดูเทียบหลายเดือน");
         logUserAccess("compare_months", "Comparing: " + state.selectedMonths.map(x => MABBR[x]).join(", "));
       }
     }
@@ -3437,58 +3518,108 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       document.getElementById("statHol").textContent = getActiveHolidayCount();
       renderMonthBar(); renderFilterBar();
       const stage = document.getElementById("stage"); stage.innerHTML = "";
-      if (state.selectedMonths && state.selectedMonths.length >= 2) {
+      if (state.compareMode && state.selectedMonths && state.selectedMonths.length >= 2) {
         stage.appendChild(buildCompareView(state.selectedMonths));
-      } else if (state.month === null) {
+      } else if (state.compareMode && state.selectedMonths && state.selectedMonths.length === 1) {
+        stage.appendChild(buildMonthCard(state.selectedMonths[0]));
+        const col = document.createElement("div");
+        col.appendChild(buildSide()); col.appendChild(buildLegend());
+        const wrap = document.createElement("div"); wrap.className = "focuswrap";
+        wrap.appendChild(stage.firstChild); wrap.appendChild(col);
+        stage.appendChild(wrap);
+      } else if (state.month === null && !state.compareMode) {
         stage.appendChild(buildYearView());
       } else {
         stage.appendChild(buildFocusView());
       }
     }
+
     function renderMonthBar() {
       const bar = document.getElementById("monthbar"); bar.innerHTML = "";
-      const isCompare = state.selectedMonths && state.selectedMonths.length >= 2;
+      const isCompare = state.compareMode;
 
+      // Year chip
       bar.appendChild(chip("Year", state.month === null && !isCompare, () => {
-        state.month = null; state.selectedMonths = []; state.selectedDate = null; renderAll();
+        state.month = null; state.compareMode = false; state.selectedMonths = []; state.selectedDate = null; renderAll();
       }));
 
+      // Month chips
       for (let m = 0; m < 12; m++) {
         const c = countCells(state.year, m);
-        const inCompare = isCompare && state.selectedMonths.includes(m);
+        const isSelectedInCompare = isCompare && state.selectedMonths.includes(m);
         const isSingleActive = !isCompare && state.month === m;
 
-        const el = chip(MABBR[m], isSingleActive || inCompare, () => {
-          if (isCompare) {
-            state.selectedMonths = [];
+        const el = chip(MABBR[m], isSingleActive || isSelectedInCompare, ev => {
+          if (ev && (ev.ctrlKey || ev.metaKey || ev.shiftKey)) {
+            toggleMonthCompare(m);
+            return;
           }
-          state.month = m; renderAll();
+          if (state.compareMode) {
+            toggleMonthCompare(m);
+          } else {
+            state.month = m;
+            state.selectedMonths = [];
+            renderAll();
+          }
         });
 
-        if (inCompare) el.classList.add("compare-active");
-
-        el.ondblclick = ev => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          toggleMonthCompare(m);
-        };
-        el.title = "Click to view · Double-click to compare (ดับเบิลคลิกเพื่อดูเทียบหลายเดือน)";
+        if (isSelectedInCompare) el.classList.add("compare-active");
+        el.title = isCompare ? "Click to toggle this month in comparison" : "Click to view · Hold Ctrl/Shift or click Compare to select multiple";
 
         if (c) { const b = document.createElement("span"); b.className = "cnt"; b.textContent = c; el.appendChild(b); }
         bar.appendChild(el);
       }
 
-      if (isCompare) {
-        const cancelBtn = document.createElement("button");
-        cancelBtn.type = "button";
-        cancelBtn.className = "btn-cancel-compare";
-        cancelBtn.innerHTML = "✕ Cancel compare <span class=\"th\">ยกเลิกดูเทียบ</span>";
-        cancelBtn.onclick = () => {
+      // Compare Mode Toggle Button
+      const compBtn = document.createElement("button");
+      compBtn.type = "button";
+      compBtn.className = "btn-compare-toggle" + (isCompare ? " active" : "");
+      compBtn.innerHTML = isCompare
+        ? "✕ Exit Compare <span class=\"th\">ออกจากโหมดดูเทียบ</span>"
+        : "📊 Compare Months <span class=\"th\">ดูเทียบหลายเดือน</span>";
+      compBtn.onclick = () => {
+        state.compareMode = !state.compareMode;
+        if (state.compareMode) {
+          if (state.selectedMonths.length < 2) {
+            state.selectedMonths = state.month !== null ? [state.month] : [0, 1];
+          }
+          toast("📊 Multi-Month Compare Activated\\nคลิกเลือกเดือนที่ต้องการเปรียบเทียบได้เลยครับ");
+        } else {
+          state.month = state.selectedMonths[0] !== undefined ? state.selectedMonths[0] : 0;
           state.selectedMonths = [];
-          renderAll();
-          toast("Exited compare mode · ยกเลิกการเปรียบเทียบ");
-        };
-        bar.appendChild(cancelBtn);
+          toast("Exited compare mode");
+        }
+        renderAll();
+      };
+      bar.appendChild(compBtn);
+
+      // Compare Quick Presets
+      if (isCompare) {
+        const pBox = document.createElement("div");
+        pBox.className = "compare-presets";
+        pBox.innerHTML = `
+          <span style="font-size:10px;color:var(--muted);font-weight:700;">Quick:</span>
+          <button type="button" class="preset-btn" data-p="q1">Q1 (1-3)</button>
+          <button type="button" class="preset-btn" data-p="q2">Q2 (4-6)</button>
+          <button type="button" class="preset-btn" data-p="q3">Q3 (7-9)</button>
+          <button type="button" class="preset-btn" data-p="q4">Q4 (10-12)</button>
+          <button type="button" class="preset-btn" data-p="h1">H1 (1-6)</button>
+          <button type="button" class="preset-btn" data-p="h2">H2 (7-12)</button>
+        `;
+        pBox.querySelectorAll(".preset-btn").forEach(pb => {
+          pb.onclick = () => {
+            const pKey = pb.dataset.p;
+            if (pKey === "q1") state.selectedMonths = [0, 1, 2];
+            else if (pKey === "q2") state.selectedMonths = [3, 4, 5];
+            else if (pKey === "q3") state.selectedMonths = [6, 7, 8];
+            else if (pKey === "q4") state.selectedMonths = [9, 10, 11];
+            else if (pKey === "h1") state.selectedMonths = [0, 1, 2, 3, 4, 5];
+            else if (pKey === "h2") state.selectedMonths = [6, 7, 8, 9, 10, 11];
+            renderAll();
+            toast("Comparing " + pb.textContent + " (" + state.selectedMonths.map(x => MABBR[x]).join(", ") + ")");
+          };
+        });
+        bar.appendChild(pBox);
       }
 
       const g = document.createElement("div"); g.className = "grow"; bar.appendChild(g);
@@ -3716,20 +3847,50 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       list.forEach(e => frag.appendChild(orderCard(e.o, e.role, key)));
       const box = document.createElement("div"); box.appendChild(frag); return box;
     }
+    /* ---------- Shipping Methods & Badge Helpers ---------- */
+    const SHIPPING_METHODS = {
+      TRUCK: { key: "TRUCK", label: "Truck", icon: "🚛", badge: "🚛 Truck", bg: "#e0f2fe", ink: "#0369a1", bd: "#bae6fd", color: "#0284c7", th: "รถบรรทุก" },
+      DHL: { key: "DHL", label: "DHL", icon: "🟡", badge: "🟡 DHL", bg: "#fef3c7", ink: "#b45309", bd: "#fde68a", color: "#d97706", th: "ขนส่ง DHL" },
+      THAIPOST: { key: "THAIPOST", label: "Thai Post", icon: "📮", badge: "📮 Thai Post", bg: "#fee2e2", ink: "#b91c1c", bd: "#fca5a5", color: "#dc2626", th: "ไปรษณีย์ไทย" },
+      LORRY: { key: "LORRY", label: "Lorry Truck", icon: "🚚", badge: "🚚 Lorry Truck", bg: "#ede9fe", ink: "#6d28d9", bd: "#ddd6fe", color: "#7c3aed", th: "รถบรรทุกใหญ่" },
+      OTHER: { key: "OTHER", label: "Other", icon: "🏷️", badge: "🏷️ Other", bg: "#f1f5f9", ink: "#475569", bd: "#cbd5e1", color: "#475569", th: "อื่น ๆ / รับเอง" }
+    };
+
+    function getMethodInfo(m) {
+      if (!m) return SHIPPING_METHODS.TRUCK;
+      const raw = String(m).toUpperCase().replace(/[\s-_]/g, "");
+      if (raw === "TRUCK") return SHIPPING_METHODS.TRUCK;
+      if (raw === "DHL") return SHIPPING_METHODS.DHL;
+      if (raw === "THAIPOST" || raw === "POST" || raw === "THAI") return SHIPPING_METHODS.THAIPOST;
+      if (raw === "LORRY" || raw === "LORRYTRUCK") return SHIPPING_METHODS.LORRY;
+      if (raw === "OTHER") return SHIPPING_METHODS.OTHER;
+      if (raw === "SEA") return { key: "SEA", label: "Sea Freight", icon: "🚢", badge: "🚢 SEA", bg: "#e0f2fe", ink: "#0369a1", bd: "#bae6fd", color: "#0284c7", th: "ทางเรือ" };
+      if (raw === "AIR") return { key: "AIR", label: "Air Freight", icon: "✈️", badge: "✈️ AIR", bg: "#e0e7ff", ink: "#4338ca", bd: "#c7d2fe", color: "#4f46e5", th: "ทางอากาศ" };
+      return {
+        key: m, label: m, icon: "🚚", badge: "🚚 " + m, bg: "#e0f2fe", ink: "#0369a1", bd: "#bae6fd", color: "#0284c7", th: m
+      };
+    }
+
     function orderCard(o, role, key) {
       const t = ty(o.type);
       const card = document.createElement("div"); card.className = "socard " + role; card.style.borderLeftColor = t.dot;
       const ld = lead(o);
       const done = o.ship && o.ship <= todayKey();
+      const mi = getMethodInfo(o.method);
+
       card.innerHTML = `
     <div class="r1">
       <span class="so">${esc(o.so)}</span>
       <span class="ttag" style="background:${t.dot}">${o.type}</span>
+      <span class="stag" style="background:${mi.bg};color:${mi.ink};border:1px solid ${mi.bd};font-weight:700;">${mi.badge}</span>
       ${o.dn ? `<span class="stag" style="background:#f1f5f9;color:var(--ink-soft);border:1px solid var(--line);font-weight:700">D/N: ${esc(o.dn)}</span>` : ""}
       <span class="stag" style="background:${done ? "var(--c-green-fill)" : "var(--c-slate-fill)"};color:${done ? "var(--c-green-ink)" : "var(--c-slate-ink)"}">
         ${o.ship ? (done ? "Shipped" : "Scheduled") : "No shipping date"}</span>
     </div>
-    <div class="r2">${o.dest ? `<b>${esc(o.dest)}</b>` : ""}</div>
+    <div class="r2">
+      ${o.dest ? `<b>${esc(o.dest)}</b>` : ""}
+      ${o.customer ? `<span style="font-size:11.5px;color:var(--muted);font-weight:500;margin-left:6px;">(${esc(o.customer)})</span>` : ""}
+    </div>
     <div class="dates">
       <span>↓ Received <b>${fmtDate(o.received)}</b></span>
       <span>↑ Shipping <b>${fmtDate(o.ship)}</b></span>
@@ -3801,12 +3962,25 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     /* ---- Order form ---- */
     function buildForm(key, order) {
       const box = document.createElement("div"); box.className = "formbox";
-      const o = order || { so: "", type: "SALE", dest: "", dn: "", received: key, ship: key, remark: "" };
+      const o = order || { so: "", type: "SALE", method: "TRUCK", customer: "", dest: "", dn: "", received: key, ship: key, remark: "" };
       let chosenType = o.type || "SALE";
+      let chosenMethod = (o.method || "TRUCK").toUpperCase();
+      if (!SHIPPING_METHODS[chosenMethod]) chosenMethod = "TRUCK";
+
+      const METHODS = [
+        { key: "TRUCK", label: "🚛 Truck", th: "รถบรรทุก", color: "#0284c7" },
+        { key: "DHL", label: "🟡 DHL", th: "ขนส่ง DHL", color: "#d97706" },
+        { key: "THAIPOST", label: "📮 Thai Post", th: "ไปรษณีย์ไทย", color: "#dc2626" },
+        { key: "LORRY", label: "🚚 Lorry Truck", th: "รถบรรทุกใหญ่", color: "#7c3aed" },
+        { key: "OTHER", label: "🏷️ Other", th: "อื่นๆ", color: "#475569" }
+      ];
+
       box.innerHTML = `
     <h4>${order ? "Edit order" : "New order"} <span class="th">${order ? "แก้ไข" : "เพิ่มออเดอร์"}</span></h4>
-    <div class="field"><label>Order type <span class="th">ประเภท</span></label>
+    <div class="field"><label>Order type <span class="th">ประเภทออเดอร์</span></label>
       <div class="segs" id="fSegs"></div></div>
+    <div class="field"><label>Shipping method <span class="th">วิธีการขนส่ง *</span></label>
+      <div class="segs" id="fMethodSegs" style="grid-template-columns:repeat(5, 1fr);"></div></div>
     <div class="field">
       <label id="fSoLbl">${chosenType === "FREE" ? 'FS number <span class="th">เลขที่ FS *</span>' : 'SO number <span class="th">เลขที่ SO *</span>'}</label>
       <input id="fSo" maxlength="32" placeholder="${chosenType === "FREE" ? 'FS-xxxx (เช่น FS-0001)' : 'SOyymmxxxx (เช่น SO26090001)'}" value="${esc(o.so)}">
@@ -3821,8 +3995,10 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       <div class="field"><label>Shipping date <span class="th">วันจัดส่ง *</span></label>
         <input id="fShip" type="date" value="${esc(o.ship || "")}"></div>
     </div>
-    <div class="field"><label>Destination <span class="th">ปลายทาง *</span></label>
+    <div class="field"><label>Destination <span class="th">ปลายทาง / ประเทศ *</span></label>
       <input id="fDest" maxlength="40" placeholder="Destination / Country (เช่น Bangkok, Tokyo, Hamburg)" value="${esc(o.dest)}"></div>
+    <div class="field"><label>Customer / Code <span class="th">ลูกค้า / รหัสลูกค้า (Optional - ระบุหรือไม่ก็ได้)</span></label>
+      <input id="fCust" maxlength="50" placeholder="Customer code or name (เช่น CUST-01, ABC Corp)" value="${esc(o.customer || "")}"></div>
     <div class="field"><label>Remark <span class="th">หมายเหตุ</span></label>
       <textarea id="fRem" placeholder="Booking no., forwarder, special instructions...">${esc(o.remark)}</textarea></div>
     <div class="formacts">
@@ -3831,6 +4007,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     </div>`;
 
       const segs = box.querySelector("#fSegs");
+      const methodSegs = box.querySelector("#fMethodSegs");
       const soLbl = box.querySelector("#fSoLbl");
       const soInp = box.querySelector("#fSo");
       const dnField = box.querySelector("#fDnField");
@@ -3857,15 +4034,29 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
         segs.appendChild(b);
       });
 
+      METHODS.forEach(m => {
+        const b = document.createElement("button"); b.type = "button";
+        b.className = "seg" + (m.key === chosenMethod ? " on" : "");
+        if (m.key === chosenMethod) b.style.background = m.color;
+        b.innerHTML = `${m.label} <span class="th" style="color:inherit;opacity:.75">${m.th}</span>`;
+        b.onclick = () => {
+          chosenMethod = m.key;
+          methodSegs.querySelectorAll(".seg").forEach(x => { x.classList.remove("on"); x.style.background = ""; });
+          b.classList.add("on"); b.style.background = m.color;
+        };
+        methodSegs.appendChild(b);
+      });
+
       box.querySelector("#fCancel").onclick = () => { state.adding = false; state.editing = null; refreshSide(); };
       box.querySelector("#fSave").onclick = () => {
         const rec = {
           so: box.querySelector("#fSo").value.trim(),
           type: (chosenType || "SALE").toUpperCase(),
+          method: (chosenMethod || "TRUCK").toUpperCase(),
           dn: chosenType === "SALE" ? box.querySelector("#fDn").value.trim() : "",
           received: normDate(box.querySelector("#fRec").value),
           ship: normDate(box.querySelector("#fShip").value),
-          customer: "",
+          customer: box.querySelector("#fCust").value.trim(),
           dest: box.querySelector("#fDest").value.trim(),
           remark: box.querySelector("#fRem").value.trim()
         };
@@ -4088,7 +4279,8 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
 
     function paneUsers() {
       const box = document.createElement("div");
-      const userList = Object.values(state.users);
+      if (!state.users) state.users = loadUsers();
+      const userList = Object.values(state.users || {});
       const totalUsers = userList.length;
       const activeUsers = userList.filter(u => u.status === "active").length;
       const editorCount = userList.filter(u => u.role === "ADMIN" || u.role === "EDITOR").length;
@@ -4439,18 +4631,20 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
           const sVal = batchBox.querySelector("#bStart").value;
           const eVal = batchBox.querySelector("#bEnd").value;
           const skipWeekend = batchBox.querySelector("#bSkipWeekend").checked;
+          const sNorm = normDate(sVal);
+          const eNorm = normDate(eVal);
 
-          if (!/^d{4}-d{2}-d{2}$/.test(sVal) || !/^d{4}-d{2}-d{2}$/.test(eVal)) {
-            toast("Please enter valid dates (YYYY-MM-DD)");
+          if (!sNorm || !eNorm) {
+            toast("Please enter valid dates\nกรุณาระบุวันที่เริ่มต้นและสิ้นสุดให้ถูกต้อง");
             return;
           }
-          if (sVal > eVal) {
+          if (sNorm > eNorm) {
             toast("Start date must be before or equal to End date\nวันเริ่มต้นต้องมาก่อนหรือตรงกับวันสิ้นสุด");
             return;
           }
 
-          const cur = new Date(sVal + "T00:00:00");
-          const end = new Date(eVal + "T00:00:00");
+          const cur = new Date(sNorm + "T00:00:00");
+          const end = new Date(eNorm + "T00:00:00");
 
           while (cur <= end) {
             const dow = cur.getDay(); // 0 = Sun, 6 = Sat
@@ -4485,7 +4679,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
           cloudUpsertMark(d, chosenColor, chosenLabel);
         });
 
-        appendLog("add", datesToMark[0] + (datesToMark.length > 1 ? "..${datesToMark[datesToMark.length-1]}" : ""), "",
+        appendLog("add", datesToMark[0] + (datesToMark.length > 1 ? (".." + datesToMark[datesToMark.length - 1]) : ""), "",
           `batch marker: ${chosenColor} (${datesToMark.length} days)`);
 
         saveMarks();
