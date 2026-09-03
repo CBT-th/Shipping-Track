@@ -4068,6 +4068,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     function renderAdmin() {
       const b = document.getElementById("admBody");
       b.innerHTML = `<div class="tabs">
+    <button data-t="users" class="${state.admTab === "users" ? "on" : ""}">👤 Users</button>
     <button data-t="holidays" class="${state.admTab === "holidays" ? "on" : ""}">Holidays</button>
     <button data-t="marks" class="${state.admTab === "marks" ? "on" : ""}">Day markers</button>
     <button data-t="backup" class="${state.admTab === "backup" ? "on" : ""}">Backup &amp; Restore</button>
@@ -4076,8 +4077,254 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
   </div><div id="admPane"></div>`;
       b.querySelectorAll(".tabs button").forEach(x => x.onclick = () => { state.admTab = x.dataset.t; renderAdmin(); });
       const p = b.querySelector("#admPane");
-      p.appendChild(state.admTab === "holidays" ? paneHolidays() : state.admTab === "marks" ? paneMarks() :
+      p.appendChild(state.admTab === "users" ? paneUsers() : state.admTab === "holidays" ? paneHolidays() : state.admTab === "marks" ? paneMarks() :
         state.admTab === "backup" ? paneBackup() : state.admTab === "log" ? paneLog() : paneSecurity());
+    }
+
+
+    /* ---- Users Management Pane (Backend) ---- */
+    let userFormOpen = false;
+    let editingUserEmail = null;
+
+    function paneUsers() {
+      const box = document.createElement("div");
+      const userList = Object.values(state.users);
+      const totalUsers = userList.length;
+      const activeUsers = userList.filter(u => u.status === "active").length;
+      const editorCount = userList.filter(u => u.role === "ADMIN" || u.role === "EDITOR").length;
+      const salesCount = userList.filter(u => u.role === "SALES" || u.role === "VIEWER").length;
+
+      box.innerHTML = `
+        <div class="access-stat-grid" style="margin-bottom:14px;">
+          <div class="access-stat-box">
+            <div class="as-num">${totalUsers}</div>
+            <div class="as-lbl">Total Users (ผู้ใช้ทั้งหมด)</div>
+          </div>
+          <div class="access-stat-box">
+            <div class="as-num">${activeUsers}</div>
+            <div class="as-lbl">Active Users (เปิดใช้งาน)</div>
+          </div>
+          <div class="access-stat-box">
+            <div class="as-num">${editorCount}</div>
+            <div class="as-lbl">Admin &amp; Editors (สิทธิ์แก้ไข)</div>
+          </div>
+          <div class="access-stat-box">
+            <div class="as-num">${salesCount}</div>
+            <div class="as-lbl">Sales &amp; Viewers (ดูอย่างเดียว)</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
+          <div style="font-size:12.5px;color:var(--muted)">
+            Manage employee access, assigned roles, and mobile security policies.
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn tiny primary" id="btnToggleAddUser">
+              ${userFormOpen ? "Close Form (ปิดฟอร์ม)" : "+ Add New User (+ เพิ่มผู้ใช้งาน)"}
+            </button>
+            <button class="btn tiny" id="btnExportUsers">Export Users</button>
+          </div>
+        </div>
+
+        <div id="userFormBox" class="batchcard" style="display:${userFormOpen ? "block" : "none"};margin-bottom:16px;">
+          <h4 style="margin:0 0 12px;font-size:13.5px;font-weight:700;">
+            ${editingUserEmail ? "✏️ Edit User (" + editingUserEmail + ")" : "👤 + Add New Employee Account"}
+          </h4>
+          <div class="batchgrid">
+            <div>
+              <label>Work Email / User ID <span class="th">อีเมล หรือ User ID *</span></label>
+              <input id="ufEmail" type="email" placeholder="e.g. employee@company.com" ${editingUserEmail ? "disabled style='background:#f1f5f9;'" : ""}>
+            </div>
+            <div>
+              <label>Full Name / Display Name <span class="th">ชื่อ-นามสกุล / ชื่อเรียก *</span></label>
+              <input id="ufName" placeholder="e.g. สมชาย ใจดี (ฝ่ายขาย)">
+            </div>
+          </div>
+
+          <div class="batchgrid" style="margin-top:10px;">
+            <div>
+              <label>Department <span class="th">แผนก / ฝ่าย</span></label>
+              <select id="ufDept" style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:8px;padding:7px 9px;font-family:inherit;font-size:12.5px;">
+                <option value="Sales">💼 Sales (ฝ่ายขาย)</option>
+                <option value="Logistics">📦 Logistics &amp; Shipping (ฝ่ายจัดส่ง)</option>
+                <option value="Management">👔 Management / Executive (ผู้บริหาร)</option>
+                <option value="Warehouse">🏭 Warehouse / Factory (คลังสินค้า / โรงงาน)</option>
+                <option value="Office">🏢 Office / Admin (สำนักงาน)</option>
+                <option value="Other">🏷️ Other (อื่น ๆ)</option>
+              </select>
+            </div>
+            <div>
+              <label>Login Password <span class="th">รหัสผ่านเข้าใช้งาน * (Default: CBTUDON22)</span></label>
+              <input id="ufPass" type="text" placeholder="CBTUDON22" value="CBTUDON22">
+            </div>
+          </div>
+
+          <div class="batchgrid" style="margin-top:10px;">
+            <div>
+              <label>Assigned Role <span class="th">บทบาทการใช้งาน *</span></label>
+              <select id="ufRole" style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:8px;padding:7px 9px;font-family:inherit;font-size:12.5px;">
+                <option value="SALES">💼 Sales (ฝ่ายขาย - Read-only)</option>
+                <option value="VIEWER">👁️ Viewer (Office LAN - Read-only)</option>
+                <option value="EDITOR">✏️ Editor (ฝ่ายจัดส่ง - เพิ่ม/แก้ไขออเดอร์ได้)</option>
+                <option value="ADMIN">👑 Admin (ผู้ดูแลระบบ - สิทธิ์เต็มรูปแบบ)</option>
+              </select>
+            </div>
+            <div>
+              <label>Account Status <span class="th">สถานะการใช้งาน</span></label>
+              <select id="ufStatus" style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:8px;padding:7px 9px;font-family:inherit;font-size:12.5px;">
+                <option value="active">✅ Active (เปิดใช้งาน)</option>
+                <option value="inactive">🚫 Inactive / Suspended (ระงับชั่วคราว)</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="batchcheck" style="margin-top:12px;">
+            <input type="checkbox" id="ufMobileReadOnly" checked>
+            🔒 <b>Mobile Security Protection:</b> Automatically enforce Read-Only when accessing via mobile device<br>
+            <span style="color:var(--muted);font-size:11px;margin-left:22px;">(หากเปิดผ่านมือถือจะปรับเป็นโหมดดูอย่างเดียวอัตโนมัติ เพื่อป้องกันข้อมูลรั่วไหลหรือการเผลอกดแก้ไข)</span>
+          </label>
+
+          <div class="batchacts" style="margin-top:14px;">
+            <button type="button" class="btn" id="ufCancel">Cancel</button>
+            <button type="button" class="btn primary" id="ufSave">Save User (บันทึกผู้ใช้)</button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="htable" style="font-size:12px;width:100%;">
+            <thead>
+              <tr>
+                <th>User / Email</th>
+                <th>Name &amp; Department</th>
+                <th>Assigned Role</th>
+                <th>Mobile Security</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody"></tbody>
+          </table>
+        </div>
+      `;
+
+      const tbody = box.querySelector("#userTableBody");
+      userList.sort((a, b) => (a.role === "ADMIN" ? -1 : 1)).forEach(u => {
+        const tr = document.createElement("tr");
+        const roleLabels = { ADMIN: "👑 Admin", EDITOR: "✏️ Editor", SALES: "💼 Sales", VIEWER: "👁️ Viewer" };
+        const roleColors = { ADMIN: "#92400e", EDITOR: "#065f46", SALES: "#3730a3", VIEWER: "#475569" };
+        const roleBgs = { ADMIN: "#fef3c7", EDITOR: "#ecfdf5", SALES: "#eef2ff", VIEWER: "#f1f5f9" };
+
+        tr.innerHTML = `
+          <td><strong>${esc(u.email)}</strong></td>
+          <td>${esc(u.name)} <span style="font-size:11px;color:var(--muted);">(${esc(u.dept || "General")})</span></td>
+          <td>
+            <span class="ttag" style="background:${roleBgs[u.role] || "#f1f5f9"};color:${roleColors[u.role] || "#475569"};font-weight:700;padding:2px 7px;border-radius:6px;">
+              ${roleLabels[u.role] || u.role}
+            </span>
+          </td>
+          <td>
+            ${u.mobile_readonly !== false ? "<span style='color:#059669;font-size:11.5px;'>🔒 Mobile Read-Only</span>" : "<span style='color:var(--muted);font-size:11.5px;'>🔓 Allowed Edit</span>"}
+          </td>
+          <td>
+            <span style="color:${u.status === "active" ? "#16a34a" : "#dc2626"};font-weight:700;">
+              ${u.status === "active" ? "● Active" : "○ Suspended"}
+            </span>
+          </td>
+          <td style="text-align:right;">
+            <button class="btn tiny btn-edit-user" style="padding:2px 7px;margin-right:4px;">Edit</button>
+            <button class="btn tiny danger btn-del-user" style="padding:2px 7px;">Delete</button>
+          </td>
+        `;
+
+        tr.querySelector(".btn-edit-user").onclick = () => {
+          editingUserEmail = u.email;
+          userFormOpen = true;
+          renderAdmin();
+          setTimeout(() => {
+            const fBox = document.getElementById("userFormBox");
+            if (fBox) {
+              fBox.querySelector("#ufEmail").value = u.email;
+              fBox.querySelector("#ufName").value = u.name;
+              fBox.querySelector("#ufDept").value = u.dept || "Sales";
+              fBox.querySelector("#ufPass").value = u.password || "CBTUDON22";
+              fBox.querySelector("#ufRole").value = u.role || "SALES";
+              fBox.querySelector("#ufStatus").value = u.status || "active";
+              fBox.querySelector("#ufMobileReadOnly").checked = u.mobile_readonly !== false;
+              fBox.scrollIntoView({ behavior: "smooth" });
+            }
+          }, 50);
+        };
+
+        tr.querySelector(".btn-del-user").onclick = () => {
+          if (u.email === "admin@company.com" || u.email === (state.currentUser && state.currentUser.email)) {
+            toast("Cannot delete default admin or currently logged in account");
+            return;
+          }
+          if (!confirm("Delete user " + u.email + " (" + u.name + ")?\nลบผู้ใช้งานนี้?")) return;
+          cloudDeleteUser(u.email);
+          delete state.users[u.email];
+          saveUsers();
+          appendLog("security", "", "", "deleted user: " + u.email);
+          renderAdmin();
+          toast("User deleted: " + u.email);
+        };
+
+        tbody.appendChild(tr);
+      });
+
+      // Events
+      box.querySelector("#btnToggleAddUser").onclick = () => {
+        userFormOpen = !userFormOpen;
+        if (!userFormOpen) editingUserEmail = null;
+        renderAdmin();
+      };
+
+      box.querySelector("#btnExportUsers").onclick = () => {
+        downloadJson({ type: "users", version: 1, exportedAt: new Date().toISOString(), users: state.users },
+          "shipping-calendar-users-" + new Date().toISOString().slice(0, 10) + ".json");
+        toast("Users exported successfully");
+      };
+
+      const fBox = box.querySelector("#userFormBox");
+      fBox.querySelector("#ufCancel").onclick = () => {
+        userFormOpen = false;
+        editingUserEmail = null;
+        renderAdmin();
+      };
+
+      fBox.querySelector("#ufSave").onclick = () => {
+        const email = fBox.querySelector("#ufEmail").value.trim().toLowerCase();
+        const name = fBox.querySelector("#ufName").value.trim();
+        const dept = fBox.querySelector("#ufDept").value;
+        const password = fBox.querySelector("#ufPass").value.trim() || "CBTUDON22";
+        const role = fBox.querySelector("#ufRole").value;
+        const status = fBox.querySelector("#ufStatus").value;
+        const mobile_readonly = fBox.querySelector("#ufMobileReadOnly").checked;
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          toast("Please enter a valid work email\nกรุณาระบุอีเมลที่ถูกต้อง");
+          fBox.querySelector("#ufEmail").focus();
+          return;
+        }
+        if (!name) {
+          toast("Please enter user name\nกรุณาระบุชื่อพนักงาน");
+          fBox.querySelector("#ufName").focus();
+          return;
+        }
+
+        const newUserObj = { email, name, dept, password, role, status, mobile_readonly };
+        state.users[email] = newUserObj;
+        saveUsers();
+        cloudUpsertUser(newUserObj);
+        appendLog("security", "", "", (editingUserEmail ? "updated user: " : "added user: ") + email + " (" + role + ")");
+
+        userFormOpen = false;
+        editingUserEmail = null;
+        renderAdmin();
+        toast("User saved successfully: " + email);
+      };
+
+      return box;
     }
 
     /* ---- Day markers pane (backend only) ---- */
@@ -4791,6 +5038,69 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     });
 
     document.getElementById("btnLoginSubmit").onclick = async () => {
+      const email = lpEmail.value.trim().toLowerCase();
+      const name = lpName.value.trim();
+      const dept = lpDept.value;
+      const pass = lpPass.value.trim();
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        toast("Please enter a valid work email\nกรุณาระบุอีเมลที่ถูกต้อง (เช่น yourname@company.com)");
+        lpEmail.focus();
+        return;
+      }
+      if (!pass) {
+        toast("Please enter password\nกรุณาระบุรหัสผ่านเข้าใช้งาน");
+        lpPass.focus();
+        return;
+      }
+
+      // Check if user exists in database
+      const u = state.users[email];
+      if (!u) {
+        toast("❌ User ID not registered in database\nไม่พบบัญชีผู้ใช้นี้ในระบบ กรุณาติดต่อผู้ดูแลระบบ (Admin) เพื่อเปิดสิทธิ์");
+        return;
+      }
+
+      if (u.status === "inactive") {
+        toast("🚫 Account suspended / deactivated\nบัญชีนี้ถูกระงับการใช้งานชั่วคราว กรุณาติดต่อ Admin");
+        return;
+      }
+
+      if (u.password !== pass) {
+        toast("❌ Incorrect password\nรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
+        lpPass.focus();
+        return;
+      }
+
+      // Smart Device Security Adaptation
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      let effectiveRole = u.role;
+      let securityNotice = "";
+
+      if (isMobile && u.mobile_readonly !== false && u.role !== "ADMIN") {
+        effectiveRole = "SALES"; // Force safe read-only role on mobile
+        securityNotice = "📱 Mobile device connected: Protected Read-Only mode activated\n(ใช้งานผ่านมือถือ: ปรับเป็นโหมดดูอย่างเดียวเพื่อความปลอดภัย)";
+      } else {
+        securityNotice = isMobile ? "📱 Mobile device connected" : "💻 Office LAN / PC connected";
+      }
+
+      state.currentUser = {
+        email: u.email,
+        name: u.name,
+        dept: u.dept || dept,
+        role: effectiveRole,
+        assignedRole: u.role,
+        isMobile,
+        loggedInAt: new Date().toISOString()
+      };
+
+      saveUserProfile(state.currentUser);
+      logUserAccess("login", "Logged in as " + effectiveRole + " (" + u.email + " · " + (isMobile ? "Mobile" : "LAN/PC") + ")");
+      toast("Welcome, " + u.name + " (" + effectiveRole + ")\n" + securityNotice);
+      showMainCalendarApp();
+    };
+
+    const _ignoreOldSubmit = async () => {
       const email = lpEmail.value.trim();
       const name = lpName.value.trim();
       const dept = lpDept.value;
