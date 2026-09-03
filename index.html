@@ -2152,7 +2152,7 @@
     <div id="stage"></div>
   </div>
 
-  <!-- User Profile & Role Switcher Modal -->
+  <!-- User Profile & Mandatory Authentication Modal -->
   <div class="backdrop" id="userModalBack">
     <div class="modal" role="dialog" aria-modal="true" style="max-width: 520px;">
       <div class="mhead">
@@ -2162,18 +2162,23 @@
             <circle cx="12" cy="7" r="4" />
           </svg></div>
         <div>
-          <h2>User Profile &amp; Role</h2>
-          <p>Select your role and identity <span class="th">ระบุชื่อและเลือกบทบาทผู้ใช้งาน</span></p>
+          <h2 id="uModalTitle">User Authentication &amp; Identity</h2>
+          <p id="uModalSub">Please provide your work email to access the system <span
+              class="th">ระบุอีเมลและตัวตนเพื่อเข้าใช้งาน</span></p>
         </div>
-        <button class="x" id="userModalClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18"
-            fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <button class="x" id="userModalClose" aria-label="Close" style="display:none;"><svg viewBox="0 0 24 24"
+            width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
             <path d="M18 6L6 18M6 6l12 12" />
           </svg></button>
       </div>
       <div class="mbody">
         <div class="field">
-          <label>Your Name / Display Name <span class="th">ชื่อผู้ใช้งาน</span></label>
-          <input id="uNameInp" placeholder="e.g. Somchai, Sales 01, Office LAN" maxlength="32">
+          <label>Work Email <span class="th">อีเมลของคุณ *</span></label>
+          <input id="uEmailInp" type="email" placeholder="e.g. yourname@company.com" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label>Full Name / Display Name <span class="th">ชื่อ-นามสกุล / ชื่อเรียก *</span></label>
+          <input id="uNameInp" placeholder="e.g. สมชาย (ฝ่ายขาย)" maxlength="40" required>
         </div>
         <div class="field">
           <label>Department / Team <span class="th">แผนก / ฝ่าย</span></label>
@@ -2187,25 +2192,30 @@
             <option value="Other">🏷️ Other (อื่น ๆ)</option>
           </select>
         </div>
+        <div class="field" id="uPassField">
+          <label>Access Password <span class="th">รหัสผ่านเข้าใช้งานระบบ *</span></label>
+          <input id="uPassInp" type="password" placeholder="ระบุรหัสผ่านเข้าใช้งาน (Default: CBTUDON22)"
+            autocomplete="current-password" required>
+        </div>
 
         <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-top:14px;">Select Role
           <span class="th">เลือกบทบาทการใช้งาน</span></label>
         <div class="role-grid">
           <div class="role-card selected" data-role="SALES">
             <div class="rtitle">💼 Sales (ฝ่ายขาย)</div>
-            <div class="rdesc">Read-Only. ดูปฏิทิน, ค้นหาออเดอร์, ดูเทียบเดือน</div>
+            <div class="rdesc">🔒 Read-Only. ดูปฏิทิน, ค้นหาออเดอร์, ดูเทียบเดือน</div>
           </div>
           <div class="role-card" data-role="VIEWER">
-            <div class="rtitle">👁️ Viewer (ทั่วไป)</div>
-            <div class="rdesc">Read-Only. พนักงานในออฟฟิศ/โรงงาน</div>
+            <div class="rtitle">👁️ Viewer (Office LAN)</div>
+            <div class="rdesc">🔒 Read-Only. ดูข้อมูลตารางการจัดส่งทั่วไป</div>
           </div>
           <div class="role-card" data-role="EDITOR">
-            <div class="rtitle">✏️ Editor (ผู้บันทึก)</div>
-            <div class="rdesc">เพิ่ม/แก้ไขคำสั่งซื้อ (ต้องใช้ PIN)</div>
+            <div class="rtitle">✏️ Editor (ฝ่ายจัดส่ง)</div>
+            <div class="rdesc">✏️ เพิ่ม/แก้ไขออเดอร์ (ต้องใช้รหัส PIN)</div>
           </div>
           <div class="role-card" data-role="ADMIN">
             <div class="rtitle">👑 Admin (แอดมิน)</div>
-            <div class="rdesc">สิทธิ์เต็มรูปแบบ &amp; ดูประวัติ (ต้องใช้ PIN)</div>
+            <div class="rdesc">👑 สิทธิ์เต็มรูปแบบ &amp; ดู Access Logs (ใช้ PIN)</div>
           </div>
         </div>
 
@@ -2215,9 +2225,10 @@
         </div>
       </div>
       <div class="mfoot">
-        <button class="btn" id="userModalCancel">Cancel</button>
+        <button class="btn danger tiny" id="userModalLogout" style="display:none;">🚪 Log out</button>
+        <button class="btn" id="userModalCancel" style="display:none;">Cancel</button>
         <div class="grow"></div>
-        <button class="btn primary" id="userModalSave">Save Profile &amp; Apply</button>
+        <button class="btn primary" id="userModalSave">Confirm &amp; Enter System</button>
       </div>
     </div>
   </div>
@@ -2480,7 +2491,14 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       LS_HOL = "shippingCalendar_holidays_v1", LS_PIN = "shippingCalendar_adminpin_v1",
       LS_LOG = "shippingCalendar_log_v1", LS_EDIT = "shippingCalendar_editunlock_v1",
       LS_SB_URL = "shippingCalendar_supabase_url_v1", LS_SB_KEY = "shippingCalendar_supabase_key_v1";
-    const DEFAULT_PIN = "135790", IDLE_LOCK_MS = 5 * 60 * 1000, MAX_TRIES = 5, LOCKOUT_MS = 60 * 1000;
+    const DEFAULT_PIN = "135790", DEFAULT_ACCESS_PASS = "CBTUDON22", IDLE_LOCK_MS = 5 * 60 * 1000, MAX_TRIES = 5, LOCKOUT_MS = 60 * 1000;
+    const LS_ACCESS_PASS = "shippingCalendar_access_pass_v1";
+    function getSystemAccessPassword() {
+      try { return localStorage.getItem(LS_ACCESS_PASS) || DEFAULT_ACCESS_PASS; } catch (e) { return DEFAULT_ACCESS_PASS; }
+    }
+    function setSystemAccessPassword(p) {
+      try { localStorage.setItem(LS_ACCESS_PASS, p); } catch (e) { }
+    }
     const SEED_HOLIDAYS = {
       "2026-01-01": { name: "New Year's Day" }, "2026-04-13": { name: "Songkran" }, "2026-04-14": { name: "Songkran" },
       "2026-04-15": { name: "Songkran" }, "2026-05-01": { name: "Labour Day" }, "2026-12-31": { name: "New Year's Eve" }
@@ -3137,7 +3155,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       const profile = state.currentUser || loadUserProfile();
       const entry = {
         ts: new Date().toISOString(),
-        user_name: profile.name || "Anonymous",
+        user_name: (profile.name || "Anonymous") + (profile.email ? " <" + profile.email + ">" : ""),
         role: profile.role || "VIEWER",
         department: profile.dept || "General",
         device: getDeviceInfo(),
@@ -3167,13 +3185,22 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       const name = document.getElementById("userRoleName");
       if (!btn) return;
 
+      if (!p) {
+        btn.className = "btn user-role-badge role-sales";
+        if (icon) icon.textContent = "🔐";
+        if (name) name.textContent = "Click to Log In · ระบุตัวตน";
+        state.editUnlocked = false;
+        applyEditUI(false);
+        return;
+      }
+
       btn.className = "btn user-role-badge role-" + (p.role ? p.role.toLowerCase() : "viewer");
       const icons = { ADMIN: "👑", EDITOR: "✏️", SALES: "💼", VIEWER: "👁️" };
-      const labels = { ADMIN: "Admin", EDITOR: "Editor", SALES: "Sales", VIEWER: "Viewer" };
+      const labels = { ADMIN: "Admin", EDITOR: "Editor", SALES: "Sales (Read-only)", VIEWER: "Viewer (Read-only)" };
       if (icon) icon.textContent = icons[p.role] || "👤";
-      if (name) name.textContent = (p.name || labels[p.role]) + " (" + (labels[p.role] || p.role) + ")";
+      if (name) name.textContent = (p.name || p.email) + " · " + (labels[p.role] || p.role);
 
-      // Sync edit permissions with role
+      // Strict permissions: SALES and VIEWER can NEVER have editUnlocked = true
       if (p.role === "ADMIN" || p.role === "EDITOR") {
         state.editUnlocked = true;
       } else {
@@ -3566,11 +3593,18 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     /* ---- Edit lock (front of house) ---- */
     function lockHint() {
       const d = document.createElement("div"); d.className = "lockhint";
+      const isReadOnly = !state.currentUser || state.currentUser.role === "SALES" || state.currentUser.role === "VIEWER";
+      const roleName = state.currentUser ? (state.currentUser.role === "SALES" ? "Sales" : "Office Viewer") : "Viewer";
+
       d.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-    <span>Editing is off, view only <span class="th">โหมดดูอย่างเดียว</span></span>`;
-      const b = document.createElement("button"); b.textContent = "Turn on";
-      b.onclick = () => setEditLock(true);
-      d.appendChild(b); return d;
+    <span>${isReadOnly ? "🔒 " + roleName + " (Read-only view · โหมดดูอย่างเดียว ไม่สามารถแก้ไขได้)" : "Editing is off, view only <span class=\"th\">โหมดดูอย่างเดียว</span>"}</span>`;
+
+      if (!isReadOnly) {
+        const b = document.createElement("button"); b.textContent = "Turn on";
+        b.onclick = () => setEditLock(true);
+        d.appendChild(b);
+      }
+      return d;
     }
     function applyEditUI(on) {
       const btn = document.getElementById("editBtn");
@@ -4344,6 +4378,13 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
         <div class="field"><label>Confirm new PIN <span class="th">ยืนยันรหัสใหม่</span></label>
           <input id="pinNew2" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Re-enter new 6-digit PIN"></div>
         <button class="btn primary" id="pinSave" style="width:100%;justify-content:center">Save New PIN</button>
+
+        <div style="border-top:1px solid var(--line);margin-top:20px;padding-top:16px;">
+          <h4 style="font-family:Sora,sans-serif;font-size:13px;margin:0 0 10px;">System Access Password <span class="th">รหัสผ่านเข้าใช้งานระบบครั้งแรกของพนักงาน</span></h4>
+          <div class="field"><label>Access Password (รหัสเข้าใช้งานตั้งต้น: CBTUDON22)</label>
+            <input id="sysPassInp" value="${getSystemAccessPassword()}" maxlength="32"></div>
+          <button class="btn tiny primary" id="btnSaveSysPass">Update Access Password</button>
+        </div>
         <p style="font-size:11.5px;color:var(--muted);line-height:1.6;margin:14px 0 0">
           Stored as a salted SHA-256 hash. Guards against unauthorized access on shared PCs.<br>
           <span class="th">รหัสผ่านถูกเข้ารหัส SHA-256 เพื่อความปลอดภัยในการใช้งานภายในองค์กร</span>
@@ -4357,6 +4398,15 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
         await setPin(n);["#pinOld", "#pinNew", "#pinNew2"].forEach(s => box.querySelector(s).value = "");
         toast("PIN changed");
       };
+
+      box.querySelector("#btnSaveSysPass").onclick = () => {
+        const sp = box.querySelector("#sysPassInp").value.trim();
+        if (!sp) { toast("Password cannot be empty"); return; }
+        setSystemAccessPassword(sp);
+        appendLog("security", "", "", "system access password changed");
+        toast("Access password updated: " + sp);
+      };
+
       return box;
     }
 
@@ -4558,19 +4608,49 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     };
 
 
-    /* ---- User Profile Modal Bindings ---- */
+    /* ---- User Profile & Authentication Modal Bindings ---- */
     const userModalBack = document.getElementById("userModalBack");
+    const uEmailInp = document.getElementById("uEmailInp");
     const uNameInp = document.getElementById("uNameInp");
     const uDeptSel = document.getElementById("uDeptSel");
+    const uPassField = document.getElementById("uPassField");
+    const uPassInp = document.getElementById("uPassInp");
     const uPinField = document.getElementById("uPinField");
     const uPinInp = document.getElementById("uPinInp");
+    const uModalTitle = document.getElementById("uModalTitle");
+    const uModalSub = document.getElementById("uModalSub");
+    const userModalClose = document.getElementById("userModalClose");
+    const userModalCancel = document.getElementById("userModalCancel");
+    const userModalLogout = document.getElementById("userModalLogout");
     let chosenRole = "SALES";
 
-    document.getElementById("userRoleBtn").onclick = () => {
-      const p = state.currentUser || loadUserProfile();
-      uNameInp.value = p.name || "";
-      uDeptSel.value = p.dept || "Sales";
-      chosenRole = p.role || "SALES";
+    function openUserAuthModal(isFirstTime = false) {
+      const p = state.currentUser;
+      if (isFirstTime || !p) {
+        uModalTitle.textContent = "🔐 User Authentication & Identity";
+        uModalSub.innerHTML = "Mandatory first-time identification <span class=\"th\">กรุณาระบุอีเมลและตัวตนเพื่อเริ่มใช้งาน</span>";
+        userModalClose.style.display = "none";
+        userModalCancel.style.display = "none";
+        userModalLogout.style.display = "none";
+        uEmailInp.value = "";
+        uNameInp.value = "";
+        uPassInp.value = "";
+        uPassField.style.display = "block";
+        uDeptSel.value = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "Sales" : "Office";
+        chosenRole = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "SALES" : "VIEWER";
+      } else {
+        uModalTitle.textContent = "User Profile & Role";
+        uModalSub.innerHTML = "Manage your identity &amp; role <span class=\"th\">จัดการโปรไฟล์และสิทธิ์การใช้งาน</span>";
+        userModalClose.style.display = "grid";
+        userModalCancel.style.display = "inline-flex";
+        userModalLogout.style.display = "inline-flex";
+        uEmailInp.value = p.email || "";
+        uNameInp.value = p.name || "";
+        uPassInp.value = "";
+        uPassField.style.display = "none";
+        uDeptSel.value = p.dept || "Sales";
+        chosenRole = p.role || "SALES";
+      }
       uPinInp.value = "";
       uPinField.style.display = (chosenRole === "ADMIN" || chosenRole === "EDITOR") ? "block" : "none";
 
@@ -4578,10 +4658,20 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
         c.classList.toggle("selected", c.dataset.role === chosenRole);
       });
       userModalBack.classList.add("show"); userModalBack.classList.add("on");
-    };
+    }
 
-    document.getElementById("userModalClose").onclick = () => { userModalBack.classList.remove("show"); userModalBack.classList.remove("on"); };
-    document.getElementById("userModalCancel").onclick = () => { userModalBack.classList.remove("show"); userModalBack.classList.remove("on"); };
+    document.getElementById("userRoleBtn").onclick = () => openUserAuthModal(false);
+    userModalClose.onclick = () => { userModalBack.classList.remove("show"); userModalBack.classList.remove("on"); };
+    userModalCancel.onclick = () => { userModalBack.classList.remove("show"); userModalBack.classList.remove("on"); };
+
+    userModalLogout.onclick = () => {
+      if (!confirm("Log out from this device?\nออกจากระบบบนเครื่องนี้?")) return;
+      localStorage.removeItem(LS_USER_PROFILE);
+      state.currentUser = null;
+      applyUserProfileUI();
+      toast("Logged out successfully");
+      openUserAuthModal(true);
+    };
 
     document.querySelectorAll(".role-card").forEach(c => {
       c.onclick = () => {
@@ -4596,13 +4686,41 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     });
 
     document.getElementById("userModalSave").onclick = async () => {
-      const name = uNameInp.value.trim() || "Anonymous";
+      const email = uEmailInp.value.trim();
+      const name = uNameInp.value.trim();
       const dept = uDeptSel.value;
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        toast("Please enter a valid work email\nกรุณาระบุอีเมลที่ถูกต้อง (เช่น yourname@company.com)");
+        uEmailInp.focus();
+        return;
+      }
+      if (!name) {
+        toast("Please enter your name\nกรุณาระบุชื่อของคุณ");
+        uNameInp.focus();
+        return;
+      }
+
+      // Check system access password on first-time login
+      if (!state.currentUser) {
+        const pass = uPassInp.value.trim();
+        const correctPass = getSystemAccessPassword();
+        if (!pass) {
+          toast("Please enter the access password\nกรุณาระบุรหัสผ่านเข้าใช้งาน (Default: CBTUDON22)");
+          uPassInp.focus();
+          return;
+        }
+        if (pass !== correctPass) {
+          toast("Incorrect access password\nรหัสผ่านเข้าใช้งานไม่ถูกต้อง");
+          uPassInp.focus();
+          return;
+        }
+      }
 
       if (chosenRole === "ADMIN" || chosenRole === "EDITOR") {
         const pin = uPinInp.value.trim();
         if (!pin) {
-          toast("Please enter PIN for " + chosenRole + " role");
+          toast("Please enter 6-digit PIN for " + chosenRole + " role");
           uPinInp.focus();
           return;
         }
@@ -4613,16 +4731,29 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
         }
       }
 
-      state.currentUser = { name, role: chosenRole, dept };
+      state.currentUser = { email, name, role: chosenRole, dept, loggedInAt: new Date().toISOString() };
       saveUserProfile(state.currentUser);
       applyUserProfileUI();
       userModalBack.classList.remove("show"); userModalBack.classList.remove("on");
-      logUserAccess("switch_role", "Role set to " + chosenRole + " (" + name + " / " + dept + ")");
-      toast("Profile updated: " + name + " (" + chosenRole + ")");
+      logUserAccess("login", "Logged in as " + chosenRole + " (" + email + " · " + dept + ")");
+      toast("Welcome, " + name + " (" + chosenRole + ")");
     };
-
     /* ---- Init ---- */
-    document.getElementById("editBtn").onclick = () => setEditLock(!state.editUnlocked);
+    ensurePinRecord();
+    state.currentUser = loadUserProfile();
+    applyUserProfileUI();
+
+    // Check First-Time Mandatory Login Gate
+    if (!state.currentUser) {
+      setTimeout(() => openUserAuthModal(true), 150);
+    }
+    document.getElementById("editBtn").onclick = () => {
+      if (!state.currentUser || state.currentUser.role === "SALES" || state.currentUser.role === "VIEWER") {
+        toast("🔒 Read-Only Mode (" + (state.currentUser ? state.currentUser.role : "Viewer") + ")\nบทบาทของคุณคือดูข้อมูลอย่างเดียว ไม่สามารถแก้ไขหรือเพิ่มออเดอร์ได้");
+        return;
+      }
+      setEditLock(!state.editUnlocked);
+    };
     ensurePinRecord();
     applyUserProfileUI();
     applyEditUI(state.editUnlocked);
