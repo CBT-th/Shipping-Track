@@ -828,20 +828,20 @@
     }
 
     .bigcell {
-      min-height: 122px;
+      min-height: 146px;
       border: 1.5px solid var(--line);
       border-radius: 12px;
       padding: 0;
       display: flex;
       flex-direction: column;
       cursor: pointer;
-      transition: .14s;
+      transition: .15s;
       background: #fff;
       position: relative;
       overflow: hidden;
       font-family: inherit;
       text-align: left;
-      color: inherit
+      color: inherit;
     }
 
     .bigcell:hover {
@@ -856,7 +856,7 @@
 
     .bigcell.sel {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, .15)
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .18)
     }
 
     .bigcell.pad {
@@ -875,18 +875,18 @@
       align-items: center;
       gap: 5px;
       padding: 6px 7px 4px;
-      flex: 0 0 auto
+      flex: 0 0 auto;
     }
 
     .bigcell .dnum {
       font-family: "Sora", sans-serif;
       font-weight: 700;
       font-size: 15px;
-      color: var(--ink)
+      color: var(--ink);
     }
 
     .bigcell.su .dnum {
-      color: var(--sun-ink)
+      color: var(--sun-ink);
     }
 
     .bigcell.today .dnum {
@@ -897,7 +897,7 @@
       border-radius: 8px;
       display: grid;
       place-items: center;
-      font-size: 13px
+      font-size: 13px;
     }
 
     .mtag {
@@ -905,17 +905,17 @@
       font-weight: 800;
       border-radius: 5px;
       padding: 2px 6px;
-      max-width: 96px;
+      max-width: 105px;
       overflow: hidden;
       white-space: nowrap;
-      text-overflow: ellipsis
+      text-overflow: ellipsis;
     }
 
     .cntbadge {
       margin-left: auto;
       display: flex;
       gap: 3px;
-      flex: 0 0 auto
+      flex: 0 0 auto;
     }
 
     .cntbadge span {
@@ -927,52 +927,134 @@
       font-size: 10.5px;
       font-weight: 800;
       display: grid;
-      place-items: center
+      place-items: center;
     }
 
     .celllist {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      padding: 0 5px 5px;
-      overflow: hidden
+      gap: 3.5px;
+      padding: 0 5px 6px;
+      overflow: hidden;
     }
 
     .soline {
       display: flex;
-      align-items: center;
-      gap: 5px;
+      flex-direction: column;
+      gap: 2px;
       font-size: 10.5px;
-      font-weight: 700;
-      line-height: 1.35;
-      border-radius: 0 5px 5px 0;
-      padding: 3px 5px;
-      border-left: 3px solid;
-      background: #fff;
+      font-weight: 600;
+      line-height: 1.3;
+      border-radius: 6px;
+      padding: 3px 6px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-left: 3.5px solid;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: .12s;
       overflow: hidden;
-      white-space: nowrap
+    }
+
+    .soline:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      border-color: rgba(0, 0, 0, 0.16);
     }
 
     .soline.in {
-      border-left-style: dashed
+      background: rgba(248, 250, 252, 0.96);
+      border-left-style: dashed;
     }
 
-    .soline .ar {
+    .soline.out {
+      background: rgba(255, 255, 255, 0.98);
+      border-left-style: solid;
+    }
+
+    .soline-top {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .soline-role {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 3.5px;
+      border-radius: 4px;
+      line-height: 1;
       flex: 0 0 auto;
-      font-size: 10px;
-      opacity: .85
+    }
+
+    .soline-role.role-out {
+      background: #0f766e;
+      color: #fff;
+    }
+
+    .soline-role.role-in {
+      background: #f59e0b;
+      color: #fff;
     }
 
     .soline .sn {
+      font-weight: 700;
+      color: var(--ink);
+      font-family: "Sora", sans-serif;
+      font-size: 11px;
       overflow: hidden;
-      text-overflow: ellipsis
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .soline-method-tag {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 4px;
+      line-height: 1.2;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .soline-sub {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9.5px;
+      color: var(--ink-soft);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .soline-dest {
+      color: #0369a1;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .soline-cust {
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .more {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--muted);
-      padding: 1px 6px
+      font-size: 9.5px;
+      font-weight: 800;
+      color: var(--primary);
+      background: #f0fdfa;
+      border: 1px solid #ccfbf1;
+      border-radius: 5px;
+      padding: 2px 6px;
+      text-align: center;
+      margin-top: 1px;
     }
 
     .holname {
@@ -2238,11 +2320,16 @@
           <label>Department / Team <span class="th">แผนก / ฝ่าย</span></label>
           <select id="lpDept"
             style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--ink);">
-            <option value="Sales">💼 Sales (ฝ่ายขาย)</option>
-            <option value="Logistics">📦 Logistics &amp; Shipping (ฝ่ายจัดส่ง)</option>
-            <option value="Management">👔 Management / Executive (ผู้บริหาร)</option>
-            <option value="Warehouse">🏭 Warehouse / Factory (คลังสินค้า / โรงงาน)</option>
-            <option value="Office">🏢 Office / Admin (สำนักงาน)</option>
+            <option value="Management">👔 Management (ฝ่ายผู้บริหาร)</option>
+            <option value="Management">👔 Management (ฝ่ายผู้บริหาร)</option>
+            <option value="Marketing & Sales">💼 Marketing &amp; Sales (ฝ่ายขาย)</option>
+            <option value="General Affair">🏢 General Affair (ฝ่ายสำนักงาน)</option>
+            <option value="Accounting">💰 Accounting (ฝ่ายบัญชี)</option>
+            <option value="QC & Environment">🔬 QC &amp; Environment (ฝ่าย QC)</option>
+            <option value="R&D - Downstream">📦 R&D - Downstream (ฝ่าย R&D - คลังสินค้า)</option>
+            <option value="R&D - Upstream">🧪 R&D - Upstream (ฝ่ายคลังวัตถุดิบ)</option>
+            <option value="R&D - Engineering">⚙️ R&D - Engineering (ฝ่ายวิศวกรรม)</option>
+            <option value="Other">🏷️ Other (อื่น ๆ)</option>
             <option value="Other">🏷️ Other (อื่น ๆ)</option>
           </select>
         </div>
@@ -2398,12 +2485,13 @@
           <label>Department / Team <span class="th">แผนก / ฝ่าย</span></label>
           <select id="uDeptSel"
             style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--ink);">
-            <option value="Sales">💼 Sales (ฝ่ายขาย)</option>
-            <option value="Logistics">📦 Logistics &amp; Shipping (ฝ่ายจัดส่ง)</option>
-            <option value="Management">👔 Management / Executive (ผู้บริหาร)</option>
-            <option value="Warehouse">🏭 Warehouse / Factory (คลังสินค้า / โรงงาน)</option>
-            <option value="Office">🏢 Office / Admin (สำนักงาน)</option>
-            <option value="Other">🏷️ Other (อื่น ๆ)</option>
+            <option value="Marketing & Sales">💼 Marketing &amp; Sales (ฝ่ายขาย)</option>
+            <option value="General Affair">🏢 General Affair (ฝ่ายสำนักงาน)</option>
+            <option value="Accounting">💰 Accounting (ฝ่ายบัญชี)</option>
+            <option value="QC & Environment">🔬 QC &amp; Environment (ฝ่าย QC)</option>
+            <option value="R&D - Downstream">📦 R&D - Downstream (ฝ่าย R&D - คลังสินค้า)</option>
+            <option value="R&D - Upstream">🧪 R&D - Upstream (ฝ่ายคลังวัตถุดิบ)</option>
+            <option value="R&D - Engineering">⚙️ R&D - Engineering (ฝ่ายวิศวกรรม)</option>
           </select>
         </div>
         <div class="field" id="uPassField">
@@ -2601,13 +2689,40 @@ CREATE TABLE IF NOT EXISTS public.calendar_logs (
     after TEXT DEFAULT ''
 );
 
--- เปิดใช้งาน Realtime สำหรับการซิงค์ข้อมูล
-ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.day_marks;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.holidays;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.mark_names;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.calendar_logs;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.access_logs;
+-- 6. ตารางบันทึกการเข้าดูและล็อกอิน (Access Log)
+CREATE TABLE IF NOT EXISTS public.access_logs (
+    id BIGSERIAL PRIMARY KEY,
+    ts TIMESTAMPTZ DEFAULT NOW(),
+    user_name TEXT DEFAULT '',
+    role TEXT DEFAULT '',
+    department TEXT DEFAULT '',
+    device TEXT DEFAULT '',
+    action TEXT DEFAULT '',
+    details TEXT DEFAULT ''
+);
+
+-- 7. ตารางพนักงานและสิทธิ์การเข้าใช้งาน (Users)
+CREATE TABLE IF NOT EXISTS public.users (
+    email TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    dept TEXT DEFAULT '',
+    password TEXT DEFAULT 'CBTUDON22',
+    role TEXT NOT NULL DEFAULT 'SALES',
+    status TEXT NOT NULL DEFAULT 'active',
+    mobile_readonly BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- เปิดใช้งาน Realtime Replication สำหรับทุกตาราง (ใช้ SET TABLE ป้องกัน Error 42710)
+ALTER PUBLICATION supabase_realtime SET TABLE 
+    public.orders,
+    public.day_marks,
+    public.holidays,
+    public.mark_names,
+    public.calendar_logs,
+    public.access_logs,
+    public.users;
 
 -- ==========================================================
 -- 🔒 Enterprise Row Level Security (RLS) Policy Setup
@@ -2618,6 +2733,7 @@ ALTER TABLE public.holidays ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mark_names ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.calendar_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.access_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
 -- ล้าง Policy เดิมเพื่อป้องกันการซ้ำซ้อน
 DROP POLICY IF EXISTS "orders_read_policy" ON public.orders;
@@ -2630,6 +2746,10 @@ DROP POLICY IF EXISTS "mark_names_read_policy" ON public.mark_names;
 DROP POLICY IF EXISTS "mark_names_write_policy" ON public.mark_names;
 DROP POLICY IF EXISTS "logs_read_policy" ON public.calendar_logs;
 DROP POLICY IF EXISTS "logs_insert_policy" ON public.calendar_logs;
+DROP POLICY IF EXISTS "access_logs_read_policy" ON public.access_logs;
+DROP POLICY IF EXISTS "access_logs_insert_policy" ON public.access_logs;
+DROP POLICY IF EXISTS "users_read_policy" ON public.users;
+DROP POLICY IF EXISTS "users_write_policy" ON public.users;
 
 -- สร้าง Enterprise Access Policies
 CREATE POLICY "orders_read_policy" ON public.orders FOR SELECT USING (true);
@@ -2646,8 +2766,12 @@ CREATE POLICY "mark_names_write_policy" ON public.mark_names FOR ALL USING (true
 
 CREATE POLICY "logs_read_policy" ON public.calendar_logs FOR SELECT USING (true);
 CREATE POLICY "logs_insert_policy" ON public.calendar_logs FOR INSERT WITH CHECK (true);
+
 CREATE POLICY "access_logs_read_policy" ON public.access_logs FOR SELECT USING (true);
-CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH CHECK (true);</pre>
+CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "users_read_policy" ON public.users FOR SELECT USING (true);
+CREATE POLICY "users_write_policy" ON public.users FOR ALL USING (true);</pre>
           <button class="btn tiny" id="btnCopySql" style="width:100%;justify-content:center;">📋 Copy SQL to
             Clipboard</button>
         </details>
@@ -2841,14 +2965,20 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     async function cloudAppendLog(entry) {
       if (!supabaseClient) return;
       try {
-        await supabaseClient.from("calendar_logs").insert({
+        const payload = {
           ts: entry.ts || new Date().toISOString(),
           action: entry.action || "",
           ref: entry.ref || "",
           before: entry.before || "",
           after: entry.after || ""
-        });
-      } catch (e) { }
+        };
+        const { error } = await supabaseClient.from("calendar_logs").insert(payload);
+        if (error) {
+          console.warn("Supabase calendar_log insert notice:", error.message || error);
+        }
+      } catch (e) {
+        console.warn("Supabase calendar_log error:", e);
+      }
     }
 
     async function pullCloudData(notify = true) {
@@ -3050,6 +3180,48 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
           renderAll();
           if (admBack.classList.contains("show")) renderAdmin();
         })
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "calendar_logs" }, payload => {
+          const l = payload.new;
+          if (l) {
+            let localLogs = loadLog();
+            if (!localLogs.some(x => x.ts === l.ts && x.action === l.action && x.ref === l.ref)) {
+              localLogs.push({ ts: l.ts, action: l.action, ref: l.ref || "", before: l.before || "", after: l.after || "" });
+              if (localLogs.length > 800) localLogs = localLogs.slice(-800);
+              try { localStorage.setItem(LS_LOG, JSON.stringify(localLogs)); } catch (e) { }
+              if (admBack.classList.contains("show") && state.admTab === "log") renderAdmin();
+            }
+          }
+        })
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "access_logs" }, payload => {
+          const al = payload.new;
+          if (al) {
+            let accList = [];
+            try { accList = JSON.parse(localStorage.getItem(LS_ACCESS_LOG)) || []; } catch (e) { }
+            if (!accList.some(x => x.ts === al.ts && x.user_name === al.user_name)) {
+              accList.push(al);
+              if (accList.length > 500) accList = accList.slice(-500);
+              try { localStorage.setItem(LS_ACCESS_LOG, JSON.stringify(accList)); } catch (e) { }
+              if (admBack.classList.contains("show") && state.admTab === "log") renderAdmin();
+            }
+          }
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "users" }, payload => {
+          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+            const u = payload.new;
+            if (u && u.email) {
+              state.users[u.email] = u;
+              saveUsers();
+              if (admBack.classList.contains("show") && state.admTab === "users") renderAdmin();
+            }
+          } else if (payload.eventType === "DELETE") {
+            const email = payload.old ? payload.old.email : null;
+            if (email && state.users[email]) {
+              delete state.users[email];
+              saveUsers();
+              if (admBack.classList.contains("show") && state.admTab === "users") renderAdmin();
+            }
+          }
+        })
         .subscribe((status, err) => {
           if (status === "SUBSCRIBED") {
             updateCloudStatusUI("connected");
@@ -3102,9 +3274,9 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     /* ---------- Users State & Storage ---------- */
     const SEED_USERS = {
       "admin@company.com": { email: "admin@company.com", name: "System Administrator", dept: "Management", password: "CBTUDON22", role: "ADMIN", status: "active", mobile_readonly: false },
-      "editor@company.com": { email: "editor@company.com", name: "Logistics Specialist", dept: "Logistics", password: "CBTUDON22", role: "EDITOR", status: "active", mobile_readonly: true },
-      "sales@company.com": { email: "sales@company.com", name: "Sales Representative", dept: "Sales", password: "CBTUDON22", role: "SALES", status: "active", mobile_readonly: true },
-      "office@company.com": { email: "office@company.com", name: "Office Staff (LAN)", dept: "Office", password: "CBTUDON22", role: "VIEWER", status: "active", mobile_readonly: true }
+      "editor@company.com": { email: "editor@company.com", name: "Logistics Specialist", dept: "R&D - Downstream", password: "CBTUDON22", role: "EDITOR", status: "active", mobile_readonly: true },
+      "sales@company.com": { email: "sales@company.com", name: "Sales Representative", dept: "Marketing & Sales", password: "CBTUDON22", role: "SALES", status: "active", mobile_readonly: true },
+      "office@company.com": { email: "office@company.com", name: "Office Staff (LAN)", dept: "General Affair", password: "CBTUDON22", role: "VIEWER", status: "active", mobile_readonly: true }
     };
     const LS_USERS = "shippingCalendar_users_v1";
 
@@ -3749,15 +3921,35 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
         }
         if (list.length) {
           const box = document.createElement("div"); box.className = "celllist";
-          list.slice(0, 3).forEach(e => {
+          const maxShown = 3;
+          list.slice(0, maxShown).forEach(e => {
             const t = ty(e.o.type);
+            const mi = getMethodInfo(e.o.method);
             const l = document.createElement("div");
             l.className = "soline " + e.role;
-            l.style.color = t.ink; l.style.borderLeftColor = t.dot;
-            l.innerHTML = `<span class="ar">${e.role === "in" ? "↓" : "↑"}</span><span class="sn">${esc(e.o.so)}</span>`;
+            l.style.borderLeftColor = t.dot;
+            const hasSub = e.o.dest || e.o.customer;
+            l.innerHTML = `
+              <div class="soline-top">
+                <span class="soline-role role-${e.role}">${e.role === "in" ? "↓" : "↑"}</span>
+                <span class="sn">${esc(e.o.so)}</span>
+                <span class="soline-method-tag" style="background:${mi.bg};color:${mi.ink};border:1px solid ${mi.bd};">${mi.badge}</span>
+              </div>
+              ${hasSub ? `
+                <div class="soline-sub">
+                  ${e.o.dest ? `<span class="soline-dest">📍 ${esc(e.o.dest)}</span>` : ""}
+                  ${e.o.customer ? `<span class="soline-cust">(${esc(e.o.customer)})</span>` : ""}
+                </div>
+              ` : ""}
+            `;
             box.appendChild(l);
           });
-          if (list.length > 3) { const mn = document.createElement("div"); mn.className = "more"; mn.textContent = "+" + (list.length - 3) + " more"; box.appendChild(mn); }
+          if (list.length > maxShown) {
+            const mn = document.createElement("div");
+            mn.className = "more";
+            mn.textContent = `+${list.length - maxShown} more`;
+            box.appendChild(mn);
+          }
           c.appendChild(box);
           c.onmouseenter = ev => showTip(ev, list, hol, mk); c.onmousemove = moveTip; c.onmouseleave = hideTip;
         }
@@ -4161,15 +4353,30 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
     const tip = document.getElementById("tip");
     function showTip(ev, list, hol, mk) {
       let h = "";
-      if (mk) { const p = mkPal(mk.color); h += `<div class="tmk" style="color:${p.dot}">■ ${esc(mk.label || markName(mk.color))}</div>`; }
-      h += list.slice(0, 5).map(e => {
-        const t = ty(e.o.type), other = e.role === "out" ? e.o.received : e.o.ship;
-        return `<div><span style="color:${t.dot}">▌</span>${e.role === "in" ? "↓" : "↑"} <b>${esc(e.o.so)}</b> · ${e.o.type}`
-          + (e.o.dest ? " · " + esc(e.o.dest) : "")
-          + (other ? `<br><span style="color:#9fb0c2">${e.role === "out" ? "received" : "shipping"} ${fmtDate(other)}</span>` : "") + `</div>`;
+      if (mk) {
+        const p = mkPal(mk.color);
+        h += `<div class="tmk" style="color:${p.dot};font-weight:700;margin-bottom:6px;">🏷️ ${esc(mk.label || markName(mk.color))}</div>`;
+      }
+      h += list.slice(0, 6).map(e => {
+        const t = ty(e.o.type);
+        const mi = getMethodInfo(e.o.method);
+        const other = e.role === "out" ? e.o.received : e.o.ship;
+        return `
+          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.12);">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="background:${t.dot};color:#fff;font-size:9px;padding:1px 4px;border-radius:3px;font-weight:800;">${e.o.type}</span>
+              <b style="color:#fff;font-size:12px;">${e.role === "in" ? "↓ Received" : "↑ Ship out"}: ${esc(e.o.so)}</b>
+              <span style="background:${mi.bg};color:${mi.ink};font-size:9.5px;padding:1px 5px;border-radius:4px;font-weight:700;">${mi.badge}</span>
+            </div>
+            ${e.o.dest ? `<div style="color:#bae6fd;font-size:11px;margin-top:2px;">📍 Destination: <b>${esc(e.o.dest)}</b> ${e.o.customer ? `(${esc(e.o.customer)})` : ""}</div>` : ""}
+            ${e.o.dn ? `<div style="color:#cbd5e1;font-size:10px;">📄 D/N: <b>${esc(e.o.dn)}</b></div>` : ""}
+            ${other ? `<div style="color:#94a3b8;font-size:10px;">${e.role === "out" ? "Received date: " : "Shipping date: "} ${fmtDate(other)}</div>` : ""}
+            ${e.o.remark ? `<div style="color:#e2e8f0;font-size:10px;font-style:italic;">💬 ${esc(e.o.remark)}</div>` : ""}
+          </div>
+        `;
       }).join("");
-      if (list.length > 5) h += `<div style="color:#9fb0c2">+${list.length - 5} more</div>`;
-      if (hol) h += `<div class="thol">Holiday: ${esc(hol.name)}</div>`;
+      if (list.length > 6) h += `<div style="color:#93c5fd;font-weight:700;">+${list.length - 6} more orders</div>`;
+      if (hol) h += `<div class="thol" style="margin-top:4px;">🎉 Holiday: <b>${esc(hol.name)}</b></div>`;
       tip.innerHTML = h; tip.classList.add("show"); moveTip(ev);
     }
     function moveTip(ev) {
@@ -4337,11 +4544,14 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
             <div>
               <label>Department <span class="th">แผนก / ฝ่าย</span></label>
               <select id="ufDept" style="width:100%;border:1.5px solid var(--line);background:#fbfcfe;border-radius:8px;padding:7px 9px;font-family:inherit;font-size:12.5px;">
-                <option value="Sales">💼 Sales (ฝ่ายขาย)</option>
-                <option value="Logistics">📦 Logistics &amp; Shipping (ฝ่ายจัดส่ง)</option>
-                <option value="Management">👔 Management / Executive (ผู้บริหาร)</option>
-                <option value="Warehouse">🏭 Warehouse / Factory (คลังสินค้า / โรงงาน)</option>
-                <option value="Office">🏢 Office / Admin (สำนักงาน)</option>
+                <option value="Management">👔 Management (ฝ่ายผู้บริหาร)</option>
+                <option value="Marketing & Sales">💼 Marketing &amp; Sales (ฝ่ายขาย)</option>
+                <option value="General Affair">🏢 General Affair (ฝ่ายสำนักงาน)</option>
+                <option value="Accounting">💰 Accounting (ฝ่ายบัญชี)</option>
+                <option value="QC & Environment">🔬 QC &amp; Environment (ฝ่าย QC)</option>
+                <option value="R&D - Downstream">📦 R&D - Downstream (ฝ่าย R&D - คลังสินค้า)</option>
+                <option value="R&D - Upstream">🧪 R&D - Upstream (ฝ่ายคลังวัตถุดิบ)</option>
+                <option value="R&D - Engineering">⚙️ R&D - Engineering (ฝ่ายวิศวกรรม)</option>
                 <option value="Other">🏷️ Other (อื่น ๆ)</option>
               </select>
             </div>
@@ -4437,7 +4647,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
             if (fBox) {
               fBox.querySelector("#ufEmail").value = u.email;
               fBox.querySelector("#ufName").value = u.name;
-              fBox.querySelector("#ufDept").value = u.dept || "Sales";
+              fBox.querySelector("#ufDept").value = u.dept || "Marketing & Sales";
               fBox.querySelector("#ufPass").value = u.password || "CBTUDON22";
               fBox.querySelector("#ufRole").value = u.role || "SALES";
               fBox.querySelector("#ufStatus").value = u.status || "active";
@@ -4932,25 +5142,126 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       return box;
     }
 
+    let logSubTab = "operations";
     function paneLog() {
-      const box = document.createElement("div"), log = loadLog().slice().reverse().slice(0, 80);
-      if (!log.length) {
-        const e = document.createElement("div"); e.className = "modempty";
-        e.innerHTML = `No entries yet<br><span class="th">ยังไม่มีประวัติ</span>`; box.appendChild(e); return box;
-      }
-      const N = { add: "Add", edit: "Edit", del: "Delete", pin: "PIN", unlock: "Unlock", lockout: "Lockout", import: "Import" };
-      const C = { add: "add", edit: "edit", del: "del", pin: "pin" };
-      log.forEach(l => {
-        const d = new Date(l.ts), row = document.createElement("div"); row.className = "logitem";
-        row.innerHTML = `<span class="lts">${d.toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}</span>
-      <span class="lact ${C[l.action] || ""}">${N[l.action] || l.action}</span>
-      <span>${esc(l.after || l.before || l.ref || "")}${l.before && l.after ? ` <span style="color:var(--muted)">(was: ${esc(l.before)})</span>` : ""}</span>`;
-        box.appendChild(row);
+      const box = document.createElement("div");
+      const isCloudOn = !!supabaseClient;
+
+      box.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div class="tabs" id="logSubTabs" style="margin:0;">
+            <button type="button" class="${logSubTab === "operations" ? "on" : ""}" data-sub="operations">📋 Operations (ออเดอร์/ปฏิทิน)</button>
+            <button type="button" class="${logSubTab === "access" ? "on" : ""}" data-sub="access">👥 User Activity (การเข้าดู/ล็อกอิน)</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;font-weight:700;color:${isCloudOn ? "#15803d" : "var(--muted)"};display:flex;align-items:center;gap:4px;">
+              ${isCloudOn ? "🟢 Realtime Cloud Synced" : "⚪ Local Storage Mode"}
+            </span>
+            <button type="button" class="btn tiny" id="btnRefreshLogs">🔄 Refresh</button>
+            <button type="button" class="btn tiny" id="btnExportCurrentLog">Export JSON</button>
+          </div>
+        </div>
+        <div id="logContentSec"></div>
+      `;
+
+      const subBtns = box.querySelectorAll("#logSubTabs button");
+      subBtns.forEach(b => {
+        b.onclick = () => {
+          logSubTab = b.dataset.sub;
+          renderAdmin();
+        };
       });
-      const n = document.createElement("p");
-      n.style.cssText = "font-size:11.5px;color:var(--muted);margin:14px 0 0;line-height:1.6";
-      n.innerHTML = `Append-only, last 800 entries <span class="th">บันทึกต่อท้าย แก้ไขไม่ได้</span>`;
-      box.appendChild(n); return box;
+
+      box.querySelector("#btnRefreshLogs").onclick = async () => {
+        if (supabaseClient) {
+          try {
+            if (logSubTab === "operations") {
+              const { data } = await supabaseClient.from("calendar_logs").select("*").order("ts", { ascending: false }).limit(200);
+              if (data && Array.isArray(data)) {
+                localStorage.setItem(LS_LOG, JSON.stringify(data.reverse()));
+              }
+            } else {
+              const { data } = await supabaseClient.from("access_logs").select("*").order("ts", { ascending: false }).limit(200);
+              if (data && Array.isArray(data)) {
+                localStorage.setItem(LS_ACCESS_LOG, JSON.stringify(data.reverse()));
+              }
+            }
+            toast("Logs refreshed from Supabase Realtime");
+            renderAdmin();
+          } catch (e) {
+            toast("Refresh failed: " + e.message);
+          }
+        } else {
+          toast("Working in offline local storage");
+          renderAdmin();
+        }
+      };
+
+      const cSec = box.querySelector("#logContentSec");
+
+      if (logSubTab === "operations") {
+        let log = loadLog().slice().reverse().slice(0, 100);
+        if (!log.length) {
+          const e = document.createElement("div"); e.className = "modempty";
+          e.innerHTML = `No operation entries yet<br><span class="th">ยังไม่มีประวัติการแก้ไข</span>`;
+          cSec.appendChild(e);
+        } else {
+          const N = { add: "Add", edit: "Edit", del: "Delete", pin: "PIN", unlock: "Unlock", lockout: "Lockout", import: "Import", security: "Security" };
+          const C = { add: "add", edit: "edit", del: "del", pin: "pin", security: "edit" };
+          log.forEach(l => {
+            const d = new Date(l.ts), row = document.createElement("div"); row.className = "logitem";
+            row.innerHTML = `<span class="lts">${d.toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}</span>
+          <span class="lact ${C[l.action] || ""}">${N[l.action] || l.action}</span>
+          <span>${esc(l.after || l.before || l.ref || "")}${l.before && l.after ? ` <span style="color:var(--muted)">(was: ${esc(l.before)})</span>` : ""}</span>`;
+            cSec.appendChild(row);
+          });
+        }
+        box.querySelector("#btnExportCurrentLog").onclick = () => {
+          downloadJson({ type: "calendar_logs", exportedAt: new Date().toISOString(), logs: loadLog() },
+            "shipping-calendar-audit-logs-" + new Date().toISOString().slice(0, 10) + ".json");
+          toast("Operation logs exported");
+        };
+      } else {
+        let accessLogs = [];
+        try { accessLogs = JSON.parse(localStorage.getItem(LS_ACCESS_LOG)) || []; } catch (e) { }
+        accessLogs = accessLogs.slice().reverse().slice(0, 100);
+        if (!accessLogs.length) {
+          const e = document.createElement("div"); e.className = "modempty";
+          e.innerHTML = `No user activity recorded yet<br><span class="th">ยังไม่มีประวัติการเข้าใช้งาน</span>`;
+          cSec.appendChild(e);
+        } else {
+          const t = document.createElement("table"); t.className = "htable";
+          t.innerHTML = `<thead><tr><th style="width:115px">Time</th><th>User / Dept</th><th style="width:90px">Role</th><th>Device</th><th>Action</th></tr></thead>`;
+          const tb = document.createElement("tbody");
+          const roleStyles = { ADMIN: "background:#fef3c7;color:#92400e;", EDITOR: "background:#ecfdf5;color:#065f46;", SALES: "background:#eef2ff;color:#3730a3;", VIEWER: "background:#f1f5f9;color:#475569;" };
+          accessLogs.forEach(l => {
+            const tr = document.createElement("tr"), d = new Date(l.ts);
+            tr.innerHTML = `
+              <td style="color:var(--muted);white-space:nowrap;font-size:11px;">${d.toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}</td>
+              <td><strong>${esc(l.user_name)}</strong><br><span style="font-size:10px;color:var(--muted)">${esc(l.department || "General")}</span></td>
+              <td><span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;${roleStyles[l.role] || ""}">${esc(l.role)}</span></td>
+              <td style="font-size:11px;color:var(--ink-soft)">${esc(l.device || "—")}</td>
+              <td style="line-height:1.35;"><span class="lact ${esc(l.action)}">${esc(l.action)}</span> ${esc(l.details || "")}</td>
+            `;
+            tb.appendChild(tr);
+          });
+          t.appendChild(tb);
+          cSec.appendChild(t);
+        }
+        box.querySelector("#btnExportCurrentLog").onclick = () => {
+          let allAccess = [];
+          try { allAccess = JSON.parse(localStorage.getItem(LS_ACCESS_LOG)) || []; } catch (e) { }
+          downloadJson({ type: "access_logs", exportedAt: new Date().toISOString(), totalLogs: allAccess.length, logs: allAccess },
+            "shipping-access-logs-" + new Date().toISOString().slice(0, 10) + ".json");
+          toast("User activity logs exported");
+        };
+      }
+
+      const foot = document.createElement("p");
+      foot.style.cssText = "font-size:11px;color:var(--muted);margin:14px 0 0;line-height:1.6";
+      foot.innerHTML = `Append-only immutable audit trail · Live sync with Supabase Realtime <span class="th">ประวัติบันทึกถาวร ซิงค์ Realtime อัตโนมัติ</span>`;
+      box.appendChild(foot);
+      return box;
     }
     async function paneSecurity() {
       const box = document.createElement("div");
@@ -5359,7 +5670,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       lpPass.value = "";
       lpPin.value = "";
       lpPinField.style.display = "none";
-      lpDept.value = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "Sales" : "Office";
+      lpDept.value = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "Marketing & Sales" : "General Affair";
       lpChosenRole = /Android|iPhone|iPad/i.test(navigator.userAgent) ? "SALES" : "VIEWER";
       document.querySelectorAll("#lpRoleGrid .role-card").forEach(c => {
         c.classList.toggle("selected", c.dataset.role === lpChosenRole);
@@ -5394,7 +5705,7 @@ CREATE POLICY "access_logs_insert_policy" ON public.access_logs FOR INSERT WITH 
       uNameInp.value = p.name || "";
       uPassInp.value = "";
       uPassField.style.display = "none";
-      uDeptSel.value = p.dept || "Sales";
+      uDeptSel.value = p.dept || "Marketing & Sales";
       chosenRole = p.role || "SALES";
       uPinInp.value = "";
       uPinField.style.display = (chosenRole === "ADMIN" || chosenRole === "EDITOR") ? "block" : "none";
